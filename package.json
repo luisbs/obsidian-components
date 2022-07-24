@@ -9,7 +9,7 @@
     "build": "npm run lint:ts && node esbuild.config.mjs production",
     "dev": "node esbuild.config.mjs",
     "lint:ts": "tsc -noEmit -skipLibCheck",
-    "local": "npm run local && npm run local:deploy",
+    "local": "npm run build && npm run local:deploy",
     "local:build": "npm run lint:ts && node esbuild.config.mjs local",
     "local:deploy": "cp manifest.json dist/main.js dist/styles.css \"/mnt/z/Local Vault/.obsidian/plugins/obsidian-fragments\"",
     "version": "node version-bump.mjs && git add manifest.json versions.json"
