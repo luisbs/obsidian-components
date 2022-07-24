@@ -8,46 +8,47 @@ if you want to view the source, please visit the github repository of this plugi
 */
 `
 
-const locale = process.argv[2] === 'locale'
+const local = process.argv[2] === 'local'
 const prod = process.argv[2] === 'production'
 
-esbuild.build({
-  banner: { js: banner },
-  watch: !prod,
-  logLevel: 'info',
+esbuild
+  .build({
+    banner: { js: banner },
+    watch: !prod,
+    logLevel: 'info',
 
-  entryPoints: ['src/main.ts'],
-  outfile: 'dist/main.js',
-  bundle: true,
-  format: 'cjs',
-  target: 'es2016',
-  treeShaking: true,
-  sourcemap: locale ? 'inline' : false,
-  external: [
-    'obsidian',
-    'electron',
-    '@codemirror/autocomplete',
-    '@codemirror/closebrackets',
-    '@codemirror/collab',
-    '@codemirror/commands',
-    '@codemirror/comment',
-    '@codemirror/fold',
-    '@codemirror/gutter',
-    '@codemirror/highlight',
-    '@codemirror/history',
-    '@codemirror/language',
-    '@codemirror/lint',
-    '@codemirror/matchbrackets',
-    '@codemirror/panel',
-    '@codemirror/rangeset',
-    '@codemirror/rectangular-selection',
-    '@codemirror/search',
-    '@codemirror/state',
-    '@codemirror/stream-parser',
-    '@codemirror/text',
-    '@codemirror/tooltip',
-    '@codemirror/view',
-    ...builtins,
-  ],
-})
-.catch(() => process.exit(1))
+    entryPoints: ['src/main.ts'],
+    outfile: 'dist/main.js',
+    bundle: true,
+    format: 'cjs',
+    target: 'es2016',
+    treeShaking: true,
+    sourcemap: local ? 'inline' : false,
+    external: [
+      'obsidian',
+      'electron',
+      '@codemirror/autocomplete',
+      '@codemirror/closebrackets',
+      '@codemirror/collab',
+      '@codemirror/commands',
+      '@codemirror/comment',
+      '@codemirror/fold',
+      '@codemirror/gutter',
+      '@codemirror/highlight',
+      '@codemirror/history',
+      '@codemirror/language',
+      '@codemirror/lint',
+      '@codemirror/matchbrackets',
+      '@codemirror/panel',
+      '@codemirror/rangeset',
+      '@codemirror/rectangular-selection',
+      '@codemirror/search',
+      '@codemirror/state',
+      '@codemirror/stream-parser',
+      '@codemirror/text',
+      '@codemirror/tooltip',
+      '@codemirror/view',
+      ...builtins,
+    ],
+  })
+  .catch(() => process.exit(1))
