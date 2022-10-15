@@ -3,9 +3,14 @@ import builtins from 'builtin-modules'
 import esbuild from 'esbuild'
 import { copy } from 'esbuild-plugin-copy'
 
+// !
+// ! is assumed that this script executes from the root project-dir
+// !
+
 /** @type {esbuild.BuildOptions} */
 const BASE_CONFIG = {
   entryPoints: ['src/main.ts'],
+  sourceRoot: '',
   bundle: true,
   format: 'cjs',
   target: 'es2016',
