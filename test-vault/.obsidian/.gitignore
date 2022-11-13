@@ -1,3 +1,9 @@
 *
 !.gitignore
 !community-plugins.json
+
+# plugins suit
+!plugins
+!plugins/hot-reload-master
+!plugins/fragments/
+!plugins/fragments/.hotreload
