@@ -25,8 +25,8 @@
     "skipDefaultLibCheck": true,
     "lib": ["DOM", "ES2018"],
     "paths": {
-      "@/*": ["src/*"],
-      "@ui/*": ["src/components/*"]
+      "@ui/*": ["src/components/*"],
+      "@/*": ["src/*"]
     }
   },
   "include": ["src/**/*.ts", "src/**/*.tsx"],
