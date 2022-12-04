@@ -25,6 +25,19 @@ export function loadFragmentsOnVault(
   return fragments
 }
 
+export function getFragmentByName(
+  name: string,
+  settings: PluginSettings,
+): FoundFragment | null {
+  for (const fragmentId in settings.resolution_names) {
+    if (settings.resolution_names[fragmentId].contains(name)) {
+      return settings.fragments_found[fragmentId] || null
+    }
+  }
+
+  return null
+}
+
 /**
  * Check if the fragment is enabled.
  */

@@ -1,5 +1,3 @@
-v# Home
-
 ## CodeBlock with annotation
 
 ### YAML
@@ -12,7 +10,7 @@ title: 'Lord of the rings'
 
 ```use book
 {
-  title: 'Lord of the rings',
+  "title": "Lord of the rings"
 }
 ```
 

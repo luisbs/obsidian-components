@@ -22,6 +22,13 @@ export function mergeFormats(
   return [...SupportedFormats, ...settings.formats_custom]
 }
 
+export function getFormat(
+  formatId: string,
+  settings: PluginSettings,
+): FragmentFormat | CustomFragmentFormat | undefined {
+  return mergeFormats(settings).find((format) => format.id === formatId)
+}
+
 /**
  * Check if the format is enabled.
  */

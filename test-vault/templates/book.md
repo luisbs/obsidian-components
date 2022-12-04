@@ -1,1 +1,1 @@
-New book {{ title }} wrote by {{ author }}
+New book '{{ title }}' wrote by '{{ author }}'
