@@ -29,6 +29,7 @@
   },
   "devDependencies": {
     "@types/node": "^16.11.6",
+    "@types/uuid": "^9.0.0",
     "@typescript-eslint/eslint-plugin": "^5.2.0",
     "@typescript-eslint/parser": "^5.2.0",
     "builtin-modules": "^3.3.0",
@@ -41,6 +42,7 @@
   },
   "dependencies": {
     "obsidian-fnc": "link:../obsidian-fnc",
-    "preact": "10.11.1"
+    "preact": "10.11.1",
+    "uuid": "^9.0.0"
   }
 }

@@ -21,3 +21,6 @@ dist
 
 # obsidian
 data.json
+
+# keep discarted code
+.no-track

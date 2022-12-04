@@ -76,7 +76,7 @@ const PROD_CONFIG = {
   watch: false,
   outdir: 'dist',
   logLevel: 'error',
-  sourcemap: 'inline',
+  sourcemap: false,
   // plugins: [],
   banner: [
     '/*',
