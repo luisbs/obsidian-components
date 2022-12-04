@@ -1,49 +1,49 @@
 export interface PluginSettings {
-  /**
-   * Stores the root where the fragments are.
-   */
-  fragments_folder: string
-
-  /**
-   * Stores the plugin behavior about enabled fragments.
-   */
+  /** Stores the plugin behavior about enabled fragments. */
   default_behavior: PluginBehavior
   /**
-   * Stores the fragment formats enabled by the user.
+   * Stores the plugin naming strategy.
+   * - `'short'` includes only the shortest names
+   * - `'long'` includes the shortest and the long names
+   * - `'all'` includes all the possible names
    */
-  formats_enabled: string[]
-  /**
-   * Stores the fragments enabled by the user.
-   */
+  naming_strategy: 'SHORT' | 'LONG' | 'ALL'
+  /** Stores the names to reference each enabled fragment. */
+  resolution_names: Record<string, string[]>
+
+  /** Stores the route where the fragments are. */
+  fragments_folder: string
+  /** Stores the fragments found on the vault. */
+  fragments_found: Record<string, FoundFragment>
+  /** Stores the fragments enabled by the user. */
   fragments_enabled: string[]
 
-  /**
-   * Stores fragment formats defined by the user.
-   */
-  custom_formats: CustomFragmentFormat[]
+  /** Stores fragment formats defined by the user. */
+  formats_custom: CustomFragmentFormat[]
+  /** Stores the fragment formats enabled by the user. */
+  formats_enabled: string[]
 }
 
 /**
  * Behavior of the plugin
  * about fragments discovery
  */
-export enum PluginBehavior {
+export type PluginBehavior =
   /**
-   * Disable all fragments by default
-   * except the ones enabled by the user.
+   * Disable all fragments by default.
+   * Allow the fragments enabled by the user.
    */
-  DENY_ALL,
+  | 'DENY'
   /**
-   * Disable all fragments by default
-   * except the ones enabled by the user
-   * and the ones with formats enabled by the user.
+   * Disable all fragments by default.
+   * Allow the fragments enabled by the user.
+   * Allow the fragments with formats enabled by the user.
    */
-  ALLOW_ENABLED,
+  | 'ALLOW_ENABLED'
   /**
    * Enable all the fragments.
    */
-  ALLOW_ALL,
-}
+  | 'ALLOW_ALL'
 
 /**
  * Defines a fragment format.
@@ -73,4 +73,15 @@ export interface FragmentFormat {
 export interface CustomFragmentFormat extends FragmentFormat {
   // TODO: define a CustomFragmentFormat
   // maybe things like call a cli command
+  // Or things with
+}
+
+/**
+ * Defines a fragment found on the vault.
+ */
+export interface FoundFragment {
+  /** Absolute path of the file on the vault. */
+  path: string
+  /** Fragment format identifier. */
+  format: string
 }
