@@ -1,0 +1,1 @@
+New book {{ title }} wrote by {{ author }}
