@@ -1,24 +1,29 @@
-import type { Codeblock } from '@/types'
 import { MarkdownRenderer, TFile } from 'obsidian'
+import { CodeblockError } from '../CodeblockError'
 import { Render } from './Render'
 
+function isRecord(obj: unknown): obj is Record<string, unknown> {
+  return typeof obj === 'object' && obj !== null
+}
+
 export class MarkdownRender extends Render {
-  async render(
-    element: HTMLElement,
-    codeblock: Codeblock,
-    file: TFile,
-  ): Promise<void> {
-    const content = await this.vault.read(file)
-    const params = codeblock.parseContent()
+  async render(element: HTMLElement, data: unknown): Promise<void> {
+    const content = await this.#getFileContent()
 
     // TODO: support other cases
-    if (typeof params !== 'object' || !params) return
+    if (!isRecord(data)) return
 
     const markdown = content.replace(/{{\ *(\w+)\ *}}/gi, (value) => {
       const key = value.replace(/\W+/gi, '')
-      return params[key] ?? '<missing>'
+      return key in data ? String(data[key]) : '<missing>'
     })
 
-    MarkdownRenderer.renderMarkdown(markdown, element, file.path, null)
+    MarkdownRenderer.renderMarkdown(markdown, element, this.fragment.path, null)
+  }
+
+  async #getFileContent(): Promise<string> {
+    const file = this.vault.getAbstractFileByPath(this.fragment.path)
+    if (file instanceof TFile) return await this.vault.read(file)
+    throw new CodeblockError('fragment-file-missing')
   }
 }

@@ -4,15 +4,19 @@
 
 ```use book
 title: 'Lord of the rings'
+author: 'J. R. Tolkien'
 ```
 
 ### JSON
 
 ```use book
 {
-  "title": "Lord of the rings"
+	"title": "Lord of the rings",
+	"author": "J. R. Tolkien"
 }
 ```
+
+---
 
 ## CodeBlock with escaped param
 

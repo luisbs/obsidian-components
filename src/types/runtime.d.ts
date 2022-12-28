@@ -10,6 +10,4 @@ export interface Codeblock {
   content: string
   /** Syntax of the codeblock. */
   syntax: 'json' | 'yaml'
-  /** Parses the content into javascript types. */
-  parseContent: () => any
 }

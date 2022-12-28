@@ -10,3 +10,12 @@
 .fragments-list {
   border: 1px solid thistle;
 }
+
+.codeblock-parse-error,
+.fragment-missing,
+.fragment-disabled,
+.fragment-format-unknown,
+.fragment-file-missing,
+.fragment-render-missing {
+  border: 1px solid orangered;
+}
