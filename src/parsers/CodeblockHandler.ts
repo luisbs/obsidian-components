@@ -9,8 +9,12 @@ import {
 import { createHmac } from 'crypto'
 import { parseYaml } from 'obsidian'
 import { CodeblockError } from './CodeblockError'
-import { Render } from './html/Render'
-import { MarkdownRender } from './html/MarkdownRender'
+import {
+  JavascriptCodeRender,
+  JavascriptMdRender,
+  MarkdownRender,
+  Render,
+} from './renders'
 
 export class CodeblockHandler {
   #plugin: FragmentsPlugin
@@ -28,7 +32,7 @@ export class CodeblockHandler {
     try {
       const codeblock = this.#parseCodeblock(source, element, context)
       const renderer = this.#getCodeblockRenderer(codeblock)
-      return renderer.render(element)
+      return renderer.render(element, codeblock.data)
       //
     } catch (error) {
       const isError = error instanceof CodeblockError
@@ -102,10 +106,13 @@ export class CodeblockHandler {
     switch (format.id) {
       case 'html':
       case 'markdown':
-        return new MarkdownRender(this.#plugin.app.vault, codeblock, fragment)
-      // case 'javascript_html':
-      // case 'javascript_markdown':
-      // case 'javascript_code':
+        return new MarkdownRender(this.#plugin, fragment)
+
+      case 'javascript_html':
+      case 'javascript_markdown':
+        return new JavascriptMdRender(this.#plugin, fragment)
+      case 'javascript_code':
+        return new JavascriptCodeRender(this.#plugin, fragment)
     }
 
     throw new CodeblockError('fragment-render-missing')

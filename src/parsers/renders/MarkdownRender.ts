@@ -4,9 +4,8 @@ import { CodeblockError } from '../CodeblockError'
 import { Render } from './Render'
 
 export class MarkdownRender extends Render {
-  async render(element: HTMLElement): Promise<void> {
+  async render(element: HTMLElement, data: unknown): Promise<void> {
     const content = await this.#getFileContent()
-    const data = this.codeblock.data
 
     // TODO: support other cases
     if (!isRecord(data)) return
@@ -16,6 +15,7 @@ export class MarkdownRender extends Render {
       return key in data ? String(data[key]) : '<missing>'
     })
 
+    // @ts-expect-error unknown parameter
     MarkdownRenderer.renderMarkdown(markdown, element, this.fragment.path, null)
   }
 

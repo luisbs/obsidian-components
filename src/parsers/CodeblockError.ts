@@ -6,6 +6,7 @@ type ErrorCode =
   | 'fragment-format-unknown'
   | 'fragment-render-missing'
   | 'fragment-file-missing'
+  | 'fragment-invalid'
 
 export class CodeblockError extends Error {
   constructor(public code: ErrorCode, public source?: unknown) {

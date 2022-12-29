@@ -1,12 +1,16 @@
 # obsidian-fragments
 
+## Tests
+
+- [ ] Test in windows system the resolution on `JavascriptRender.ts@require`
+
 ## Support
 
 - [x] Add support for `'html'` fragments.
 - [x] Add support for `'markdown'` fragments.
-- [ ] Add support for `'javascript_html'` fragments.
-- [ ] Add support for `'javascript_markdown'` fragments.
-- [ ] Add support for `'javascript_code'` fragments.
+- [x] Add support for `'javascript_html'` fragments.
+- [x] Add support for `'javascript_markdown'` fragments.
+- [x] Add support for `'javascript_code'` fragments.
 
 ## Features for v1.0.0
 
