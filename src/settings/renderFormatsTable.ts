@@ -22,11 +22,7 @@ export function renderFormatsTable(
     rows = !filter
       ? formats
       : formats.filter((value) => {
-          return (
-            value.id.contains(filter) ||
-            value.ext.contains(filter) ||
-            value.type.contains(filter)
-          )
+          return value.id.contains(filter) || value.type.contains(filter)
         })
 
     filtered = rows.map((row) => row.id)
@@ -40,7 +36,7 @@ export function renderFormatsTable(
 
       new Setting(formatsList)
         .setName(row.id)
-        .setDesc(`File extension: '${row.ext}'. Type: ${row.type}`)
+        .setDesc(`Type: ${row.type}. File extension: '${row.ext.source}'.`)
         .addToggle((input) => {
           input.setValue(settings.formats_enabled.includes(row.id))
           input.onChange((enable) => {

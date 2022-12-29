@@ -127,7 +127,7 @@ function constructNames(fragment: FoundFragment, format: FragmentFormat) {
   const dir = path.dirname(fragment.path) + '/'
   const ext = format.type === 'code' ? path.extname(fragment.path) : format.type
 
-  const shortest = path.basename(fragment.path, format.ext).replace('.', '_')
+  const shortest = path.basename(fragment.path).replace(/\..*$/i, '')
   const shorter = shortest + '_' + ext.replace('.', '')
 
   return {

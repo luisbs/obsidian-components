@@ -7,13 +7,13 @@ import type {
 /** Get a list of the default formats. */
 const SupportedFormats: FragmentFormat[] = [
   // html/markdown
-  { id: 'html', ext: '.html', type: 'html' },
-  { id: 'markdown', ext: '.md', type: 'md' },
+  { id: 'html', ext: /\.html$/i, type: 'html' },
+  { id: 'markdown', ext: /\.md$/i, type: 'md' },
 
   // javascript
-  { id: 'javascript_html', ext: '.html.js', type: 'html' },
-  { id: 'javascript_markdown', ext: '.md.js', type: 'md' },
-  { id: 'javascript_code', ext: '.js', type: 'code' },
+  { id: 'javascript_html', ext: /\.html\.c?js$/i, type: 'html' },
+  { id: 'javascript_markdown', ext: /\.md\.c?js$/i, type: 'md' },
+  { id: 'javascript_code', ext: /\.c?js$/i, type: 'code' },
 ]
 
 export function mergeFormats(

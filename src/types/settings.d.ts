@@ -65,7 +65,7 @@ export interface FragmentFormat {
    * Defines the extension of the files
    * with this format.
    */
-  ext: string
+  ext: RegExp
   /**
    * Defines the type of behavior of the fragments
    * - `code` corresponds with formats that can handle the DOM a.k.a. **javascript**

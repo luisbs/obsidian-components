@@ -14,10 +14,12 @@
 
 ## Features for v1.0.0
 
+- [ ] Add a real documentation.
 - [x] Add settings page to control all the plugin variables.
 - [x] Add granular control over which fragments are allow to run.
 - [x] Print error messages
 - [x] Add alternative to inline fragment name method.
+- [ ] Isolate the html related fragment formats to custom renders.
 - [ ] Add support for custom block name like
 
   > ```book

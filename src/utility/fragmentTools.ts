@@ -16,7 +16,7 @@ export function loadFragmentsOnVault(
 
   const fragments: PluginSettings['fragments_found'] = {}
   for (const file of files) {
-    const format = supported.find((format) => file.name.endsWith(format.ext))
+    const format = supported.find((format) => format.ext.test(file.name))
     if (!format) continue
 
     fragments[file.path] = { path: file.path, format: format.id }
