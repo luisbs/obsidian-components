@@ -16,10 +16,13 @@
 
 - [ ] Add a real documentation.
 - [x] Add settings page to control all the plugin variables.
-- [x] Add granular control over which fragments are allow to run.
+- [ ] Add granular control over which fragments are allow to run.
+  - [ ] Isolate the user-enabled fragments
 - [x] Print error messages
 - [x] Add alternative to inline fragment name method.
 - [ ] Isolate the html related fragment formats to custom renders.
+- [x] Reload the fragments when the file is updated
+  - Since the codeblock processor is re-run on file changes, it updates automatically
 - [ ] Add support for custom block name like
 
   > ```book

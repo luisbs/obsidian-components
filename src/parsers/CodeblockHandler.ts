@@ -21,7 +21,12 @@ export class CodeblockHandler {
 
   constructor(plugin: FragmentsPlugin) {
     this.#plugin = plugin
-    plugin.registerMarkdownCodeBlockProcessor('use', this.handle.bind(this), -1)
+    this.registerProcessors()
+  }
+
+  // prettier-ignore
+  registerProcessors(): void {
+    this.#plugin.registerMarkdownCodeBlockProcessor('use', this.handle.bind(this), -1)
   }
 
   async handle(

@@ -7,7 +7,7 @@ type MDRender = (data: unknown) => string
 type JSRender = (container: HTMLElement, data: unknown) => void
 
 abstract class JavascriptRender extends Render {
-  protected getRenderer(): Function {
+  protected getRenderer(): unknown {
     const module = this.requireModule()
     if (typeof module === 'function') return module
     if (!isRecord(module) || typeof module.render !== 'function') {
