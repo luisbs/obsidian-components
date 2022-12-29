@@ -1,11 +1,19 @@
 export interface PluginSettings {
   /** Stores the plugin behavior about enabled fragments. */
   default_behavior: PluginBehavior
+
+  /**
+   * Stores the naming method for the vault.
+   * - `'INLINE'` specify the name as an inline string (e.g. `use book`)
+   * - `'PARAM'` specify the name as a param (e.g. `__name: 'book'`)
+   * - `'BOTH'` use both methods
+   */
+  naming_method: 'INLINE' | 'PARAM' | 'BOTH'
   /**
    * Stores the plugin naming strategy.
-   * - `'short'` includes only the shortest names
-   * - `'long'` includes the shortest and the long names
-   * - `'all'` includes all the possible names
+   * - `'SHORT'` includes only the shortest names
+   * - `'LONG'` includes the shortest and the long names
+   * - `'ALL'` includes all the possible names
    */
   naming_strategy: 'SHORT' | 'LONG' | 'ALL'
   /** Stores the names to reference each enabled fragment. */

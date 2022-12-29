@@ -1,14 +1,12 @@
+import { isRecord } from '@/utility'
 import { MarkdownRenderer, TFile } from 'obsidian'
 import { CodeblockError } from '../CodeblockError'
 import { Render } from './Render'
 
-function isRecord(obj: unknown): obj is Record<string, unknown> {
-  return typeof obj === 'object' && obj !== null
-}
-
 export class MarkdownRender extends Render {
-  async render(element: HTMLElement, data: unknown): Promise<void> {
+  async render(element: HTMLElement): Promise<void> {
     const content = await this.#getFileContent()
+    const data = this.codeblock.data
 
     // TODO: support other cases
     if (!isRecord(data)) return

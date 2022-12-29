@@ -1,5 +1,6 @@
 type ErrorCode =
-  | 'codeblock-parse-error'
+  | 'codeblock-missing-name'
+  | 'codeblock-invalid-data'
   | 'fragment-missing'
   | 'fragment-disabled'
   | 'fragment-format-unknown'

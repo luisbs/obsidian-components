@@ -11,7 +11,8 @@
   border: 1px solid thistle;
 }
 
-.codeblock-parse-error,
+.codeblock-missing-name,
+.codeblock-invalid-data,
 .fragment-missing,
 .fragment-disabled,
 .fragment-format-unknown,

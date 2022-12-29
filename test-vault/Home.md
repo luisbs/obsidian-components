@@ -23,15 +23,17 @@ author: 'J. R. Tolkien'
 ### YAML
 
 ```use
-__file: book
+__name: book
 title: 'Lord of the rings'
+author: 'J. R. Tolkien'
 ```
 
 ### JSON
 
 ```use
 {
-  __file: 'book',
-  title: 'Lord of the rings',
+  "__name": "book",
+  "title": "Lord of the rings",
+  "author": "J. R. Tolkien"
 }
 ```

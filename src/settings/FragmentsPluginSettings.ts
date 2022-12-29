@@ -10,6 +10,8 @@ export const DEFAULT_SETTINGS: PluginSettings = {
   // ! By default deny to keep security
   // ! of code execution
   default_behavior: 'DENY',
+
+  naming_method: 'INLINE',
   naming_strategy: 'LONG',
   resolution_names: {},
 
@@ -49,6 +51,7 @@ export class FragmentsSettingsTab extends PluginSettingTab {
     this.containerEl.addClass('fragments-settings')
 
     this.#displayGeneralSettings()
+    this.#displayParserSettings()
     this.#tablesEl = this.containerEl.createDiv()
     this.#displaySettingsTables()
   }
@@ -80,8 +83,36 @@ export class FragmentsSettingsTab extends PluginSettingTab {
           .setValue(this.settings.default_behavior)
           .onChange((value) => this.update('default_behavior', value))
       })
+  }
 
+  #displayParserSettings(): void {
+    this.#newSetting().setName('Parser').setHeading()
+    this.#displayMethodSetting()
     this.#displayStrategySetting()
+  }
+
+  #displayMethodSetting(): void {
+    const methodDesc = createFragment()
+    // prettier-ignore
+    methodDesc.createEl('ul', undefined, (ul) => {
+      ul.createEl('li', undefined, (li) => li.append('Inline names: like', createEl('code', { text: "'```use book```'" })))
+      ul.createEl('li', undefined, (li) => li.append('Param names: like', createEl('code', { text: `'__name: "book"'` }), '(inside the codeblock)'))
+    })
+
+    /** Stores the naming method for the vault. */
+
+    this.#newSetting()
+      .setName('Codeblock fragment naming method')
+      .setDesc(methodDesc)
+      .addDropdown((input) => {
+        input.addOptions({
+          INLINE: 'Use inline names',
+          PARAM: 'Use param names',
+          BOTH: 'Use both methods',
+        })
+        input.setValue(this.settings.naming_method)
+        input.onChange((value) => this.update('naming_method', value))
+      })
   }
 
   #displayStrategySetting(): void {
@@ -92,23 +123,22 @@ export class FragmentsSettingsTab extends PluginSettingTab {
     strategyDesc.appendText('In cases of naming collition the names are going to be assigned incrementally in the next order.')
     // prettier-ignore
     strategyDesc.createEl('ul', undefined, (ul) => {
-      ul.createEl('li', { text: 'Short names: like `book`.' })
-      ul.createEl('li', { text: 'Long names: like `folder/book`.' })
-      ul.createEl('li', { text: 'Full names: like `full/vault/path/book`.' })
+      ul.createEl('li', undefined, (li) => li.append('Short names: like', createEl('code', { text: "'book'" })))
+      ul.createEl('li', undefined, (li) => li.append('Long names: like', createEl('code', { text: "'folder/book'" })))
+      ul.createEl('li', undefined, (li) => li.append('Full names: like', createEl('code', { text: "'full/vault/path/book'" })))
     })
 
     this.#newSetting()
       .setName('Fragments naming strategy.')
       .setDesc(strategyDesc)
       .addDropdown((input) => {
-        input
-          .addOptions({
-            SHORT: 'Only the shortest names.',
-            LONG: 'Include the shortest and long names (recomended).',
-            ALL: 'Include all names',
-          })
-          .setValue(this.settings.naming_strategy)
-          .onChange((value) => this.update('naming_strategy', value))
+        input.addOptions({
+          SHORT: 'Only the shortest names.',
+          LONG: 'Include the short and long names (recomended).',
+          ALL: 'Include all names',
+        })
+        input.setValue(this.settings.naming_strategy)
+        input.onChange((value) => this.update('naming_strategy', value))
       })
   }
 

@@ -1,8 +1,19 @@
 # obsidian-fragments
 
-## TODO
+## Support
 
+- [x] Add support for `'html'` fragments.
+- [x] Add support for `'markdown'` fragments.
+- [ ] Add support for `'javascript_html'` fragments.
+- [ ] Add support for `'javascript_markdown'` fragments.
+- [ ] Add support for `'javascript_code'` fragments.
+
+## Features for v1.0.0
+
+- [x] Add settings page to control all the plugin variables.
+- [x] Add granular control over which fragments are allow to run.
 - [x] Print error messages
+- [x] Add alternative to inline fragment name method.
 - [ ] Add support for custom block name like
 
   > ```book
@@ -26,16 +37,8 @@
   - [ ] Manage (enable, disable)
   - [ ] Manage Cache
 
-#### Fragments support
-
-- [x] `html`
-- [x] `markdown`
-- [ ] `javascript_html`
-- [ ] `javascript_markdown`
-- [ ] `javascript_code`
-
 ## Ideas
 
-- Add syntax support on _edit mode_
-- Add fragments cache system
-- Add support for other codeblock content syntax (e.g. **TOML**)
+- [ ] Add syntax highlight on _edit mode_.
+- [ ] Add cache of `'html' | 'md'` fragment types.
+- [ ] Add support for other codeblock content syntax (e.g. **TOML**)

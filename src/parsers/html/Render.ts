@@ -8,5 +8,5 @@ export abstract class Render {
     protected fragment: FoundFragment,
   ) {}
 
-  abstract render(element: HTMLElement, data: unknown): Promise<void>
+  abstract render(element: HTMLElement): Promise<void>
 }

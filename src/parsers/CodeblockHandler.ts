@@ -1,11 +1,16 @@
 import type { Codeblock, FragmentsPlugin } from '@/types'
 import type { MarkdownPostProcessorContext } from 'obsidian'
-import { getFormat, getFragmentByName, isFragmentEnabled } from '@/utility'
+import {
+  getFormat,
+  getFragmentByName,
+  isFragmentEnabled,
+  isRecord,
+} from '@/utility'
 import { createHmac } from 'crypto'
 import { parseYaml } from 'obsidian'
 import { CodeblockError } from './CodeblockError'
 import { Render } from './html/Render'
-import { MarkdownRender } from './html/markdown'
+import { MarkdownRender } from './html/MarkdownRender'
 
 export class CodeblockHandler {
   #plugin: FragmentsPlugin
@@ -20,27 +25,20 @@ export class CodeblockHandler {
     element: HTMLElement,
     context: MarkdownPostProcessorContext,
   ): Promise<void> {
-    const codeblock = this.#parseCodeblock(source, element, context)
-    if (!codeblock) {
-      element.createEl('pre').append('Error on fragment execution')
-      // element.createEl('pre').append(source)
-      return
-    }
-
     try {
-      console.log(codeblock)
-
-      const renderer = this.#getCodeblockRenderer(codeblock, this.#plugin)
-      const data = this.#getCodeblockData(codeblock)
-      return renderer.render(element, data)
-
+      const codeblock = this.#parseCodeblock(source, element, context)
+      const renderer = this.#getCodeblockRenderer(codeblock)
+      return renderer.render(element)
       //
     } catch (error) {
-      const pre = element.createEl('pre')
-      pre.append(codeblock.content)
+      const isError = error instanceof CodeblockError
+      if (isError && error.source) {
+        return element.createEl('pre').append(String(error.source))
+      }
 
-      pre.classList.add(`language-${codeblock.syntax}`)
-      if (error instanceof CodeblockError) {
+      const pre = element.createEl('pre')
+      pre.append(source)
+      if (isError) {
         pre.classList.add(error.code)
       }
     }
@@ -51,50 +49,65 @@ export class CodeblockHandler {
     element: HTMLElement,
     context: MarkdownPostProcessorContext,
     codeblockPrefix = '```use',
-  ): Codeblock | null {
-    const info = context.getSectionInfo(element)
-    if (!info) return null
-
-    const header = info.text.split('\n').at(info.lineStart) ?? ''
+  ): Codeblock {
     const isJson = source.trimStart().startsWith('{')
+    let data = {}
+
+    // parse the data
+    try {
+      data = !isJson ? parseYaml(source) : JSON.parse(source)
+    } catch (error) {
+      throw new CodeblockError('codeblock-invalid-data', error)
+    }
+
+    // define name
+    let name = ''
+
+    // first search for the name on the data
+    if (this.#plugin.settings.naming_method !== 'INLINE' && isRecord(data)) {
+      name = typeof data['__name'] === 'string' ? data['__name'] : ''
+    }
+
+    // if the name is missing try to get it from inline
+    if (!name && this.#plugin.settings.naming_method !== 'PARAM') {
+      const info = context.getSectionInfo(element)
+      if (!info) throw new CodeblockError('codeblock-missing-name')
+
+      const header = info.text.split('\n').at(info.lineStart) ?? ''
+      name = header.replace(codeblockPrefix, '').trim()
+    }
+
+    if (!name) throw new CodeblockError('codeblock-missing-name')
 
     return {
-      name: header.replace(codeblockPrefix, '').trim(),
+      name,
       hash: createHmac('sha256', '').update(source).digest('base64'),
-      content: source,
       syntax: isJson ? 'json' : 'yaml',
+      source,
+      data,
     }
   }
 
-  #getCodeblockRenderer(codeblock: Codeblock, plugin: FragmentsPlugin): Render {
-    const fragment = getFragmentByName(codeblock.name, plugin.settings)
+  #getCodeblockRenderer(codeblock: Codeblock): Render {
+    const fragment = getFragmentByName(codeblock.name, this.#plugin.settings)
     if (!fragment) throw new CodeblockError('fragment-missing')
 
-    if (!isFragmentEnabled(fragment, plugin.settings)) {
+    if (!isFragmentEnabled(fragment, this.#plugin.settings)) {
       throw new CodeblockError('fragment-disabled')
     }
 
-    const format = getFormat(fragment.format, plugin.settings)
+    const format = getFormat(fragment.format, this.#plugin.settings)
     if (!format) throw new CodeblockError('fragment-format-unknown')
 
     switch (format.id) {
       case 'html':
       case 'markdown':
-        return new MarkdownRender(plugin.app.vault, codeblock, fragment)
+        return new MarkdownRender(this.#plugin.app.vault, codeblock, fragment)
       // case 'javascript_html':
       // case 'javascript_markdown':
       // case 'javascript_code':
     }
 
     throw new CodeblockError('fragment-render-missing')
-  }
-
-  #getCodeblockData(codeblock: Codeblock): unknown {
-    try {
-      if (codeblock.syntax === 'yaml') return parseYaml(codeblock.content)
-      return JSON.parse(codeblock.content)
-    } catch (error) {
-      throw new CodeblockError('codeblock-parse-error', error)
-    }
   }
 }

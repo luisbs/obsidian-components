@@ -6,8 +6,10 @@ export interface Codeblock {
   name: string
   /** Hash result of the content. (used for cache) */
   hash: string
-  /** Codeblock content text. */
-  content: string
   /** Syntax of the codeblock. */
   syntax: 'json' | 'yaml'
+  /** Codeblock content text. */
+  source: string
+  /** Codeblock content parsed. */
+  data: unknown
 }
