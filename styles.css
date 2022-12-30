@@ -3,12 +3,38 @@
   border: var(--input-border-width) solid var(--background-modifier-border);
 }
 
-.format-list {
+.fragments-table {
   border: 1px solid teal;
+  width: 100%;
 }
 
-.fragments-list {
-  border: 1px solid thistle;
+.fragments-table tbody tr:nth-child(2n-1) {
+  background-color: var(--color-base-20);
+}
+
+input[type='range'].plugin-fragments-3wayswitch {
+  /* width: calc(var(--toggle-width) * 1.5); */
+
+  /* copied from the obsidian .checkbox-container */
+  -webkit-app-region: no-drag;
+  cursor: var(--cursor);
+  background-color: var(--background-modifier-border-hover);
+  border-radius: var(--toggle-radius);
+  display: inline-block;
+  height: calc(var(--toggle-thumb-height) + var(--toggle-border-width) * 2);
+  position: relative;
+  user-select: none;
+  box-shadow: inset 0 4px 10px rgb(0 0 0 / 7%), inset 0 0 1px rgb(0 0 0 / 21%);
+  outline: 0 solid var(--background-modifier-border-focus);
+  transition: background-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out,
+    outline 0.15s ease-in-out, border 0.15s ease-in-out,
+    opacity 0.15s ease-in-out;
+}
+input[type='range'].plugin-fragments-3wayswitch.is-enabled {
+  background-color: var(--color-green);
+}
+input[type='range'].plugin-fragments-3wayswitch.is-disabled {
+  background-color: var(--color-red);
 }
 
 .codeblock-missing-name,

@@ -1,6 +1,7 @@
-import type { FoundFragment, PluginSettings } from '@/types/settings'
+import type { FragmentFound, PluginSettings } from '@/types/settings'
 import { Vault } from 'obsidian'
 import { getFilesOnFolder } from 'obsidian-fnc'
+import { isRecord } from './common'
 import { mergeFormats } from './formatTools'
 
 /**
@@ -19,7 +20,15 @@ export function loadFragmentsOnVault(
     const format = supported.find((format) => format.ext.test(file.name))
     if (!format) continue
 
-    fragments[file.path] = { path: file.path, format: format.id }
+    // keep the previous configuration
+    const prev = settings.fragments_found[file.path] as
+      | FragmentFound
+      | undefined
+    fragments[file.path] = {
+      path: file.path,
+      format: format.id,
+      enabled: prev?.enabled ?? null,
+    }
   }
 
   return fragments
@@ -28,7 +37,7 @@ export function loadFragmentsOnVault(
 export function getFragmentByName(
   name: string,
   settings: PluginSettings,
-): FoundFragment | null {
+): FragmentFound | null {
   for (const fragmentId in settings.resolution_names) {
     if (settings.resolution_names[fragmentId].contains(name)) {
       return settings.fragments_found[fragmentId] || null
@@ -42,9 +51,13 @@ export function getFragmentByName(
  * Check if the fragment is enabled.
  */
 export function isFragmentEnabled(
-  fragment: string | FoundFragment,
+  fragment: string | FragmentFound,
   settings: PluginSettings,
 ): boolean {
+  if (isFragmentDisabledByUser(fragment, settings)) {
+    return false
+  }
+
   if (settings.default_behavior === 'ALLOW_ALL') {
     // if the behavior allows all the fragments
     return true
@@ -64,18 +77,33 @@ export function isFragmentEnabled(
 
 /** Check if the fragment is enabled by the user. */
 export function isFragmentEnabledByUser(
-  fragment: string | FoundFragment,
+  fragment: string | FragmentFound,
   settings: PluginSettings,
 ): boolean {
-  const fragmentId = typeof fragment === 'string' ? fragment : fragment.path
+  if (typeof fragment === 'string') {
+    fragment = settings.fragments_found[fragment]
+  }
 
   // check if the fragment has been whitelisted
-  return settings.fragments_enabled.contains(fragmentId)
+  return isRecord(fragment) && fragment.enabled === true
+}
+
+/** Check if the fragment is enabled by the user. */
+export function isFragmentDisabledByUser(
+  fragment: string | FragmentFound,
+  settings: PluginSettings,
+): boolean {
+  if (typeof fragment === 'string') {
+    fragment = settings.fragments_found[fragment]
+  }
+
+  // check if the fragment has been whitelisted
+  return isRecord(fragment) && fragment.enabled === false
 }
 
 /** Check if the fragment is enabled by an enabled format. */
 export function isFragmentEnabledByFormat(
-  fragment: string | FoundFragment,
+  fragment: string | FragmentFound,
   settings: PluginSettings,
 ): boolean {
   // if the behavior allows only whitelisted fragments

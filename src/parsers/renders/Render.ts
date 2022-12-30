@@ -1,4 +1,4 @@
-import type { FoundFragment, FragmentsPlugin, PluginSettings } from '@/types'
+import type { FragmentFound, FragmentsPlugin, PluginSettings } from '@/types'
 import type { Vault } from 'obsidian'
 
 export abstract class Render {
@@ -7,7 +7,7 @@ export abstract class Render {
 
   constructor(
     protected plugin: FragmentsPlugin,
-    protected fragment: FoundFragment,
+    protected fragment: FragmentFound,
   ) {
     this.vault = plugin.app.vault
     this.settings = plugin.settings

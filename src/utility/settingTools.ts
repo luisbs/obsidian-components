@@ -1,7 +1,8 @@
-import type { FoundFragment, FragmentFormat, PluginSettings } from '@/types'
+import type { FragmentFound, FragmentFormat, PluginSettings } from '@/types'
 import path from 'path'
 import { arrayToObject, reverseObject } from './common'
 import { mergeFormats } from './formatTools'
+import { isFragmentEnabled } from './fragmentTools'
 
 /**
  * Pre-process the plugin settings to calculate the enabled fragments.
@@ -16,16 +17,14 @@ export function resolveFragmentsNames(
   const formats = arrayToObject(mergeFormats(settings), 'id')
 
   // filter and sort the fragments
-  const fragments = settings.fragments_enabled
+  const fragments = Object.values(settings.fragments_found)
     // removes the entries with missing data
-    .filter((fragmentId) => {
-      const fragment = settings.fragments_found[fragmentId]
+    .filter((fragment) => {
+      if (!isFragmentEnabled(fragment, settings)) return false
       return fragment && formats[fragment.format]
     })
     // sorts the fragments based on custom rules
-    .sort((fragmentId1, fragmentId2) => {
-      const fragment1 = settings.fragments_found[fragmentId1]
-      const fragment2 = settings.fragments_found[fragmentId2]
+    .sort((fragment1, fragment2) => {
       return sortFragments(
         fragment1,
         formats[fragment1.format],
@@ -39,12 +38,9 @@ export function resolveFragmentsNames(
   const includeLongNames = settings.naming_strategy !== 'SHORT'
   const includeAllNames = settings.naming_strategy === 'ALL'
 
-  for (const fragmentId of fragments) {
-    const fragment = settings.fragments_found[fragmentId]
-    if (!fragment) continue
-
+  for (const fragment of fragments) {
+    const fragmentId = fragment.path
     const format = formats[fragment.format]
-    if (!format) continue
 
     const name = constructNames(fragment, format)
 
@@ -94,9 +90,9 @@ export function resolveFragmentsNames(
  * - `1` if fragment1 is more than fragment2
  */
 function sortFragments(
-  fragment1: FoundFragment,
+  fragment1: FragmentFound,
   format1: FragmentFormat,
-  fragment2: FoundFragment,
+  fragment2: FragmentFound,
   format2: FragmentFormat,
 ): number {
   if (format1.id === 'html') return -1
@@ -122,7 +118,7 @@ function sortFragments(
 /**
  * Construct the names used on runtime.
  */
-function constructNames(fragment: FoundFragment, format: FragmentFormat) {
+function constructNames(fragment: FragmentFound, format: FragmentFormat) {
   const basename = path.basename(fragment.path)
   const dir = path.dirname(fragment.path) + '/'
   const ext = format.type === 'code' ? path.extname(fragment.path) : format.type

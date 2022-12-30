@@ -1,6 +1,11 @@
 export interface PluginSettings {
-  /** Stores the plugin behavior about enabled fragments. */
-  default_behavior: PluginBehavior
+  /**
+   * Stores the plugin behavior about fragments discovery.
+   * - `'DENY'` allow only fragments enabled by the user.
+   * - `'ALLOW_ENABLED'` allow fragments by user input and format.
+   * - `'ALLOW_ALL'` allow all the fragments.
+   */
+  default_behavior: 'DENY' | 'ALLOW_ENABLED' | 'ALLOW_ALL'
 
   /**
    * Stores the naming method for the vault.
@@ -22,36 +27,13 @@ export interface PluginSettings {
   /** Stores the route where the fragments are. */
   fragments_folder: string
   /** Stores the fragments found on the vault. */
-  fragments_found: Record<string, FoundFragment>
-  /** Stores the fragments enabled by the user. */
-  fragments_enabled: string[]
+  fragments_found: Record<string, FragmentFound>
 
   /** Stores fragment formats defined by the user. */
   formats_custom: CustomFragmentFormat[]
   /** Stores the fragment formats enabled by the user. */
   formats_enabled: string[]
 }
-
-/**
- * Behavior of the plugin
- * about fragments discovery
- */
-export type PluginBehavior =
-  /**
-   * Disable all fragments by default.
-   * Allow the fragments enabled by the user.
-   */
-  | 'DENY'
-  /**
-   * Disable all fragments by default.
-   * Allow the fragments enabled by the user.
-   * Allow the fragments with formats enabled by the user.
-   */
-  | 'ALLOW_ENABLED'
-  /**
-   * Enable all the fragments.
-   */
-  | 'ALLOW_ALL'
 
 /**
  * Defines a fragment format.
@@ -87,9 +69,11 @@ export interface CustomFragmentFormat extends FragmentFormat {
 /**
  * Defines a fragment found on the vault.
  */
-export interface FoundFragment {
+export interface FragmentFound {
   /** Absolute path of the file on the vault. */
   path: string
   /** Fragment format identifier. */
   format: string
+  /** Enforced state defined by the user. */
+  enabled: boolean | null
 }
