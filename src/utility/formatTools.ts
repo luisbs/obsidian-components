@@ -1,32 +1,28 @@
-import type {
-  CustomFragmentFormat,
-  FragmentFormat,
-  PluginSettings,
-} from '@/types'
+import type { FragmentFormat, PluginSettings } from '@/types'
 
 /** Get a list of the default formats. */
-const SupportedFormats: FragmentFormat[] = [
-  // html/markdown
-  { id: 'html', ext: /\.html$/i, type: 'html' },
-  { id: 'markdown', ext: /\.md$/i, type: 'md' },
+function SupportedFormats(): FragmentFormat[] {
+  return [
+    // html/markdown
+    { id: 'html', ext: /\.html$/i, type: 'html' },
+    { id: 'markdown', ext: /\.md$/i, type: 'md' },
 
-  // javascript
-  { id: 'javascript_html', ext: /\.html\.c?js$/i, type: 'html' },
-  { id: 'javascript_markdown', ext: /\.md\.c?js$/i, type: 'md' },
-  { id: 'javascript_code', ext: /\.c?js$/i, type: 'code' },
-]
+    // javascript
+    { id: 'javascript_html', ext: /\.html\.c?js$/i, type: 'html' },
+    { id: 'javascript_markdown', ext: /\.md\.c?js$/i, type: 'md' },
+    { id: 'javascript_code', ext: /\.c?js$/i, type: 'code' },
+  ]
+}
 
-export function mergeFormats(
-  settings: PluginSettings,
-): Array<FragmentFormat | CustomFragmentFormat> {
-  return [...SupportedFormats, ...settings.formats_custom]
+export function getSupportedFormats(): Array<FragmentFormat> {
+  return SupportedFormats()
 }
 
 export function getFormat(
   formatId: string,
   settings: PluginSettings,
-): FragmentFormat | CustomFragmentFormat | undefined {
-  return mergeFormats(settings).find((format) => format.id === formatId)
+): FragmentFormat | undefined {
+  return getSupportedFormats().find((format) => format.id === formatId)
 }
 
 /**
@@ -37,7 +33,7 @@ export function isFormatEnabled(
   settings: PluginSettings,
 ): boolean {
   // if the behavior is to allow all the fragments by default
-  if (settings.default_behavior === 'ALLOW_ALL') {
+  if (settings.enable_fragments === 'ALL') {
     return true
   }
 

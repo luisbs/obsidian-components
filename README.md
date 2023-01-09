@@ -38,16 +38,19 @@
 - [x] Fragment Formats
   - [x] Manage (enable, disable)
   - [ ] Manage Cache
-
-<!--  -->
-
-- [ ] Custom Fragment Formats
-  - [ ] Manage (add, edit, delete)
-  - [ ] Manage (enable, disable)
-  - [ ] Manage Cache
+  - [ ] Custom names
+  - [ ] Usage as Codeblock
 
 ## Ideas
 
 - [ ] Add syntax highlight on _edit mode_.
 - [ ] Add cache of `'html' | 'md'` fragment types.
 - [ ] Add support for other codeblock content syntax (e.g. **TOML**)
+
+<!--  -->
+
+- [ ] Add support for custom formats, defined by the user.
+- [ ] Custom Fragment Formats
+  - [ ] Manage (add, edit, delete)
+  - [ ] Manage (enable, disable)
+  - [ ] Manage Cache

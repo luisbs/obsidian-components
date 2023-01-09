@@ -1,5 +1,5 @@
 import type { FragmentFormat, PluginSettings } from '@/types'
-import { isFormatEnabled, mergeFormats } from '@/utility'
+import { isFormatEnabled, getSupportedFormats } from '@/utility'
 import { SettingsTable } from './SettingsTable'
 import { TableRow } from './TableRow'
 
@@ -15,7 +15,7 @@ export class FormatsTable extends SettingsTable {
     super(parentEl, settings, saveSettings)
     if (!settings.formats_enabled) settings.formats_enabled = []
     this.enabled = settings.formats_enabled
-    this.formats = mergeFormats(settings)
+    this.formats = getSupportedFormats()
     this.initialItems()
   }
 

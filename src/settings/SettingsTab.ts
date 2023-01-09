@@ -1,26 +1,10 @@
 import type { FragmentsPlugin, PluginSettings } from '@/types'
 import { PluginSettingTab, Setting } from 'obsidian'
 import { FolderSuggester } from 'obsidian-fnc'
-import { loadFragmentsOnVault, resolveFragmentsNames } from '@/utility'
+import { loadFragmentsOnVault, prepareFragmentsAndCodeblocks } from '@/utility'
 import { FormatsTable, FragmentsTable } from './components'
 
-export const DEFAULT_SETTINGS: PluginSettings = {
-  // ! By default deny to keep security
-  // ! of code execution
-  default_behavior: 'DENY',
-
-  naming_method: 'INLINE',
-  naming_strategy: 'LONG',
-  resolution_names: {},
-
-  fragments_folder: '',
-  fragments_found: {},
-
-  formats_custom: [],
-  formats_enabled: [],
-}
-
-export class FragmentsSettingsTab extends PluginSettingTab {
+export class SettingsTab extends PluginSettingTab {
   #plugin: FragmentsPlugin
   settings: PluginSettings
 
@@ -34,7 +18,7 @@ export class FragmentsSettingsTab extends PluginSettingTab {
   }
 
   saveChanges(refresh = true): void {
-    this.settings.resolution_names = resolveFragmentsNames(this.settings)
+    prepareFragmentsAndCodeblocks(this.settings)
     this.#plugin.saveSettings()
 
     if (!refresh) return
@@ -93,7 +77,7 @@ export class FragmentsSettingsTab extends PluginSettingTab {
             ALLOW_ENABLED: 'Fragments and formats enabled by the user.',
             ALLOW_ALL: 'Allow all the fragments',
           })
-          .setValue(this.settings.default_behavior)
+          .setValue(this.settings.enable_fragments)
           .onChange((value) => this.update('default_behavior', value))
       })
 

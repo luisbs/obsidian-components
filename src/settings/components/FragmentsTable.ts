@@ -120,7 +120,7 @@ export class FragmentsTable extends SettingsTable {
 
     for (const id of this.filtered) {
       const fragment = this.fragments[id]
-      const names = this.settings.resolution_names[id] ?? []
+      const names = this.settings.current_fragments[id] ?? []
 
       // construct the description of the fragment
       const desc = createFragment()
@@ -134,7 +134,7 @@ export class FragmentsTable extends SettingsTable {
 
       // check if enabled by parent
       const isEnabledByContext =
-        this.settings.default_behavior === 'ALLOW_ALL' ||
+        this.settings.enable_fragments === 'ALL' ||
         isFragmentEnabledByFormat(id, this.settings)
 
       // TODO add custom naming support

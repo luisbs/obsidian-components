@@ -1,7 +1,7 @@
 import type { FragmentFound, FragmentFormat, PluginSettings } from '@/types'
 import path from 'path'
 import { arrayToObject, reverseObject } from './common'
-import { mergeFormats } from './formatTools'
+import { getSupportedFormats } from './formatTools'
 import { isFragmentEnabled } from './fragmentTools'
 
 /**
@@ -11,13 +11,11 @@ import { isFragmentEnabled } from './fragmentTools'
  * but is expected to not be run frequently,
  * and it pre-calculates other settings useful on runtime
  */
-export function resolveFragmentsNames(
-  settings: PluginSettings,
-): PluginSettings['resolution_names'] {
-  const formats = arrayToObject(mergeFormats(settings), 'id')
+export function prepareFragmentsAndCodeblocks(settings: PluginSettings): void {
+  const formats = arrayToObject(getSupportedFormats(), 'id')
 
   // filter and sort the fragments
-  const fragments = Object.values(settings.fragments_found)
+  const source = Object.values(settings.fragments_found)
     // removes the entries with missing data
     .filter((fragment) => {
       if (!isFragmentEnabled(fragment, settings)) return false
@@ -33,25 +31,37 @@ export function resolveFragmentsNames(
       )
     })
 
-  // calculates names
-  const names = {} as Record<string, string>
   const includeLongNames = settings.naming_strategy !== 'SHORT'
   const includeAllNames = settings.naming_strategy === 'ALL'
 
-  for (const fragment of fragments) {
+  const codeblocks = {} as Record<string, string>
+  const fragments = {} as Record<string, string>
+
+  // prettier-ignore
+  for (const fragment of source) {
     const fragmentId = fragment.path
     const format = formats[fragment.format]
 
-    const name = constructNames(fragment, format)
+    // add the user defined names as codeblocks and fragments
+    if (!settings.enable_codeblocks) {
+      fragment.names.forEach((name) => (fragments[name] = fragmentId))
+    } else {
+      fragment.names.forEach((name) => {
+        fragments[name] = fragmentId
+        codeblocks[name] = fragmentId
+      })
+    }
+
+    const names = constructNames(fragment, format)
 
     // allways try to include the shortest names
-    const collitionInShortest = name.shortest in names
-    const collitionInShorter = name.shorter in names
-    const collitionInShort = name.short in names
+    const collitionInShortest = names.shortest in fragments
+    const collitionInShorter = names.shorter in fragments
+    const collitionInShort = names.short in fragments
 
-    if (!collitionInShortest) names[name.shortest] = fragmentId
-    if (!collitionInShorter) names[name.shorter] = fragmentId
-    if (!collitionInShort) names[name.short] = fragmentId
+    if (!collitionInShortest) fragments[names.shortest] = fragmentId
+    if (!collitionInShorter) fragments[names.shorter] = fragmentId
+    if (!collitionInShort) fragments[names.short] = fragmentId
 
     // if there is a collition or the user requires longer names include them
     if (
@@ -62,20 +72,21 @@ export function resolveFragmentsNames(
     }
 
     // include the long names if required
-    const collitionInLong = name.long in names
-    if (!collitionInLong) names[name.long] = fragmentId
-    if (!(name.longer in names)) names[name.longer] = fragmentId
-    if (!(name.longest in names)) names[name.longest] = fragmentId
+    const collitionInLong = names.long in fragments
+    if (!collitionInLong) fragments[names.long] = fragmentId
+    if (!(names.longer in fragments)) fragments[names.longer] = fragmentId
+    if (!(names.longest in fragments)) fragments[names.longest] = fragmentId
 
     // if there is a collition or the user requires longer names include them
     if (!collitionInLong && !includeAllNames) continue
 
     // is expected that the full names are collition free
-    if (!(name.full in names)) names[name.full] = fragmentId
-    names[name.fullPath] = fragmentId
+    if (!(names.full in fragments)) fragments[names.full] = fragmentId
+    fragments[names.fullPath] = fragmentId
   }
 
-  return reverseObject(names)
+  settings.current_fragments = reverseObject(fragments)
+  settings.current_codeblocks = reverseObject(codeblocks)
 }
 
 /**
@@ -94,25 +105,27 @@ function sortFragments(
   format1: FragmentFormat,
   fragment2: FragmentFound,
   format2: FragmentFormat,
-): number {
+): -1 | 0 | 1 {
+  // the no-code formats, take presedence
   if (format1.id === 'html') return -1
   if (format2.id === 'html') return 1
   if (format1.id === 'markdown') return -1
   if (format2.id === 'markdown') return 1
 
   if (format1.type === format2.type) {
-    // if they have the same formats, sort by the deepnes
-    return fragment1.path.split('/').length - fragment2.path.split('/').length
+    // if they have the same formats,
+    // sort by the deepnes of the fragment
+    return fragment1.path.split('/').length < fragment2.path.split('/').length
+      ? -1
+      : 1
   }
 
   // if they have diferent formats, give priority to the simplier
   if (format1.type === 'html') return -1
   if (format2.type === 'html') return 1
   if (format1.type === 'md') return -1
-
-  // if the format1 is not 'md', it means it is code
-  // and since they cant be both 'code', format2 is 'md'
-  return 1
+  if (format2.type === 'md') return 1
+  return 0
 }
 
 /**
