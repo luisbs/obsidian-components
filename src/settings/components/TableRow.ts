@@ -7,7 +7,7 @@ export class TableRow {
     this.#trEl = parentEl.createEl('tr')
   }
 
-  addInfo(title: string, desc: string | DocumentComponent): void {
+  addInfo(title: string, desc: string | DocumentFragment): void {
     const td = this.#trEl.createEl('td')
     td.createEl('div', 'setting-item-name').append(title)
     td.createEl('div', 'setting-item-description').append(desc)
@@ -23,7 +23,7 @@ export class TableRow {
       input.disabled = true
     } else {
       input.tabIndex = 0
-      input.addEventListener('input', (ev) => {
+      input.addEventListener('change', (ev) => {
         if (!(ev.target instanceof HTMLInputElement)) return
         update(ev.target.value)
       })

@@ -1,5 +1,3 @@
-# [obsidian-components](https://github.com/luisbs/obsidian-components)
-
 ## Usage
 
 ### Inline names
@@ -27,7 +25,8 @@ author: 'F. Scott Fitzgerald'
 
 > **This behavior is disabled by default** and can be enabled with the _Enabled custom Codeblocks_ setting.
 
-The **custom Codeblocks** allow a user to use **components** avoiding the `use` word. It uses the **components** custom names defined by the user instead. Example:
+The **custom Codeblocks** allow a user to use **components** avoiding the `use` word.
+It uses the **components** custom names defined by the user instead. Example:
 
 ```book
 title: 'Cien años de Soledad'
@@ -43,7 +42,6 @@ Each supported syntax can be enabled as a `format` on the settings. The formats 
 ### HTML Components
 
 The `html` components:
-
 1. Reads the **content of the file as plain text**.
 2. Replaces the placeholders like `{{ key_name_1 }}` _(allows only alphanumeric and underscores)_ with the correspending parameter on the **Codeblock**.
 3. Injects the replaced string as the `innerHTML` of the element.
@@ -51,7 +49,6 @@ The `html` components:
 ### Markdown Components
 
 The `markdown` components:
-
 1. Reads the **content of the file as plain text**.
 2. Replaces the placeholders like `{{ key_name_1 }}` _(allows only alphanumeric and underscores)_ with the correspending parameter on the **Codeblock**.
 3. Injects the replaced string into the **Codeblock** using the obsidian `MarkdownRenderer.renderMarkdown()` method.
@@ -63,27 +60,23 @@ The javascript-based components use the **content of the file as CommonJS Module
 #### Javascript-HTML Components
 
 The `javascript_html` components:
-
 1. Calls the `render` function waiting for a string to be returned (the `render` function will recive a _javascript object_ parsed from the content of the **Codeblock**).
 2. Injects the returned string as the `innerHTML` of the element.
 
 #### Javascript-Markdown Components
 
 The `javascript_markdown` components:
-
 1. Calls the `render` function waiting for a string to be returned (the `render` function will recive a _javascript object_ parsed from the content of the **Codeblock**).
-2. Injects the returned string into the **Codeblock** using the obsidian `MarkdownRenderer.renderMarkdown()` method.
+3. Injects the returned string into the **Codeblock** using the obsidian `MarkdownRenderer.renderMarkdown()` method.
 
 #### Javascript-code Components
 
 The `javascript_code` components:
-
 1. Calls the `render` funcion with:
-   - A `HTMLElement` as first param.
-   - A `javascript object` as second param (parsed from the content of the **Codeblock**).
+	- A `HTMLElement` as first param.
+	- A `javascript object` as second param (parsed from the content of the **Codeblock**).
 
 Example:
-
 ```use book.cjs
 title: 'Lord of the rings'
 author: 'J. R. Tolkien'
@@ -94,7 +87,6 @@ author: 'J. R. Tolkien'
 ## Settings and other details
 
 All the **Codeblocks** support the use of `JSON` too. Example:
-
 ```book
 {
 	"title": "Lord of the rings",

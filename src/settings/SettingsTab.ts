@@ -42,6 +42,9 @@ export class SettingsTab extends PluginSettingTab {
     this.#newSetting().setName('Plugin Settings').setHeading()
     this.#displayGeneralSettings()
 
+    this.#newSetting().setName('Usage Settings').setHeading()
+    this.#displayUsageSettings()
+
     this.#newSetting().setName('Components Settings').setHeading()
     this.#displayComponentsSettings()
 
@@ -76,25 +79,25 @@ export class SettingsTab extends PluginSettingTab {
       .addDropdown((input) => {
         input
           .addOptions({
-            DENY: 'Only components enabled by the user. (recomended)',
-            ALLOW_ENABLED: 'Components and formats enabled by the user.',
-            ALLOW_ALL: 'Allow all the components',
+            STRICT: 'Only components enabled by the user. (recomended)',
+            FLEXIBLE: 'Components and formats enabled by the user.',
+            ALL: 'Allow all the components',
           })
           .setValue(this.settings.enable_components)
-          .onChange((value) => this.update('default_behavior', value))
+          .onChange((value) => this.update('enable_components', value))
       })
+  }
 
-    //
-    // Codeblock naming method
-    const methodDesc = createComponent()
+  #displayUsageSettings(): void {
+    const methodDesc = createFragment()
     // prettier-ignore
     methodDesc.createEl('ul', undefined, (ul) => {
-      ul.createEl('li', undefined, (li) => li.append('Inline names: like', createEl('code', { text: "'```use book```'" })))
-      ul.createEl('li', undefined, (li) => li.append('Param names: like', createEl('code', { text: `'__name: "book"'` }), '(inside the codeblock)'))
-    })
+    ul.createEl('li', undefined, (li) => li.append('Inline names: like', createEl('code', { text: "'```use book```'" })))
+    ul.createEl('li', undefined, (li) => li.append('Param names: like', createEl('code', { text: `'__name: "book"'` }), '(inside the codeblock)'))
+  })
 
     this.#newSetting()
-      .setName('Codeblock naming method')
+      .setName('Base Codeblock usage method')
       .setDesc(methodDesc)
       .addDropdown((input) => {
         input.addOptions({
@@ -104,6 +107,15 @@ export class SettingsTab extends PluginSettingTab {
         })
         input.setValue(this.settings.naming_method)
         input.onChange((value) => this.update('naming_method', value))
+      })
+
+    this.#newSetting()
+      .setName('Enable custom Codeblocks?')
+      .setDesc('Allows to use the components custom names as codeblocks types')
+      .addToggle((input) => {
+        input
+          .setValue(this.settings.enable_codeblocks)
+          .onChange((value) => this.update('enable_codeblocks', value))
       })
   }
 
@@ -121,7 +133,7 @@ export class SettingsTab extends PluginSettingTab {
 
     //
     // Naming strategy setting
-    const strategyDesc = createComponent()
+    const strategyDesc = createFragment()
     strategyDesc.appendText('Strategy used for using the components.')
     strategyDesc.createEl('br')
     // prettier-ignore

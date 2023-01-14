@@ -28,9 +28,9 @@ export class ComponentsTable extends SettingsTable {
     if (!filter) this.initialItems()
     else {
       this.filtered = Object.values(this.settings.components_found) //
-        .reduce((colletion, frag) => {
-          if (frag.path.contains(filter) || frag.format.contains(filter)) {
-            colletion.push(frag.path)
+        .reduce((colletion, item) => {
+          if (item.path.contains(filter) || item.format.contains(filter)) {
+            colletion.push(item.path)
           }
           return colletion
         }, [] as string[])
@@ -105,7 +105,7 @@ export class ComponentsTable extends SettingsTable {
     this.theadEl.replaceChildren()
     const tr = this.theadEl.createEl('tr')
     tr.createEl('th', { text: 'Details' })
-    // tr.createEl('th', { text: 'Custom Codeblocks' })
+    tr.createEl('th', { text: 'Custom Codeblocks' })
     tr.createEl('th', { text: 'Enabled by Context?' })
     tr.createEl('th', { text: 'Enabled by User?' })
     tr.createEl('th', { text: 'Is enabled?' })
@@ -123,7 +123,7 @@ export class ComponentsTable extends SettingsTable {
       const names = this.settings.current_components[id] ?? []
 
       // construct the description of the component
-      const desc = createComponent()
+      const desc = createFragment()
       desc.append(
         'Use it as: ',
         createEl('code', { text: names.map((v) => `'${v}'`).join(', ') }),
@@ -162,7 +162,7 @@ export class ComponentsTable extends SettingsTable {
     component.raw_names = source
 
     component.names = []
-    source.split(/(|;, )+/gi).forEach((name) => {
+    source.split(/[|;, ]+/gi).forEach((name) => {
       name = name.replace(/\W*/gi, '')
       if (name.length > 0) component.names.push(name)
     })

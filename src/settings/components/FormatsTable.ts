@@ -90,7 +90,7 @@ export class FormatsTable extends SettingsTable {
       if (!format) continue
 
       // construct the description of the format
-      const desc = createComponent()
+      const desc = createFragment()
       desc.append('Type:', createEl('code', { text: `'${format.type}'` }))
       // prettier-ignore
       desc.append('Extension:', createEl('code', { text: `'${format.ext.source}'` }))
