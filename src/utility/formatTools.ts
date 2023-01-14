@@ -18,7 +18,7 @@ export function getSupportedFormats(): Array<FragmentFormat> {
   return SupportedFormats()
 }
 
-export function getFormat(
+export function getFormatById(
   formatId: string,
   settings: PluginSettings,
 ): FragmentFormat | undefined {

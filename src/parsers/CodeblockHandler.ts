@@ -1,26 +1,15 @@
+import type { MarkdownPostProcessorContext } from 'obsidian'
 import type {
   CodeblockContent,
   FragmentFound,
   FragmentsPlugin,
   PluginSettings,
 } from '@/types'
-import type { MarkdownPostProcessorContext } from 'obsidian'
-import {
-  getFormat,
-  getFragmentById,
-  getFragmentByName,
-  isFragmentEnabled,
-  isRecord,
-} from '@/utility'
 import { createHmac } from 'crypto'
 import { parseYaml } from 'obsidian'
+import { getFragmentById, getFragmentByName, isRecord } from '@/utility'
 import { CodeblockError } from './CodeblockError'
-import {
-  JavascriptCodeRender,
-  JavascriptMdRender,
-  MarkdownRender,
-  Render,
-} from './renders'
+import { getRenderer } from './renders'
 
 export class CodeblockHandler {
   #plugin: FragmentsPlugin
@@ -40,7 +29,7 @@ export class CodeblockHandler {
         this.#printErrors(source, el, () => {
           const content = this.#parseCodeblock(source)
           const fragment = this.#getFragment(content, el, ctx)
-          const renderer = this.#getFragmentRenderer(fragment)
+          const renderer = getRenderer(this.#plugin, fragment)
           renderer.render(el, content.data)
         })
       },
@@ -58,7 +47,7 @@ export class CodeblockHandler {
             return this.#printErrors(source, el, () => {
               const content = this.#parseCodeblock(source)
               const fragment = getFragmentById(fragmentId, this.#settings)
-              const renderer = this.#getFragmentRenderer(fragment)
+              const renderer = getRenderer(this.#plugin, fragment)
               renderer.render(el, content.data)
             })
           },
@@ -135,32 +124,5 @@ export class CodeblockHandler {
     if (!name) throw new CodeblockError('missing-fragment-name')
 
     return getFragmentByName(name, this.#settings)
-  }
-
-  #getFragmentRenderer(fragment: FragmentFound | null): Render {
-    if (!fragment) {
-      throw new CodeblockError('unknown-fragment')
-    }
-
-    if (!isFragmentEnabled(fragment, this.#settings)) {
-      throw new CodeblockError('disabled-fragment')
-    }
-
-    const format = getFormat(fragment.format, this.#settings)
-    if (!format) throw new CodeblockError('missing-fragment-renderer')
-
-    switch (format.id) {
-      case 'html':
-      case 'markdown':
-        return new MarkdownRender(this.#plugin, fragment)
-
-      case 'javascript_html':
-      case 'javascript_markdown':
-        return new JavascriptMdRender(this.#plugin, fragment)
-      case 'javascript_code':
-        return new JavascriptCodeRender(this.#plugin, fragment)
-    }
-
-    throw new CodeblockError('missing-fragment-renderer')
   }
 }

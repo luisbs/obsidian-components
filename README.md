@@ -23,7 +23,7 @@
 - [x] Reload the fragments when the file is updated
   - Since the codeblock processor is re-run on file changes, it updates automatically
 - [x] Add support for custom codeblocks name like
-- [ ] Isolate the html related fragment formats to custom renders.
+- [x] Isolate the html related fragment formats to custom renders.
 - [ ] Change all the references of the name **fragment** to **component** for better naming
 - [ ] Add a setting to allow the user to set the the parameters to use on names
 
@@ -58,3 +58,17 @@
 ## Documentation
 
 Custom names can be separated by `|;, ` (includes spaces)
+
+### On javascript files
+
+- Should be a **CommonJS Module**
+- Should return a method as default export or a method named `render`
+- The method will recive:
+  - On `code` type fragments: the container element (`HTMLElement`) and the data
+  - On `html` or `md` type fragments: only the data
+
+### Renderers behavior
+
+- `html` renderers inject the content directly to the element.
+- `md` renderers inject the content using the obsidian `MarkdownRenderer.renderMarkdown` method.
+- `code` renderers gives total control over the element.
