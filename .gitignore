@@ -10,6 +10,8 @@
 
 # npm
 node_modules
+package-lock.json
+pnpm-lock.yaml
 
 # Don't include the compiled dist folder in the repo.
 # They should be uploaded to GitHub releases instead.
