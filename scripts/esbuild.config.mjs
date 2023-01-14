@@ -87,14 +87,10 @@ const PROD_CONFIG = {
 }
 
 // compilation process
-try {
-  if (process.env.PROD) {
-    // Production plugin build
-    await esbuild.build(PROD_CONFIG)
-  } else {
-    // Development build
-    await esbuild.build(DEV_CONFIG)
-  }
-} catch (error) {
-  process.exit(1)
+if ((process.env.npm_lifecycle_script || '').includes('production')) {
+  // Production plugin build
+  await esbuild.build(PROD_CONFIG)
+} else {
+  // Development build
+  await esbuild.build(DEV_CONFIG)
 }
