@@ -1,4 +1,4 @@
-import type { FragmentFound, FragmentsPlugin, PluginSettings } from '@/types'
+import type { ComponentFound, ComponentsPlugin, PluginSettings } from '@/types'
 import { isRecord } from '@/utility'
 import { MarkdownRenderer, TFile, Vault } from 'obsidian'
 import { CodeblockError } from '../CodeblockError'
@@ -8,8 +8,8 @@ export abstract class Renderer {
   protected vault: Vault
 
   constructor(
-    protected plugin: FragmentsPlugin,
-    protected fragment: FragmentFound,
+    protected plugin: ComponentsPlugin,
+    protected component: ComponentFound,
   ) {
     this.vault = plugin.app.vault
     this.settings = plugin.settings
@@ -35,20 +35,20 @@ export abstract class Renderer {
   protected renderMDContent(element: HTMLElement, content: string): void {
     // @ts-expect-error unknown parameter
     // TODO change the the path, to avoid bad link generation of relative links
-    MarkdownRenderer.renderMarkdown(content, element, this.fragment.path, null)
+    MarkdownRenderer.renderMarkdown(content, element, this.component.path, null)
   }
 
   protected async getFileContent(): Promise<string> {
-    const file = this.vault.getAbstractFileByPath(this.fragment.path)
+    const file = this.vault.getAbstractFileByPath(this.component.path)
     if (file instanceof TFile) return await this.vault.read(file)
-    throw new CodeblockError('missing-fragment-file')
+    throw new CodeblockError('missing-component-file')
   }
 
   protected requireRenderFn(): unknown {
     const module = this.requireFileModule()
     if (typeof module === 'function') return module
     if (!isRecord(module) || typeof module.render !== 'function') {
-      throw new CodeblockError('invalid-fragment-syntax')
+      throw new CodeblockError('invalid-component-syntax')
     }
     return module.render
   }
@@ -58,14 +58,14 @@ export abstract class Renderer {
     try {
       // construct the real filepath on the user system
       const modulePath = this.vault.adapter
-        .getResourcePath(this.fragment.path)
+        .getResourcePath(this.component.path)
         .replace('app://local', '')
         .replace(/\?\d+$/i, '')
 
       // console.log({ modulePath, module: require(modulePath), basePath: this.vault.adapter.basePath })
       return require(modulePath)
     } catch (error) {
-      throw new CodeblockError('invalid-fragment-syntax', error)
+      throw new CodeblockError('invalid-component-syntax', error)
     }
   }
 }

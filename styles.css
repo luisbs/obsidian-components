@@ -3,16 +3,16 @@
   border: var(--input-border-width) solid var(--background-modifier-border);
 }
 
-.fragments-table {
+.components-table {
   border: 1px solid teal;
   width: 100%;
 }
 
-.fragments-table tbody tr:nth-child(2n-1) {
+.components-table tbody tr:nth-child(2n-1) {
   background-color: var(--color-base-20);
 }
 
-input[type='range'].plugin-fragments-3wayswitch {
+input[type='range'].plugin-components-3wayswitch {
   /* width: calc(var(--toggle-width) * 1.5); */
 
   /* copied from the obsidian .checkbox-container */
@@ -30,19 +30,19 @@ input[type='range'].plugin-fragments-3wayswitch {
     outline 0.15s ease-in-out, border 0.15s ease-in-out,
     opacity 0.15s ease-in-out;
 }
-input[type='range'].plugin-fragments-3wayswitch.is-enabled {
+input[type='range'].plugin-components-3wayswitch.is-enabled {
   background-color: var(--color-green);
 }
-input[type='range'].plugin-fragments-3wayswitch.is-disabled {
+input[type='range'].plugin-components-3wayswitch.is-disabled {
   background-color: var(--color-red);
 }
 
 .invalid-codeblock-syntax,
-.invalid-fragment-syntax,
-.missing-fragment-name,
-.missing-fragment-renderer,
-.missing-fragment-file,
-.unknown-fragment,
-.disabled-fragment {
+.invalid-component-syntax,
+.missing-component-name,
+.missing-component-renderer,
+.missing-component-file,
+.unknown-component,
+.disabled-component {
   border: 1px solid orangered;
 }

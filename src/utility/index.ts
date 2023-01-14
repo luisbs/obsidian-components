@@ -1,4 +1,4 @@
 export * from './common'
-export * from './formatTools'
-export * from './fragmentTools'
-export * from './settingTools'
+export * from './formatsTools'
+export * from './componentsTools'
+export * from './settingsTools'

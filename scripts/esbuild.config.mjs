@@ -12,7 +12,7 @@ function resolve(...paths) {
 
 /** @param {string[]} paths */
 function resolveOnVault(...paths) {
-  return resolve('test-vault/.obsidian/plugins/fragments/', ...paths)
+  return resolve('test-vault/.obsidian/plugins/components/', ...paths)
 }
 
 /** @type {esbuild.BuildOptions} */

@@ -1,10 +1,10 @@
-import type { FragmentFormat, PluginSettings } from '@/types'
+import type { ComponentFormat, PluginSettings } from '@/types'
 import { isFormatEnabled, getSupportedFormats } from '@/utility'
 import { SettingsTable } from './SettingsTable'
 import { TableRow } from './TableRow'
 
 export class FormatsTable extends SettingsTable {
-  protected formats: FragmentFormat[] = []
+  protected formats: ComponentFormat[] = []
   protected enabled: PluginSettings['formats_enabled'] = []
 
   constructor(
@@ -90,7 +90,7 @@ export class FormatsTable extends SettingsTable {
       if (!format) continue
 
       // construct the description of the format
-      const desc = createFragment()
+      const desc = createComponent()
       desc.append('Type:', createEl('code', { text: `'${format.type}'` }))
       // prettier-ignore
       desc.append('Extension:', createEl('code', { text: `'${format.ext.source}'` }))

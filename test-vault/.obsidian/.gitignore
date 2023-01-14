@@ -5,5 +5,5 @@
 # plugins suit
 !plugins
 !plugins/hot-reload-master
-!plugins/fragments/
-!plugins/fragments/.hotreload
+!plugins/components/
+!plugins/components/.hotreload

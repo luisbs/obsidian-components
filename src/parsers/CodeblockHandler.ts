@@ -1,21 +1,21 @@
 import type { MarkdownPostProcessorContext } from 'obsidian'
 import type {
   CodeblockContent,
-  FragmentFound,
-  FragmentsPlugin,
+  ComponentFound,
+  ComponentsPlugin,
   PluginSettings,
 } from '@/types'
 import { createHmac } from 'crypto'
 import { parseYaml } from 'obsidian'
-import { getFragmentById, getFragmentByName, isRecord } from '@/utility'
+import { getComponentById, getComponentByName, isRecord } from '@/utility'
 import { CodeblockError } from './CodeblockError'
 import { getRenderer } from './renders'
 
 export class CodeblockHandler {
-  #plugin: FragmentsPlugin
+  #plugin: ComponentsPlugin
   #settings: PluginSettings
 
-  constructor(plugin: FragmentsPlugin) {
+  constructor(plugin: ComponentsPlugin) {
     this.#plugin = plugin
     this.#settings = plugin.settings
     this.registerProcessors()
@@ -28,8 +28,8 @@ export class CodeblockHandler {
       (source, el, ctx) => {
         this.#printErrors(source, el, () => {
           const content = this.#parseCodeblock(source)
-          const fragment = this.#getFragment(content, el, ctx)
-          const renderer = getRenderer(this.#plugin, fragment)
+          const component = this.#getComponent(content, el, ctx)
+          const renderer = getRenderer(this.#plugin, component)
           renderer.render(el, content.data)
         })
       },
@@ -37,7 +37,7 @@ export class CodeblockHandler {
     )
 
     // register custom codeblock processors
-    for (const [fragmentId, names] of Object.entries(
+    for (const [componentId, names] of Object.entries(
       this.#settings.current_codeblocks,
     )) {
       for (const name of names) {
@@ -46,8 +46,8 @@ export class CodeblockHandler {
           (source, el, ctx) => {
             return this.#printErrors(source, el, () => {
               const content = this.#parseCodeblock(source)
-              const fragment = getFragmentById(fragmentId, this.#settings)
-              const renderer = getRenderer(this.#plugin, fragment)
+              const component = getComponentById(componentId, this.#settings)
+              const renderer = getRenderer(this.#plugin, component)
               renderer.render(el, content.data)
             })
           },
@@ -98,12 +98,12 @@ export class CodeblockHandler {
     }
   }
 
-  #getFragment(
+  #getComponent(
     content: CodeblockContent,
     element: HTMLElement,
     context: MarkdownPostProcessorContext,
     codeblockPrefix = '```use',
-  ): FragmentFound | null {
+  ): ComponentFound | null {
     const { data } = content
     let name = ''
 
@@ -115,14 +115,14 @@ export class CodeblockHandler {
     // if the name is missing try to get it from inline
     if (!name && this.#settings.naming_method !== 'PARAM') {
       const info = context.getSectionInfo(element)
-      if (!info) throw new CodeblockError('missing-fragment-name')
+      if (!info) throw new CodeblockError('missing-component-name')
 
       const header = info.text.split('\n').at(info.lineStart) ?? ''
       name = header.replace(codeblockPrefix, '').trim()
     }
 
-    if (!name) throw new CodeblockError('missing-fragment-name')
+    if (!name) throw new CodeblockError('missing-component-name')
 
-    return getFragmentByName(name, this.#settings)
+    return getComponentByName(name, this.#settings)
   }
 }

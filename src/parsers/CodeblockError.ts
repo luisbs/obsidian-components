@@ -1,11 +1,11 @@
 type ErrorCode =
   | 'invalid-codeblock-syntax'
-  | 'missing-fragment-name'
-  | 'unknown-fragment'
-  | 'disabled-fragment'
-  | 'missing-fragment-renderer'
-  | 'missing-fragment-file'
-  | 'invalid-fragment-syntax'
+  | 'missing-component-name'
+  | 'unknown-component'
+  | 'disabled-component'
+  | 'missing-component-renderer'
+  | 'missing-component-file'
+  | 'invalid-component-syntax'
 
 export class CodeblockError extends Error {
   constructor(public code: ErrorCode, public source?: unknown) {

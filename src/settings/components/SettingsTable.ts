@@ -15,7 +15,7 @@ export abstract class SettingsTable {
     protected saveSettings: () => void,
   ) {
     this.headerSetting = new Setting(parentEl)
-    this.tableEl = parentEl.createEl('table', 'fragments-table')
+    this.tableEl = parentEl.createEl('table', 'components-table')
     this.theadEl = this.tableEl.createEl('thead')
     this.tbodyEl = this.tableEl.createEl('tbody')
   }

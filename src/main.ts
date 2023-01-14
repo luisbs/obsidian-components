@@ -4,7 +4,7 @@ import { CodeblockHandler } from './parsers'
 import { SettingsTab } from './settings/SettingsTab'
 
 export const DEFAULT_SETTINGS: PluginSettings = {
-  enable_fragments: 'STRICT',
+  enable_components: 'STRICT',
   enable_codeblocks: false,
 
   naming_method: 'INLINE',
@@ -12,14 +12,14 @@ export const DEFAULT_SETTINGS: PluginSettings = {
 
   formats_enabled: [],
 
-  fragments_folder: '',
-  fragments_found: {},
+  components_folder: '',
+  components_found: {},
 
-  current_fragments: {},
+  current_components: {},
   current_codeblocks: {},
 }
 
-export default class FragmentsPlugin extends Plugin {
+export default class ComponentsPlugin extends Plugin {
   public settings = {} as PluginSettings
   protected parser: CodeblockHandler | null = null
 

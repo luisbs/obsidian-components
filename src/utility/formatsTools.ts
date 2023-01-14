@@ -1,7 +1,7 @@
-import type { FragmentFormat, PluginSettings } from '@/types'
+import type { ComponentFormat, PluginSettings } from '@/types'
 
 /** Get a list of the default formats. */
-function SupportedFormats(): FragmentFormat[] {
+function SupportedFormats(): ComponentFormat[] {
   return [
     // html/markdown
     { id: 'html', ext: /\.html$/i, type: 'html' },
@@ -14,14 +14,14 @@ function SupportedFormats(): FragmentFormat[] {
   ]
 }
 
-export function getSupportedFormats(): Array<FragmentFormat> {
+export function getSupportedFormats(): Array<ComponentFormat> {
   return SupportedFormats()
 }
 
 export function getFormatById(
   formatId: string,
   settings: PluginSettings,
-): FragmentFormat | undefined {
+): ComponentFormat | undefined {
   return getSupportedFormats().find((format) => format.id === formatId)
 }
 
@@ -29,11 +29,11 @@ export function getFormatById(
  * Check if the format is enabled.
  */
 export function isFormatEnabled(
-  format: string | FragmentFormat,
+  format: string | ComponentFormat,
   settings: PluginSettings,
 ): boolean {
-  // if the behavior is to allow all the fragments by default
-  if (settings.enable_fragments === 'ALL') {
+  // if the behavior is to allow all the components by default
+  if (settings.enable_components === 'ALL') {
     return true
   }
 

@@ -1,11 +1,11 @@
-import type { FragmentFound, PluginSettings } from '@/types'
+import type { ComponentFound, PluginSettings } from '@/types'
 import type { SwitchState } from './TableRow'
-import { isFragmentEnabled, isFragmentEnabledByFormat } from '@/utility'
+import { isComponentEnabled, isComponentEnabledByFormat } from '@/utility'
 import { SettingsTable } from './SettingsTable'
 import { TableRow } from './TableRow'
 
-export class FragmentsTable extends SettingsTable {
-  protected fragments: PluginSettings['fragments_found']
+export class ComponentsTable extends SettingsTable {
+  protected components: PluginSettings['components_found']
 
   constructor(
     parentEl: HTMLElement,
@@ -14,20 +14,20 @@ export class FragmentsTable extends SettingsTable {
     protected refreshSettings: () => void,
   ) {
     super(parentEl, settings, saveSettings)
-    if (!settings.fragments_found) settings.fragments_found = {}
-    this.fragments = settings.fragments_found
+    if (!settings.components_found) settings.components_found = {}
+    this.components = settings.components_found
     this.initialItems()
   }
 
   protected initialItems(): void {
-    this.filtered = Object.values(this.settings.fragments_found) //
+    this.filtered = Object.values(this.settings.components_found) //
       .map((item) => item.path)
   }
 
   protected filterItems(filter?: string): void {
     if (!filter) this.initialItems()
     else {
-      this.filtered = Object.values(this.settings.fragments_found) //
+      this.filtered = Object.values(this.settings.components_found) //
         .reduce((colletion, frag) => {
           if (frag.path.contains(filter) || frag.format.contains(filter)) {
             colletion.push(frag.path)
@@ -39,7 +39,7 @@ export class FragmentsTable extends SettingsTable {
     this.refresh()
   }
 
-  #searchFragmentOnVault(): void {
+  #searchComponentOnVault(): void {
     this.refreshSettings()
     this.filterItems()
     this.refresh()
@@ -47,13 +47,13 @@ export class FragmentsTable extends SettingsTable {
 
   render(): void {
     this.headerSetting.clear()
-    this.headerSetting.setName('Fragments filter')
-    this.headerSetting.setDesc('The entries are fragments found on the vault.')
+    this.headerSetting.setName('Components filter')
+    this.headerSetting.setDesc('The entries are components found on the vault.')
 
-    // refresh the fragments
+    // refresh the components
     this.headerSetting.addExtraButton((btn) => {
       btn.setIcon('reset').setTooltip('Refresh')
-      btn.onClick(this.#searchFragmentOnVault.bind(this))
+      btn.onClick(this.#searchComponentOnVault.bind(this))
     })
 
     // filter input
@@ -61,40 +61,40 @@ export class FragmentsTable extends SettingsTable {
       input.onChange(this.filterItems.bind(this))
     })
 
-    // disable all the filtered fragments
+    // disable all the filtered components
     this.headerSetting.addExtraButton((btn) => {
       btn.setIcon('cross')
       btn.setTooltip('Disable All')
       btn.onClick(() => {
         this.filtered.forEach((id) => {
-          if (!this.fragments[id]) return
-          this.fragments[id].enabled = false
+          if (!this.components[id]) return
+          this.components[id].enabled = false
         })
         this.saveChanges()
       })
     })
 
-    // return all the filtered fragments to the default state
+    // return all the filtered components to the default state
     this.headerSetting.addExtraButton((btn) => {
       btn.setIcon('trash')
       btn.setTooltip('Reset All')
       btn.onClick(() => {
         this.filtered.forEach((id) => {
-          if (!this.fragments[id]) return
-          this.fragments[id].enabled = null
+          if (!this.components[id]) return
+          this.components[id].enabled = null
         })
         this.saveChanges()
       })
     })
 
-    // enable all the filtered fragments
+    // enable all the filtered components
     this.headerSetting.addExtraButton((btn) => {
       btn.setIcon('checkmark')
       btn.setTooltip('Enable All')
       btn.onClick(() => {
         this.filtered.forEach((id) => {
-          if (!this.fragments[id]) return
-          this.fragments[id].enabled = true
+          if (!this.components[id]) return
+          this.components[id].enabled = true
         })
         this.saveChanges()
       })
@@ -119,11 +119,11 @@ export class FragmentsTable extends SettingsTable {
     this.tbodyEl.replaceChildren()
 
     for (const id of this.filtered) {
-      const fragment = this.fragments[id]
-      const names = this.settings.current_fragments[id] ?? []
+      const component = this.components[id]
+      const names = this.settings.current_components[id] ?? []
 
-      // construct the description of the fragment
-      const desc = createFragment()
+      // construct the description of the component
+      const desc = createComponent()
       desc.append(
         'Use it as: ',
         createEl('code', { text: names.map((v) => `'${v}'`).join(', ') }),
@@ -134,34 +134,37 @@ export class FragmentsTable extends SettingsTable {
 
       // check if enabled by parent
       const isEnabledByContext =
-        this.settings.enable_fragments === 'ALL' ||
-        isFragmentEnabledByFormat(id, this.settings)
+        this.settings.enable_components === 'ALL' ||
+        isComponentEnabledByFormat(id, this.settings)
 
       row.addInput(
-        fragment.raw_names,
-        this.#updateFragmentNames.bind(this, fragment),
+        component.raw_names,
+        this.#updateComponentNames.bind(this, component),
       )
       row.add2waySwitch(isEnabledByContext)
       row.add3waySwitch(
-        fragment.enabled,
-        this.#updateEnabledFragments.bind(this, fragment),
+        component.enabled,
+        this.#updateEnabledComponents.bind(this, component),
       )
-      row.add2waySwitch(isFragmentEnabled(id, this.settings))
+      row.add2waySwitch(isComponentEnabled(id, this.settings))
     }
   }
 
-  #updateEnabledFragments(fragment: FragmentFound, state: SwitchState): void {
-    fragment.enabled = state
+  #updateEnabledComponents(
+    component: ComponentFound,
+    state: SwitchState,
+  ): void {
+    component.enabled = state
     this.saveChanges()
   }
 
-  #updateFragmentNames(fragment: FragmentFound, source: string): void {
-    fragment.raw_names = source
+  #updateComponentNames(component: ComponentFound, source: string): void {
+    component.raw_names = source
 
-    fragment.names = []
+    component.names = []
     source.split(/(|;, )+/gi).forEach((name) => {
       name = name.replace(/\W*/gi, '')
-      if (name.length > 0) fragment.names.push(name)
+      if (name.length > 0) component.names.push(name)
     })
 
     this.saveChanges()

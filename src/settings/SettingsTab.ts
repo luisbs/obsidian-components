@@ -1,28 +1,31 @@
-import type { FragmentsPlugin, PluginSettings } from '@/types'
+import type { ComponentsPlugin, PluginSettings } from '@/types'
 import { PluginSettingTab, Setting } from 'obsidian'
 import { FolderSuggester } from 'obsidian-fnc'
-import { loadFragmentsOnVault, prepareFragmentsAndCodeblocks } from '@/utility'
-import { FormatsTable, FragmentsTable } from './components'
+import {
+  loadComponentsOnVault,
+  prepareComponentsAndCodeblocks,
+} from '@/utility'
+import { FormatsTable, ComponentsTable } from './components'
 
 export class SettingsTab extends PluginSettingTab {
-  #plugin: FragmentsPlugin
+  #plugin: ComponentsPlugin
   settings: PluginSettings
 
-  #fragmentsTable?: FragmentsTable
+  #componentsTable?: ComponentsTable
   #formatsTable?: FormatsTable
 
-  constructor(plugin: FragmentsPlugin) {
+  constructor(plugin: ComponentsPlugin) {
     super(plugin.app, plugin)
     this.#plugin = plugin
     this.settings = plugin.settings
   }
 
   saveChanges(refresh = true): void {
-    prepareFragmentsAndCodeblocks(this.settings)
+    prepareComponentsAndCodeblocks(this.settings)
     this.#plugin.saveSettings()
 
     if (!refresh) return
-    this.#fragmentsTable?.refresh()
+    this.#componentsTable?.refresh()
     this.#formatsTable?.refresh()
   }
 
@@ -34,24 +37,24 @@ export class SettingsTab extends PluginSettingTab {
 
   display(): void {
     this.containerEl.empty()
-    this.containerEl.addClass('fragments-settings')
+    this.containerEl.addClass('components-settings')
 
     this.#newSetting().setName('Plugin Settings').setHeading()
     this.#displayGeneralSettings()
 
-    this.#newSetting().setName('Fragments Settings').setHeading()
-    this.#displayFragmentsSettings()
+    this.#newSetting().setName('Components Settings').setHeading()
+    this.#displayComponentsSettings()
 
-    this.#fragmentsTable = new FragmentsTable(
+    this.#componentsTable = new ComponentsTable(
       this.containerEl,
       this.settings,
       this.saveChanges.bind(this),
       () => {
-        const fragments = loadFragmentsOnVault(
+        const components = loadComponentsOnVault(
           this.#plugin.app.vault,
           this.settings,
         )
-        this.update('fragments_found', fragments, false)
+        this.update('components_found', components, false)
       },
     )
 
@@ -62,28 +65,28 @@ export class SettingsTab extends PluginSettingTab {
       this.saveChanges.bind(this),
     )
 
-    this.#fragmentsTable.render()
+    this.#componentsTable.render()
     this.#formatsTable.render()
   }
 
   #displayGeneralSettings(): void {
     this.#newSetting()
       .setName('Default execution behavior')
-      .setDesc('Security behavior when runing the fragments.')
+      .setDesc('Security behavior when runing the components.')
       .addDropdown((input) => {
         input
           .addOptions({
-            DENY: 'Only fragments enabled by the user. (recomended)',
-            ALLOW_ENABLED: 'Fragments and formats enabled by the user.',
-            ALLOW_ALL: 'Allow all the fragments',
+            DENY: 'Only components enabled by the user. (recomended)',
+            ALLOW_ENABLED: 'Components and formats enabled by the user.',
+            ALLOW_ALL: 'Allow all the components',
           })
-          .setValue(this.settings.enable_fragments)
+          .setValue(this.settings.enable_components)
           .onChange((value) => this.update('default_behavior', value))
       })
 
     //
     // Codeblock naming method
-    const methodDesc = createFragment()
+    const methodDesc = createComponent()
     // prettier-ignore
     methodDesc.createEl('ul', undefined, (ul) => {
       ul.createEl('li', undefined, (li) => li.append('Inline names: like', createEl('code', { text: "'```use book```'" })))
@@ -104,22 +107,22 @@ export class SettingsTab extends PluginSettingTab {
       })
   }
 
-  #displayFragmentsSettings(): void {
+  #displayComponentsSettings(): void {
     this.#newSetting()
-      .setName('Fragments templates folder.')
-      .setDesc('Files in this directory will be taken as fragments.')
+      .setName('Components templates folder.')
+      .setDesc('Files in this directory will be taken as components.')
       .addText((text) => {
         new FolderSuggester(this.app, text.inputEl, this.containerEl)
         text
           .setPlaceholder('Example: folder1/folder2')
-          .setValue(this.settings.fragments_folder)
-          .onChange((value) => this.update('fragments_folder', value))
+          .setValue(this.settings.components_folder)
+          .onChange((value) => this.update('components_folder', value))
       })
 
     //
     // Naming strategy setting
-    const strategyDesc = createFragment()
-    strategyDesc.appendText('Strategy used for using the fragments.')
+    const strategyDesc = createComponent()
+    strategyDesc.appendText('Strategy used for using the components.')
     strategyDesc.createEl('br')
     // prettier-ignore
     strategyDesc.appendText('In cases of naming collition the names are going to be assigned incrementally in the next order.')
@@ -131,7 +134,7 @@ export class SettingsTab extends PluginSettingTab {
     })
 
     this.#newSetting()
-      .setName('Fragments naming strategy.')
+      .setName('Components naming strategy.')
       .setDesc(strategyDesc)
       .addDropdown((input) => {
         input.addOptions({

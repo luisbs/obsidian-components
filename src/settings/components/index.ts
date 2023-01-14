@@ -1,2 +1,2 @@
 export * from './FormatsTable'
-export * from './FragmentsTable'
+export * from './ComponentsTable'

@@ -1,9 +1,9 @@
 {
   "private": true,
-  "name": "obsidian-fragments",
-  "version": "0.2.0",
+  "name": "obsidian-components",
+  "version": "0.3.0",
   "license": "MIT",
-  "description": "Plugin to use template fragments on render time",
+  "description": "Plugin to use template components on render time",
   "keywords": [
     "obsidian",
     "template"

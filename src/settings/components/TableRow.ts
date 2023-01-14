@@ -7,7 +7,7 @@ export class TableRow {
     this.#trEl = parentEl.createEl('tr')
   }
 
-  addInfo(title: string, desc: string | DocumentFragment): void {
+  addInfo(title: string, desc: string | DocumentComponent): void {
     const td = this.#trEl.createEl('td')
     td.createEl('div', 'setting-item-name').append(title)
     td.createEl('div', 'setting-item-description').append(desc)
@@ -58,7 +58,7 @@ export class TableRow {
     update?: (state: SwitchState) => void,
   ): void {
     const td = this.#trEl.createEl('td', '')
-    const input = td.createEl('input', 'plugin-fragments-3wayswitch')
+    const input = td.createEl('input', 'plugin-components-3wayswitch')
     input.type = 'range'
     input.step = '1'
     input.min = String(this.#sliderMin)
