@@ -29,11 +29,19 @@ export function loadFragmentsOnVault(
 
       // keep the previous configuration
       enabled: prev?.enabled ?? null,
+      raw_names: prev?.raw_names ?? '',
       names: prev?.names ?? [],
     }
   }
 
   return fragments
+}
+
+export function getFragmentById(
+  fragmentId: string,
+  settings: PluginSettings,
+): FragmentFound | null {
+  return settings.fragments_found[fragmentId] || null
 }
 
 export function getFragmentByName(

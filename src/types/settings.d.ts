@@ -72,4 +72,6 @@ export interface FragmentFound {
   enabled: boolean | null
   /** User defined names to use as Codeblocks */
   names: string[]
+  /** User defined names */
+  raw_names: string
 }

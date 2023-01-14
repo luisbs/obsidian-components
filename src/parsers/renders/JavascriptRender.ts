@@ -11,7 +11,7 @@ abstract class JavascriptRender extends Render {
     const module = this.requireModule()
     if (typeof module === 'function') return module
     if (!isRecord(module) || typeof module.render !== 'function') {
-      throw new CodeblockError('fragment-invalid')
+      throw new CodeblockError('invalid-fragment-syntax')
     }
     return module.render
   }
@@ -27,7 +27,7 @@ abstract class JavascriptRender extends Render {
       // console.log({ modulePath, module: require(modulePath), basePath: this.vault.adapter.basePath })
       return require(modulePath)
     } catch (error) {
-      throw new CodeblockError('fragment-invalid', error)
+      throw new CodeblockError('invalid-fragment-syntax', error)
     }
   }
 }

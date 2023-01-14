@@ -37,13 +37,12 @@ input[type='range'].plugin-fragments-3wayswitch.is-disabled {
   background-color: var(--color-red);
 }
 
-.codeblock-missing-name,
-.codeblock-invalid-data,
-.fragment-missing,
-.fragment-disabled,
-.fragment-format-unknown,
-.fragment-file-missing,
-.fragment-render-missing,
-.fragment-invalid {
+.invalid-codeblock-syntax,
+.invalid-fragment-syntax,
+.missing-fragment-name,
+.missing-fragment-renderer,
+.missing-fragment-file,
+.unknown-fragment,
+.disabled-fragment {
   border: 1px solid orangered;
 }

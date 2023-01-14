@@ -13,17 +13,20 @@ export class TableRow {
     td.createEl('div', 'setting-item-description').append(desc)
   }
 
-  addInput(
-    value: string,
-    enabled = true,
-    update?: (value: string) => void,
-  ): void {
+  addInput(value: string, update?: (value: string) => void): void {
     const td = this.#trEl.createEl('td')
     const input = td.createEl('input')
-    if (enabled) input.tabIndex = 0
-    else {
+
+    input.value = value
+    if (!update) {
       input.tabIndex = -1
       input.disabled = true
+    } else {
+      input.tabIndex = 0
+      input.addEventListener('input', (ev) => {
+        if (!(ev.target instanceof HTMLInputElement)) return
+        update(ev.target.value)
+      })
     }
   }
 
@@ -35,7 +38,11 @@ export class TableRow {
     input.checked = value
 
     if (value) label.classList.add('is-enabled')
-    if (update) {
+    if (!update) {
+      input.tabIndex = -1
+      input.disabled = true
+    } else {
+      input.tabIndex = 0
       input.addEventListener('change', (ev) => {
         if (!(ev.target instanceof HTMLInputElement)) return
         const value = ev.target.checked

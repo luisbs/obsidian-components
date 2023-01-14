@@ -1,7 +1,13 @@
-import type { Codeblock, FragmentsPlugin } from '@/types'
+import type {
+  CodeblockContent,
+  FragmentFound,
+  FragmentsPlugin,
+  PluginSettings,
+} from '@/types'
 import type { MarkdownPostProcessorContext } from 'obsidian'
 import {
   getFormat,
+  getFragmentById,
   getFragmentByName,
   isFragmentEnabled,
   isRecord,
@@ -18,27 +24,57 @@ import {
 
 export class CodeblockHandler {
   #plugin: FragmentsPlugin
+  #settings: PluginSettings
 
   constructor(plugin: FragmentsPlugin) {
     this.#plugin = plugin
+    this.#settings = plugin.settings
     this.registerProcessors()
   }
 
-  // prettier-ignore
   registerProcessors(): void {
-    this.#plugin.registerMarkdownCodeBlockProcessor('use', this.handle.bind(this), -1)
+    // register base codeblock processor
+    this.#plugin.registerMarkdownCodeBlockProcessor(
+      'use',
+      (source, el, ctx) => {
+        this.#printErrors(source, el, () => {
+          const content = this.#parseCodeblock(source)
+          const fragment = this.#getFragment(content, el, ctx)
+          const renderer = this.#getFragmentRenderer(fragment)
+          renderer.render(el, content.data)
+        })
+      },
+      -1,
+    )
+
+    // register custom codeblock processors
+    for (const [fragmentId, names] of Object.entries(
+      this.#settings.current_codeblocks,
+    )) {
+      for (const name of names) {
+        this.#plugin.registerMarkdownCodeBlockProcessor(
+          name,
+          (source, el, ctx) => {
+            return this.#printErrors(source, el, () => {
+              const content = this.#parseCodeblock(source)
+              const fragment = getFragmentById(fragmentId, this.#settings)
+              const renderer = this.#getFragmentRenderer(fragment)
+              renderer.render(el, content.data)
+            })
+          },
+          -2,
+        )
+      }
+    }
   }
 
-  async handle(
+  #printErrors(
     source: string,
     element: HTMLElement,
-    context: MarkdownPostProcessorContext,
-  ): Promise<void> {
+    callback: () => void,
+  ): void {
     try {
-      const codeblock = this.#parseCodeblock(source, element, context)
-      const renderer = this.#getCodeblockRenderer(codeblock)
-      return renderer.render(element, codeblock.data)
-      //
+      callback()
     } catch (error) {
       const isError = error instanceof CodeblockError
       if (isError && error.source) {
@@ -53,43 +89,19 @@ export class CodeblockHandler {
     }
   }
 
-  #parseCodeblock(
-    source: string,
-    element: HTMLElement,
-    context: MarkdownPostProcessorContext,
-    codeblockPrefix = '```use',
-  ): Codeblock {
-    const isJson = source.trimStart().startsWith('{')
+  #parseCodeblock(source: string): CodeblockContent {
+    source = source.trim()
+
+    const isJson = source.startsWith('{')
     let data = {}
 
-    // parse the data
     try {
-      data = !isJson ? parseYaml(source) : JSON.parse(source)
+      data = isJson ? JSON.parse(source) : parseYaml(source)
     } catch (error) {
-      throw new CodeblockError('codeblock-invalid-data', error)
+      throw new CodeblockError('invalid-codeblock-syntax', error)
     }
-
-    // define name
-    let name = ''
-
-    // first search for the name on the data
-    if (this.#plugin.settings.naming_method !== 'INLINE' && isRecord(data)) {
-      name = typeof data['__name'] === 'string' ? data['__name'] : ''
-    }
-
-    // if the name is missing try to get it from inline
-    if (!name && this.#plugin.settings.naming_method !== 'PARAM') {
-      const info = context.getSectionInfo(element)
-      if (!info) throw new CodeblockError('codeblock-missing-name')
-
-      const header = info.text.split('\n').at(info.lineStart) ?? ''
-      name = header.replace(codeblockPrefix, '').trim()
-    }
-
-    if (!name) throw new CodeblockError('codeblock-missing-name')
 
     return {
-      name,
       hash: createHmac('sha256', '').update(source).digest('base64'),
       syntax: isJson ? 'json' : 'yaml',
       source,
@@ -97,16 +109,45 @@ export class CodeblockHandler {
     }
   }
 
-  #getCodeblockRenderer(codeblock: Codeblock): Render {
-    const fragment = getFragmentByName(codeblock.name, this.#plugin.settings)
-    if (!fragment) throw new CodeblockError('fragment-missing')
+  #getFragment(
+    content: CodeblockContent,
+    element: HTMLElement,
+    context: MarkdownPostProcessorContext,
+    codeblockPrefix = '```use',
+  ): FragmentFound | null {
+    const { data } = content
+    let name = ''
 
-    if (!isFragmentEnabled(fragment, this.#plugin.settings)) {
-      throw new CodeblockError('fragment-disabled')
+    // first search for the name on the data
+    if (this.#settings.naming_method !== 'INLINE' && isRecord(data)) {
+      name = typeof data['__name'] === 'string' ? data['__name'] : ''
     }
 
-    const format = getFormat(fragment.format, this.#plugin.settings)
-    if (!format) throw new CodeblockError('fragment-format-unknown')
+    // if the name is missing try to get it from inline
+    if (!name && this.#settings.naming_method !== 'PARAM') {
+      const info = context.getSectionInfo(element)
+      if (!info) throw new CodeblockError('missing-fragment-name')
+
+      const header = info.text.split('\n').at(info.lineStart) ?? ''
+      name = header.replace(codeblockPrefix, '').trim()
+    }
+
+    if (!name) throw new CodeblockError('missing-fragment-name')
+
+    return getFragmentByName(name, this.#settings)
+  }
+
+  #getFragmentRenderer(fragment: FragmentFound | null): Render {
+    if (!fragment) {
+      throw new CodeblockError('unknown-fragment')
+    }
+
+    if (!isFragmentEnabled(fragment, this.#settings)) {
+      throw new CodeblockError('disabled-fragment')
+    }
+
+    const format = getFormat(fragment.format, this.#settings)
+    if (!format) throw new CodeblockError('missing-fragment-renderer')
 
     switch (format.id) {
       case 'html':
@@ -120,6 +161,6 @@ export class CodeblockHandler {
         return new JavascriptCodeRender(this.#plugin, fragment)
     }
 
-    throw new CodeblockError('fragment-render-missing')
+    throw new CodeblockError('missing-fragment-renderer')
   }
 }

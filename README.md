@@ -20,19 +20,17 @@
   - [x] Isolate the user-enabled fragments
 - [x] Print error messages
 - [x] Add alternative to inline fragment name method.
-- [ ] Isolate the html related fragment formats to custom renders.
 - [x] Reload the fragments when the file is updated
   - Since the codeblock processor is re-run on file changes, it updates automatically
-- [ ] Add support for custom block name like
+- [x] Add support for custom codeblocks name like
+- [ ] Isolate the html related fragment formats to custom renders.
+- [ ] Change all the references of the name **fragment** to **component** for better naming
+- [ ] Add a setting to allow the user to set the the parameters to use on names
 
-  > ```book
-  > {}
-  > ```
-  >
-  > instead of
-  >
-  > ```use book
-  > {}
+  > ```use
+  >   __name: 'fragment-name'
+  >   __frag: 'fragment-name'
+  >   component: 'fragment-name'
   > ```
 
 - [x] Fragment Formats
@@ -54,3 +52,9 @@
   - [ ] Manage (add, edit, delete)
   - [ ] Manage (enable, disable)
   - [ ] Manage Cache
+
+---
+
+## Documentation
+
+Custom names can be separated by `|;, ` (includes spaces)

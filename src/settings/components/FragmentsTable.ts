@@ -137,8 +137,10 @@ export class FragmentsTable extends SettingsTable {
         this.settings.enable_fragments === 'ALL' ||
         isFragmentEnabledByFormat(id, this.settings)
 
-      // TODO add custom naming support
-      // row.addInput('', true, () => {})
+      row.addInput(
+        fragment.raw_names,
+        this.#updateFragmentNames.bind(this, fragment),
+      )
       row.add2waySwitch(isEnabledByContext)
       row.add3waySwitch(
         fragment.enabled,
@@ -150,6 +152,18 @@ export class FragmentsTable extends SettingsTable {
 
   #updateEnabledFragments(fragment: FragmentFound, state: SwitchState): void {
     fragment.enabled = state
+    this.saveChanges()
+  }
+
+  #updateFragmentNames(fragment: FragmentFound, source: string): void {
+    fragment.raw_names = source
+
+    fragment.names = []
+    source.split(/(|;, )+/gi).forEach((name) => {
+      name = name.replace(/\W*/gi, '')
+      if (name.length > 0) fragment.names.push(name)
+    })
+
     this.saveChanges()
   }
 }
