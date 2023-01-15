@@ -15,13 +15,11 @@ export class CodeblockHandler {
 
   constructor(plugin: ComponentsPlugin) {
     this.#plugin = plugin
-    this.registerProcessors()
+    this.registerBaseCodeblock()
+    this.registerCustomCodeblocks()
   }
 
-  registerProcessors(): void {
-    const { settings, state } = this.#plugin
-
-    // register base codeblock processor
+  registerBaseCodeblock(): void {
     this.#plugin.registerMarkdownCodeBlockProcessor(
       'use',
       (source, el, ctx) => {
@@ -34,8 +32,11 @@ export class CodeblockHandler {
       },
       -1,
     )
+  }
 
-    // register custom codeblock processors
+  registerCustomCodeblocks(): void {
+    const { settings, state } = this.#plugin
+
     for (const [componentId, names] of Object.entries(state.codeblocks)) {
       for (const name of names) {
         this.#plugin.registerMarkdownCodeBlockProcessor(
@@ -48,7 +49,7 @@ export class CodeblockHandler {
               renderer.render(el, content.data)
             })
           },
-          -2,
+          -1,
         )
       }
     }

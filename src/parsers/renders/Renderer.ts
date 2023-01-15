@@ -20,11 +20,11 @@ export abstract class Renderer {
   protected replaceData(
     source: string,
     data: unknown,
-    fallback = '<missing>',
+    fallback = '[missing]',
   ): string {
     if (!isRecord(data)) throw new CodeblockError('invalid-codeblock-syntax')
-    return source.replace(/{{ *(\w+) *}}/gi, (name) => {
-      return name in data ? String(data[name]) : fallback
+    return source.replace(/\{\{ *(\w+) *\}\}/gi, (match, key) => {
+      return key in data ? String(data[key]) : fallback
     })
   }
 
