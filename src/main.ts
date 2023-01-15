@@ -33,10 +33,12 @@ export default class ComponentsPlugin extends Plugin {
   async loadSettings() {
     this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData())
     preparePluginState(this)
+    console.log(this.state)
   }
 
   async saveSettings() {
     await this.saveData(this.settings)
     preparePluginState(this)
+    console.log(this.state)
   }
 }

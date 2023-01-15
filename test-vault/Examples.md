@@ -16,7 +16,7 @@ author: 'J. R. Tolkien'
 Allows the user to use a **component** placing the name as a value inside the **Codeblock**, by default with the `__name` param, but can be changed. Example:
 
 ```use
-__name: book
+__component: book
 title: 'The Great Gatsby'
 author: 'F. Scott Fitzgerald'
 ```

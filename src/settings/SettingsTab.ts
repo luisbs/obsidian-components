@@ -17,18 +17,16 @@ export class SettingsTab extends PluginSettingTab {
     this.settings = plugin.settings
   }
 
-  saveChanges(refresh = true): void {
-    this.#plugin.saveSettings()
-
-    if (!refresh) return
+  async saveChanges(): Promise<void> {
+    await this.#plugin.saveSettings()
     this.#componentsTable?.refresh()
     this.#formatsTable?.refresh()
   }
 
-  update(key: keyof PluginSettings, value: unknown, refresh = true) {
+  update(key: keyof PluginSettings, value: unknown) {
     // @ts-expect-error dynamic assignation
     this.settings[key] = value
-    this.saveChanges(refresh)
+    this.saveChanges()
   }
 
   display(): void {
@@ -46,14 +44,14 @@ export class SettingsTab extends PluginSettingTab {
 
     this.#componentsTable = new ComponentsTable(
       this.containerEl,
-      this.settings,
+      this.#plugin,
       this.saveChanges.bind(this),
-      () => {
+      async () => {
         const components = loadComponentsOnVault(
           this.#plugin.app.vault,
           this.settings,
         )
-        this.update('components_found', components, false)
+        this.update('components_found', components)
       },
     )
 
@@ -116,7 +114,7 @@ export class SettingsTab extends PluginSettingTab {
       .setDesc('Defines the parameters used to identify a component')
       .addTextArea((input) => {
         input.setValue(this.settings.naming_params)
-        input.onChange((value) => this.update('naming_params', value, false))
+        input.onChange((value) => this.update('naming_params', value))
       })
 
     this.#newSetting()

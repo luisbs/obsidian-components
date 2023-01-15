@@ -31,7 +31,7 @@ export class TableRow {
     } else {
       textarea.tabIndex = 0
       textarea.addEventListener('change', (ev) => {
-        if (!(ev.target instanceof HTMLInputElement)) return
+        if (!(ev.target instanceof HTMLTextAreaElement)) return
         update(ev.target.value)
       })
     }

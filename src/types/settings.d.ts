@@ -67,8 +67,6 @@ export interface ComponentFound {
   format: string
   /** Enforced state defined by the user. */
   enabled: boolean | null
-  /** User defined names to use as Codeblocks */
-  names: string[]
   /** User defined names */
-  raw_names: string
+  names: string
 }

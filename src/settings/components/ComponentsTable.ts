@@ -1,10 +1,5 @@
-import type { ComponentFound, PluginSettings } from '@/types'
-import type { SwitchState } from './TableRow'
-import {
-  isComponentEnabled,
-  isComponentEnabledByFormat,
-  parseStringList,
-} from '@/utility'
+import type { ComponentFound, ComponentsPlugin, PluginSettings } from '@/types'
+import { isComponentEnabled, isComponentEnabledByFormat } from '@/utility'
 import { SettingsTable } from './SettingsTable'
 import { TableRow } from './TableRow'
 
@@ -13,11 +8,13 @@ export class ComponentsTable extends SettingsTable {
 
   constructor(
     parentEl: HTMLElement,
-    settings: PluginSettings,
+    protected plugin: ComponentsPlugin,
     saveSettings: () => void,
     protected refreshSettings: () => void,
   ) {
-    super(parentEl, settings, saveSettings)
+    super(parentEl, plugin.settings, saveSettings)
+
+    const settings = plugin.settings
     if (!settings.components_found) settings.components_found = {}
     this.components = settings.components_found
     this.initialItems()
@@ -123,8 +120,10 @@ export class ComponentsTable extends SettingsTable {
     this.tbodyEl.replaceChildren()
 
     for (const id of this.filtered) {
-      const component = this.components[id]
-      const names = this.settings.current_components[id] ?? []
+      const component = this.components[id] as ComponentFound | undefined
+      if (!component) continue
+
+      const names = this.plugin.state.components[id] ?? []
 
       // construct the description of the component
       const desc = createFragment()
@@ -141,9 +140,8 @@ export class ComponentsTable extends SettingsTable {
         this.settings.enable_components === 'ALL' ||
         isComponentEnabledByFormat(id, this.settings)
 
-      row.addTextarea(component.raw_names, (value) => {
-        component.raw_names = value
-        component.names = parseStringList(value)
+      row.addTextarea(component.names, (value) => {
+        component.names = value
         this.saveChanges()
       })
 

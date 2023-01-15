@@ -29,8 +29,7 @@ export function loadComponentsOnVault(
 
       // keep the previous configuration
       enabled: prev?.enabled ?? null,
-      raw_names: prev?.raw_names ?? '',
-      names: prev?.names ?? [],
+      names: prev?.names ?? '',
     }
   }
 

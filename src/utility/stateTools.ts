@@ -44,10 +44,11 @@ export function preparePluginState(plugin: ComponentsPlugin): void {
     const format = formats[component.format]
 
     // add the user defined names as codeblocks and components
+    const customNames = parseStringList(component.names)
     if (!settings.enable_codeblocks) {
-      component.names.forEach((name) => (components[name] = componentId))
+      customNames.forEach((name) => (components[name] = componentId))
     } else {
-      component.names.forEach((name) => {
+      customNames.forEach((name) => {
         components[name] = componentId
         codeblocks[name] = componentId
       })
