@@ -102,6 +102,30 @@ All the **Codeblocks** support the use of `JSON` too. Example:
 }
 ```
 
+### Styling
+
+Each component/codeblock is assigned two classes `component` and `<component-name>-component` (the component-name is the word you are using to reference the component)
+
+Example:
+
+```use book
+
+```
+
+And
+
+```use
+__name: 'book'
+```
+
+And
+
+```book
+
+```
+
+will all use `.component.book-component`
+
 ### About the components custom names
 
 - Any character not alphanumeric nor underscore is going to be ignored, so the input `%%b$l-u.e+` is going to allow the word `blue` to reference that component.

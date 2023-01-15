@@ -25,8 +25,10 @@ export class CodeblockHandler {
       (source, el, ctx) => {
         this.#printErrors(source, el, () => {
           const content = this.#parseCodeblock(source)
-          const component = this.#getComponent(content, el, ctx)
+          const { name, component } = this.#getComponent(content, el, ctx)
           const renderer = getRenderer(this.#plugin, component)
+
+          el.classList.add('component', `${name}-component`)
           renderer.render(el, content.data)
         })
       },
@@ -46,6 +48,8 @@ export class CodeblockHandler {
               const content = this.#parseCodeblock(source)
               const component = getComponentById(componentId, settings)
               const renderer = getRenderer(this.#plugin, component)
+
+              el.classList.add('component', `${name}-component`)
               renderer.render(el, content.data)
             })
           },
@@ -101,7 +105,7 @@ export class CodeblockHandler {
     element: HTMLElement,
     context: MarkdownPostProcessorContext,
     codeblockPrefix = '```use',
-  ): ComponentFound | null {
+  ): { name: string; component: ComponentFound | null } {
     const { settings, state } = this.#plugin
 
     const { data } = content
@@ -131,10 +135,13 @@ export class CodeblockHandler {
     // search the component
     for (const componentId in state.components) {
       if (state.components[componentId].contains(name)) {
-        return settings.components_found[componentId] || null
+        return {
+          name,
+          component: settings.components_found[componentId] || null,
+        }
       }
     }
 
-    return null
+    return { name, component: null }
   }
 }
