@@ -9,6 +9,8 @@ export interface PluginSettings {
   /** Stores the user desition to use custom codeblocks. */
   enable_codeblocks: boolean
 
+  /** Store the user input about which params can be used to retrive a component name. */
+  naming_params: string
   /**
    * Stores the component naming method for the vault.
    * - `'INLINE'` specify the name as an inline string (e.g. `use book`)
@@ -31,11 +33,6 @@ export interface PluginSettings {
   components_folder: string
   /** Stores the components found on the vault. */
   components_found: Record<string, ComponentFound>
-
-  /** Stores the currently enabled components. */
-  current_components: Record<string, string[]>
-  /** Stores the currently enabled codeblocks. */
-  current_codeblocks: Record<string, string[]>
 }
 
 /**

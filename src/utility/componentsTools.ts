@@ -44,19 +44,6 @@ export function getComponentById(
   return settings.components_found[componentId] || null
 }
 
-export function getComponentByName(
-  name: string,
-  settings: PluginSettings,
-): ComponentFound | null {
-  for (const componentId in settings.current_components) {
-    if (settings.current_components[componentId].contains(name)) {
-      return settings.components_found[componentId] || null
-    }
-  }
-
-  return null
-}
-
 /**
  * Check if the component is enabled.
  */

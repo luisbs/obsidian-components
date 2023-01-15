@@ -1,17 +1,18 @@
-import type { ComponentFound, ComponentFormat, PluginSettings } from '@/types'
+import type { ComponentFound, ComponentFormat, ComponentsPlugin } from '@/types'
 import path from 'path'
-import { arrayToObject, reverseObject } from './common'
+import { arrayToObject, reverseObject, parseStringList } from './common'
 import { getSupportedFormats } from './formatsTools'
 import { isComponentEnabled } from './componentsTools'
 
 /**
- * Pre-process the plugin settings to calculate the enabled components.
+ * Pre-process the plugin settings to set the plugin state.
  *
  * It can be costly if the user has a lot of components,
  * but is expected to not be run frequently,
- * and it pre-calculates other settings useful on runtime
+ * and it pre-calculates all values useful on runtime.
  */
-export function prepareComponentsAndCodeblocks(settings: PluginSettings): void {
+export function preparePluginState(plugin: ComponentsPlugin): void {
+  const settings = plugin.settings
   const formats = arrayToObject(getSupportedFormats(), 'id')
 
   // filter and sort the components
@@ -31,11 +32,11 @@ export function prepareComponentsAndCodeblocks(settings: PluginSettings): void {
       )
     })
 
-  const includeLongNames = settings.naming_strategy !== 'SHORT'
-  const includeAllNames = settings.naming_strategy === 'ALL'
-
   const codeblocks = {} as Record<string, string>
   const components = {} as Record<string, string>
+
+  const includeLongNames = settings.naming_strategy !== 'SHORT'
+  const includeAllNames = settings.naming_strategy === 'ALL'
 
   // prettier-ignore
   for (const component of source) {
@@ -85,8 +86,12 @@ export function prepareComponentsAndCodeblocks(settings: PluginSettings): void {
     components[names.fullPath] = componentId
   }
 
-  settings.current_components = reverseObject(components)
-  settings.current_codeblocks = reverseObject(codeblocks)
+  // reset state
+  plugin.state = {
+    params: parseStringList(settings.naming_params),
+    components: reverseObject(components),
+    codeblocks: reverseObject(codeblocks),
+  }
 }
 
 /**

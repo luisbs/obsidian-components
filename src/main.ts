@@ -1,12 +1,14 @@
-import type { PluginSettings } from './types'
+import type { PluginSettings, PluginState } from './types'
 import { Plugin } from 'obsidian'
 import { CodeblockHandler } from './parsers'
 import { SettingsTab } from './settings/SettingsTab'
+import { preparePluginState } from './utility'
 
 export const DEFAULT_SETTINGS: PluginSettings = {
   enable_components: 'STRICT',
   enable_codeblocks: false,
 
+  naming_params: '__name',
   naming_method: 'INLINE',
   naming_strategy: 'LONG',
 
@@ -14,13 +16,12 @@ export const DEFAULT_SETTINGS: PluginSettings = {
 
   components_folder: '',
   components_found: {},
-
-  current_components: {},
-  current_codeblocks: {},
 }
 
 export default class ComponentsPlugin extends Plugin {
   public settings = {} as PluginSettings
+  public state = {} as PluginState
+
   protected parser: CodeblockHandler | null = null
 
   async onload() {
@@ -31,9 +32,11 @@ export default class ComponentsPlugin extends Plugin {
 
   async loadSettings() {
     this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData())
+    preparePluginState(this)
   }
 
   async saveSettings() {
     await this.saveData(this.settings)
+    preparePluginState(this)
   }
 }

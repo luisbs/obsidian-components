@@ -16,14 +16,8 @@
 - [x] Isolate the html related component formats to custom renders.
 - [x] Change all the references of the name **fragment** to **component** for better naming
 - [x] Change the 3way-switch into a select input for a simplier design.
-- [ ] Isolate the plugin state out of the plugin settings.
+- [x] Isolate the plugin state out of the plugin settings.
 - [ ] Add a setting to allow the user to set the the parameters to use on names
-
-  > ```use
-  >   __name: 'component-name'
-  >   __frag: 'component-name'
-  >   component: 'component-name'
-  > ```
 
 ### Support
 

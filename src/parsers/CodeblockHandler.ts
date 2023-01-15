@@ -3,25 +3,24 @@ import type {
   CodeblockContent,
   ComponentFound,
   ComponentsPlugin,
-  PluginSettings,
 } from '@/types'
 import { createHmac } from 'crypto'
 import { parseYaml } from 'obsidian'
-import { getComponentById, getComponentByName, isRecord } from '@/utility'
+import { getComponentById, isRecord } from '@/utility'
 import { CodeblockError } from './CodeblockError'
 import { getRenderer } from './renders'
 
 export class CodeblockHandler {
   #plugin: ComponentsPlugin
-  #settings: PluginSettings
 
   constructor(plugin: ComponentsPlugin) {
     this.#plugin = plugin
-    this.#settings = plugin.settings
     this.registerProcessors()
   }
 
   registerProcessors(): void {
+    const { settings, state } = this.#plugin
+
     // register base codeblock processor
     this.#plugin.registerMarkdownCodeBlockProcessor(
       'use',
@@ -37,16 +36,14 @@ export class CodeblockHandler {
     )
 
     // register custom codeblock processors
-    for (const [componentId, names] of Object.entries(
-      this.#settings.current_codeblocks,
-    )) {
+    for (const [componentId, names] of Object.entries(state.codeblocks)) {
       for (const name of names) {
         this.#plugin.registerMarkdownCodeBlockProcessor(
           name,
           (source, el, ctx) => {
             return this.#printErrors(source, el, () => {
               const content = this.#parseCodeblock(source)
-              const component = getComponentById(componentId, this.#settings)
+              const component = getComponentById(componentId, settings)
               const renderer = getRenderer(this.#plugin, component)
               renderer.render(el, content.data)
             })
@@ -104,16 +101,23 @@ export class CodeblockHandler {
     context: MarkdownPostProcessorContext,
     codeblockPrefix = '```use',
   ): ComponentFound | null {
+    const { settings, state } = this.#plugin
+
     const { data } = content
     let name = ''
 
     // first search for the name on the data
-    if (this.#settings.naming_method !== 'INLINE' && isRecord(data)) {
-      name = typeof data['__name'] === 'string' ? data['__name'] : ''
+    if (settings.naming_method !== 'INLINE' && isRecord(data)) {
+      for (const paramName of state.params) {
+        if (typeof data[paramName] === 'string') {
+          name = data[paramName] as string
+          break
+        }
+      }
     }
 
     // if the name is missing try to get it from inline
-    if (!name && this.#settings.naming_method !== 'PARAM') {
+    if (!name && settings.naming_method !== 'PARAM') {
       const info = context.getSectionInfo(element)
       if (!info) throw new CodeblockError('missing-component-name')
 
@@ -123,6 +127,13 @@ export class CodeblockHandler {
 
     if (!name) throw new CodeblockError('missing-component-name')
 
-    return getComponentByName(name, this.#settings)
+    // search the component
+    for (const componentId in state.components) {
+      if (state.components[componentId].contains(name)) {
+        return settings.components_found[componentId] || null
+      }
+    }
+
+    return null
   }
 }
