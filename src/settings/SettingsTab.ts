@@ -86,11 +86,17 @@ export class SettingsTab extends PluginSettingTab {
 
   #displayUsageSettings(): void {
     const methodDesc = createFragment()
-    // prettier-ignore
     methodDesc.createEl('ul', undefined, (ul) => {
-    ul.createEl('li', undefined, (li) => li.append('Inline names: like', createEl('code', { text: "'```use book```'" })))
-    ul.createEl('li', undefined, (li) => li.append('Param names: like', createEl('code', { text: `'__name: "book"'` }), '(inside the codeblock)'))
-  })
+      ul.createEl('li').append(
+        'Inline names: like',
+        createEl('code', { text: "'```use book```'" }),
+      )
+      ul.createEl('li').append(
+        'Param names: like',
+        createEl('code', { text: `'__name: "book"'` }),
+        '(inside the codeblock)',
+      )
+    })
 
     this.#newSetting()
       .setName('Base Codeblock usage method')
@@ -106,8 +112,16 @@ export class SettingsTab extends PluginSettingTab {
       })
 
     this.#newSetting()
+      .setName('Base Codeblock name parameters')
+      .setDesc('Defines the parameters used to identify a component')
+      .addTextArea((input) => {
+        input.setValue(this.settings.naming_params)
+        input.onChange((value) => this.update('naming_params', value, false))
+      })
+
+    this.#newSetting()
       .setName('Enable custom Codeblocks?')
-      .setDesc('Allows to use the components custom names as codeblocks types')
+      .setDesc('Allows to use the components custom names as codeblocks')
       .addToggle((input) => {
         input
           .setValue(this.settings.enable_codeblocks)

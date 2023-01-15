@@ -17,7 +17,7 @@
 - [x] Change all the references of the name **fragment** to **component** for better naming
 - [x] Change the 3way-switch into a select input for a simplier design.
 - [x] Isolate the plugin state out of the plugin settings.
-- [ ] Add a setting to allow the user to set the the parameters to use on names
+- [x] Add a setting to allow the user to set the the parameters to use on names
 
 ### Support
 

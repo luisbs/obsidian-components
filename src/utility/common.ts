@@ -40,7 +40,7 @@ export function reverseObject(
 }
 
 export function parseStringList(source: string): string[] {
-  return source.split(/[|;, ]+/gi).reduce((arr, str) => {
+  return source.split(/[|;,\s]+/gi).reduce((arr, str) => {
     str = str.replace(/\W*/gi, '')
     if (str.length > 0 && !arr.includes(str)) arr.push(str)
     return arr
