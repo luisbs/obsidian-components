@@ -11,6 +11,11 @@ function resolve(...paths) {
 }
 
 /** @param {string[]} paths */
+function resolveOnDist(...paths) {
+  return resolve('dist/', ...paths)
+}
+
+/** @param {string[]} paths */
 function resolveOnVault(...paths) {
   return resolve('test-vault/.obsidian/plugins/components/', ...paths)
 }
@@ -60,7 +65,6 @@ const DEV_CONFIG = {
   sourcemap: 'inline',
   plugins: [
     copy({
-      once: true,
       resolveFrom: resolve(),
       assets: [
         { from: 'manifest.json', to: resolveOnVault('manifest.json') },
@@ -77,7 +81,16 @@ const PROD_CONFIG = {
   outdir: 'dist',
   logLevel: 'error',
   sourcemap: false,
-  // plugins: [],
+  plugins: [
+    copy({
+      once: true,
+      resolveFrom: resolve(),
+      assets: [
+        { from: 'manifest.json', to: resolveOnDist('manifest.json') },
+        { from: 'styles.css', to: resolveOnDist('styles.css') },
+      ],
+    }),
+  ],
   banner: {
     js: [
       '/*',
