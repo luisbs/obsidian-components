@@ -1,10 +1,7 @@
 import type { ComponentsPlugin, PluginSettings } from '@/types'
 import { PluginSettingTab, Setting } from 'obsidian'
 import { FolderSuggester } from 'obsidian-fnc'
-import {
-  loadComponentsOnVault,
-  prepareComponentsAndCodeblocks,
-} from '@/utility'
+import { loadComponentsOnVault, preparePluginState } from '@/utility'
 import { FormatsTable, ComponentsTable } from './components'
 
 export class SettingsTab extends PluginSettingTab {
@@ -21,7 +18,7 @@ export class SettingsTab extends PluginSettingTab {
   }
 
   saveChanges(refresh = true): void {
-    prepareComponentsAndCodeblocks(this.settings)
+    preparePluginState(this.settings)
     this.#plugin.saveSettings()
 
     if (!refresh) return

@@ -7,31 +7,38 @@ export class TableRow {
     this.#trEl = parentEl.createEl('tr')
   }
 
-  addInfo(title: string, desc: string | DocumentFragment): void {
+  addInfo(title: string, desc?: string | DocumentFragment): void {
     const td = this.#trEl.createEl('td')
     td.createEl('div', 'setting-item-name').append(title)
-    td.createEl('div', 'setting-item-description').append(desc)
+    if (desc) {
+      td.createEl('div', 'setting-item-description').append(desc)
+    }
   }
 
-  addInput(value: string, update?: (value: string) => void): void {
+  addText(text: string | HTMLElement | DocumentFragment): void {
     const td = this.#trEl.createEl('td')
-    const input = td.createEl('input')
+    td.append(text)
+  }
 
-    input.value = value
+  addTextarea(value: string, update?: (value: string) => void): void {
+    const td = this.#trEl.createEl('td', 'text-center')
+    const textarea = td.createEl('textarea')
+    textarea.value = value
+
     if (!update) {
-      input.tabIndex = -1
-      input.disabled = true
+      textarea.tabIndex = -1
+      textarea.disabled = true
     } else {
-      input.tabIndex = 0
-      input.addEventListener('change', (ev) => {
+      textarea.tabIndex = 0
+      textarea.addEventListener('change', (ev) => {
         if (!(ev.target instanceof HTMLInputElement)) return
         update(ev.target.value)
       })
     }
   }
 
-  add2waySwitch(value: boolean, update?: (state: boolean) => void): void {
-    const td = this.#trEl.createEl('td')
+  addSwitch(value: boolean, update?: (state: boolean) => void): void {
+    const td = this.#trEl.createEl('td', 'text-center')
     const label = td.createEl('label', 'checkbox-container')
     const input = label.createEl('input')
     input.type = 'checkbox'
@@ -53,58 +60,37 @@ export class TableRow {
     }
   }
 
-  add3waySwitch(
+  addBehaviorSelector(
     value: SwitchState,
     update?: (state: SwitchState) => void,
   ): void {
-    const td = this.#trEl.createEl('td', '')
-    const input = td.createEl('input', 'plugin-components-3wayswitch')
-    input.type = 'range'
-    input.step = '1'
-    input.min = String(this.#sliderMin)
-    input.max = String(this.#sliderMax)
+    const td = this.#trEl.createEl('td', 'text-center')
+    const select = td.createEl('select', 'dropdown')
 
-    this.#updateState(
-      input,
-      value === null ? 0 : value ? this.#sliderMax : this.#sliderMin,
-    )
+    // prettier-ignore
+    const optNone = select.createEl('option', { text: 'Inherit', value: 'none' })
+    const optOff = select.createEl('option', { text: 'Disabled', value: 'off' })
+    const optOn = select.createEl('option', { text: 'Enabled', value: 'on' })
+
+    // assign base state
+    if (value === false) optOff.selected = true
+    else if (value === true) optOn.selected = true
+    else optNone.selected = true
 
     if (!update) {
-      input.tabIndex = -1
-      input.disabled = true
+      select.tabIndex = -1
+      select.disabled = true
     } else {
-      input.tabIndex = 0
-      input.addEventListener('change', (ev) => {
-        if (!(ev.target instanceof HTMLInputElement)) return
-        const value = this.#updateState(input, Number(ev.target.value))
-        update(value)
+      select.tabIndex = 0
+      select.addEventListener('change', (ev) => {
+        const t = ev.target
+        if (!(t instanceof HTMLSelectElement)) return
+
+        // propagate the new state
+        if (t.value === 'on') update(true)
+        else if (t.value === 'off') update(false)
+        else update(null)
       })
     }
-  }
-
-  #sliderMin = -10
-  #sliderMinBreak = -3
-  #sliderMax = 10
-  #sliderMaxBreak = 3
-
-  #updateState(input: HTMLInputElement, value: number): SwitchState {
-    if (value < this.#sliderMinBreak) {
-      input.value = String(this.#sliderMin)
-      input.classList.remove('is-enabled')
-      input.classList.add('is-disabled')
-      return false
-    }
-
-    if (value > this.#sliderMaxBreak) {
-      input.value = String(this.#sliderMax)
-      input.classList.remove('is-disabled')
-      input.classList.add('is-enabled')
-      return true
-    }
-
-    input.value = '0'
-    input.classList.remove('is-enabled')
-    input.classList.remove('is-disabled')
-    return null
   }
 }

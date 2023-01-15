@@ -1,3 +1,7 @@
+export function isRecord(obj: unknown): obj is Record<string, unknown> {
+  return typeof obj === 'object' && obj !== null
+}
+
 /**
  * Creates an object from an array_of_objects
  * using a value on the array items, as key of the result object
@@ -35,6 +39,10 @@ export function reverseObject(
   return result
 }
 
-export function isRecord(obj: unknown): obj is Record<string, unknown> {
-  return typeof obj === 'object' && obj !== null
+export function parseStringList(source: string): string[] {
+  return source.split(/[|;, ]+/gi).reduce((arr, str) => {
+    str = str.replace(/\W*/gi, '')
+    if (str.length > 0 && !arr.includes(str)) arr.push(str)
+    return arr
+  }, [] as string[])
 }

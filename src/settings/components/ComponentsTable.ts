@@ -1,6 +1,10 @@
 import type { ComponentFound, PluginSettings } from '@/types'
 import type { SwitchState } from './TableRow'
-import { isComponentEnabled, isComponentEnabledByFormat } from '@/utility'
+import {
+  isComponentEnabled,
+  isComponentEnabledByFormat,
+  parseStringList,
+} from '@/utility'
 import { SettingsTable } from './SettingsTable'
 import { TableRow } from './TableRow'
 
@@ -137,36 +141,18 @@ export class ComponentsTable extends SettingsTable {
         this.settings.enable_components === 'ALL' ||
         isComponentEnabledByFormat(id, this.settings)
 
-      row.addInput(
-        component.raw_names,
-        this.#updateComponentNames.bind(this, component),
-      )
-      row.add2waySwitch(isEnabledByContext)
-      row.add3waySwitch(
-        component.enabled,
-        this.#updateEnabledComponents.bind(this, component),
-      )
-      row.add2waySwitch(isComponentEnabled(id, this.settings))
+      row.addTextarea(component.raw_names, (value) => {
+        component.raw_names = value
+        component.names = parseStringList(value)
+        this.saveChanges()
+      })
+
+      row.addSwitch(isEnabledByContext)
+      row.addBehaviorSelector(component.enabled, (value) => {
+        component.enabled = value
+        this.saveChanges()
+      })
+      row.addSwitch(isComponentEnabled(id, this.settings))
     }
-  }
-
-  #updateEnabledComponents(
-    component: ComponentFound,
-    state: SwitchState,
-  ): void {
-    component.enabled = state
-    this.saveChanges()
-  }
-
-  #updateComponentNames(component: ComponentFound, source: string): void {
-    component.raw_names = source
-
-    component.names = []
-    source.split(/[|;, ]+/gi).forEach((name) => {
-      name = name.replace(/\W*/gi, '')
-      if (name.length > 0) component.names.push(name)
-    })
-
-    this.saveChanges()
   }
 }

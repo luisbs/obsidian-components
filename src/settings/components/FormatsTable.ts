@@ -74,7 +74,9 @@ export class FormatsTable extends SettingsTable {
     // thead
     this.theadEl.replaceChildren()
     const tr = this.theadEl.createEl('tr')
-    tr.createEl('th', { text: 'Details' })
+    tr.createEl('th', { text: 'Format Id' })
+    tr.createEl('th', { text: 'Type' })
+    tr.createEl('th', { text: 'Regex' })
     tr.createEl('th', { text: 'Enabled by User?' })
 
     //
@@ -89,17 +91,13 @@ export class FormatsTable extends SettingsTable {
       const format = this.formats.find((format) => format.id === id)
       if (!format) continue
 
-      // construct the description of the format
-      const desc = createFragment()
-      desc.append('Type:', createEl('code', { text: `'${format.type}'` }))
-      // prettier-ignore
-      desc.append('Extension:', createEl('code', { text: `'${format.ext.source}'` }))
-
       const row = new TableRow(this.tbodyEl)
-      row.addInfo(id, desc)
+      row.addInfo(id)
+      row.addText(format.type)
+      row.addText(format.ext.source)
 
       const isEnabled = isFormatEnabled(format, this.settings)
-      row.add2waySwitch(isEnabled, this.#updateEnabledFormats.bind(this, id))
+      row.addSwitch(isEnabled, this.#updateEnabledFormats.bind(this, id))
     }
   }
 
