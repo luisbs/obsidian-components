@@ -16,7 +16,7 @@ export abstract class Renderer {
     this.settings = plugin.settings
   }
 
-  abstract render(element: HTMLElement, data: unknown): Promise<void>
+  // abstract render(element: HTMLElement, data: unknown): Promise<void>
 
   protected replaceData(
     source: string,
@@ -56,26 +56,26 @@ export abstract class Renderer {
 
   // TODO test in windows system
   protected requireFileModule(): unknown {
-    try {
-      // construct the real filepath on the user system
-      // const modulePath = this.vault.adapter
-      //   .getResourcePath(this.component.path)
-      //   .replace('app://local', '')
-      //   .replace(/\?\d+$/i, '')
+    // try {
+    // construct the real filepath on the user system
+    // const modulePath = this.vault.adapter
+    //   .getResourcePath(this.component.path)
+    //   .replace('app://local', '')
+    //   .replace(/\?\d+$/i, '')
 
-      const modulePath = path.resolve(
-        this.vault.adapter.basePath,
-        this.component.path,
-      )
+    const modulePath = path.resolve(
+      this.vault.adapter.basePath,
+      this.component.path,
+    )
 
-      // console.log({
-      //   modulePath,
-      //   module: require(modulePath),
-      //   basePath: this.vault.adapter.basePath,
-      // })
-      return require(modulePath)
-    } catch (error) {
-      throw new CodeblockError('invalid-component-syntax', error)
-    }
+    // console.log({
+    //   modulePath,
+    //   module: require(modulePath),
+    //   basePath: this.vault.adapter.basePath,
+    // })
+    return require(modulePath)
+    // } catch (error) {
+    //   throw new CodeblockError('invalid-component-syntax', error)
+    // }
   }
 }

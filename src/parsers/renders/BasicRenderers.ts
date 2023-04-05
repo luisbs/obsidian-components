@@ -1,3 +1,4 @@
+import { CodeblockError } from '../CodeblockError'
 import { Renderer } from './Renderer'
 
 type TextRenderer = (data: unknown) => string

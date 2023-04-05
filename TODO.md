@@ -1,9 +1,5 @@
 # obsidian-component
 
-## Tests
-
-- [ ] Test in windows system the resolution on `JavascriptRender.ts@require`
-
 ## Features for v1.0.0
 
 - [x] Add a real documentation.
@@ -19,6 +15,14 @@
 - [x] Isolate the plugin state out of the plugin settings.
 - [x] Add a setting to allow the user to set the the parameters to use on names
 
+## Things to fix
+
+- [ ] El selector de carpeta, tiene el fondo transparente.
+- [ ] La pagina de settings no se actualiza correctamente al cambiar la configuracion en la tabla de componentes.
+- [ ] Cambiar la forma en que se cargan los archivos js, la forma actual (cargando el archivo directamente) carga el codigo a memoria, y si se hacen cambios al archivo estos no son actualizados en la version de la memoria, eso genera que los cambios hechos en caliente (con obsidian abierto) no se tomen en cuenta.
+  - Idea: sacar hash del archivo (para poder identificar cuando cambia) y hacer un clone del archivo cambiando el nombre con cada actualizacion (eso hace que sean archivos distintos) antes de cargar el archivo a memoria.
+  - Problema: puede generar que se cargue execivamente la memoria con versiones ligeramente distintas del mismo codigo.
+
 ### Support
 
 - [x] Add support for `'html'` component.
@@ -27,9 +31,33 @@
 - [x] Add support for `'javascript_markdown'` component.
 - [x] Add support for `'javascript_code'` component.
 
+- [x] Support on Linux
+- [x] Support on Windows
+
 ## Ideas for the future
 
-- [ ] Add syntax highlight on _edit mode_.
 - [ ] Add cache of `'html' | 'md'` component types.
+- [ ] Add support for other codeblock content syntax (e.g. **JS objects**)
 - [ ] Add support for other codeblock content syntax (e.g. **TOML**)
 - [ ] Add support for custom formats, defined by the user.
+
+## Discarted Ideas
+
+> Add syntax highlight on _edit mode_.
+> R/ It seems the syntax highlight can not be easily be activated for custom codeblocks.
+
+> Add the posibility to use a separator inside `yaml`
+> to make easier the use of objects arrays.
+> R/ Is better to keep a valid syntax
+> Example:
+>
+> ```yaml
+> var1: a
+> var2: b
+> ---
+> var1: c
+> var2: d
+> ---
+> var1: e
+> var2: f
+> ```
