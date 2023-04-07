@@ -34,26 +34,30 @@ export default class ComponentsPlugin extends Plugin {
   }
 
   async loadSettings() {
-    const { formats_enabled, ...primitiveData } = (await this.loadData()) || {}
+    const { enabled_formats, enabled_components, ...primitiveData } =
+      (await this.loadData()) || {}
 
     // load primitives
     this.settings = Object.assign({}, DEFAULT_SETTINGS, primitiveData)
 
     // load non-primitives
-    this.settings.formats_enabled = new Set(formats_enabled || [])
+    this.settings.enabled_formats = new Set(enabled_formats || [])
+    this.settings.enabled_components = new Map(enabled_components || [])
 
     // load runtime configuration
     preparePluginState(this)
   }
 
   async saveSettings() {
-    const { formats_enabled, ...primitiveData } = this.settings
+    const { enabled_formats, enabled_components, ...primitiveData } =
+      this.settings
 
     // shallow copy primitives
     const rawData = Object.assign({}, primitiveData) as RawPluginSettings
 
     // convert non-primitives
-    rawData.formats_enabled = Array.from(formats_enabled)
+    rawData.enabled_formats = Array.from(enabled_formats)
+    rawData.enabled_components = Array.from(enabled_components)
 
     // store the data
     await this.saveData(rawData)

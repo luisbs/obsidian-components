@@ -1,8 +1,7 @@
 import type { ComponentFound, PluginSettings } from '@/types/settings'
 import { Vault } from 'obsidian'
 import { getFilesOnFolder } from 'obsidian-fnc'
-import { isRecord } from './common'
-import { getSupportedFormats } from './formatsTools'
+import { getSupportedFormats, isFormatEnabled } from './formatsTools'
 
 /**
  * Load the valid components on the vault.
@@ -23,12 +22,12 @@ export function loadComponentsOnVault(
     const prev = settings.components_found[file.path] as
       | ComponentFound
       | undefined
+
     components[file.path] = {
       path: file.path,
       format: format.id,
 
       // keep the previous configuration
-      enabled: prev?.enabled ?? null,
       names: prev?.names ?? '',
     }
   }
@@ -54,13 +53,13 @@ export function isComponentEnabled(
     return false
   }
 
+  // if the behavior allows all the components
   if (settings.enable_components === 'ALL') {
-    // if the behavior allows all the components
     return true
   }
 
+  // if the behavior allows only whitelisted components
   if (settings.enable_components === 'STRICT') {
-    // if the behavior allows only whitelisted components
     return isComponentEnabledByUser(component, settings)
   }
 
@@ -71,7 +70,9 @@ export function isComponentEnabled(
   )
 }
 
-/** Check if the component is enabled by an enabled format. */
+/**
+ * Check if the component is enabled by an enabled format.
+ */
 export function isComponentEnabledByFormat(
   component: string | ComponentFound,
   settings: PluginSettings,
@@ -89,31 +90,31 @@ export function isComponentEnabledByFormat(
 
   // if the behavior allows the user whitelisted formats
   // check if the format has been whitelisted
-  return settings.formats_enabled.has(component.format)
+  return isFormatEnabled(component.format, settings)
 }
 
-/** Check if the component is enabled by the user. */
+/**
+ * Check if the component is enabled by the user.
+ */
 export function isComponentEnabledByUser(
   component: string | ComponentFound,
   settings: PluginSettings,
 ): boolean {
-  if (typeof component === 'string') {
-    component = settings.components_found[component]
-  }
+  const componentId = typeof component === 'string' ? component : component.path
 
   // check if the component has been whitelisted
-  return isRecord(component) && component.enabled === true
+  return settings.enabled_components.get(componentId) === true
 }
 
-/** Check if the component is enabled by the user. */
+/**
+ * Check if the component is disabled by the user.
+ */
 export function isComponentDisabledByUser(
   component: string | ComponentFound,
   settings: PluginSettings,
 ): boolean {
-  if (typeof component === 'string') {
-    component = settings.components_found[component]
-  }
+  const componentId = typeof component === 'string' ? component : component.path
 
-  // check if the component has been whitelisted
-  return isRecord(component) && component.enabled === false
+  // check if the component has been blacklisted
+  return settings.enabled_components.get(componentId) === false
 }

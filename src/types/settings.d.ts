@@ -1,6 +1,10 @@
-export type PrimitivePluginSettings = Omit<PluginSettings, 'formats_enabled'>
+export type PrimitivePluginSettings = Omit<
+  PluginSettings,
+  'enabled_formats' | 'enabled_components'
+>
 export type RawPluginSettings = PrimitivePluginSettings & {
-  formats_enabled: string[]
+  enabled_formats: string[]
+  enabled_components: [string, boolean][]
 }
 
 export interface PluginSettings {
@@ -31,13 +35,24 @@ export interface PluginSettings {
    */
   naming_strategy: 'SHORT' | 'LONG' | 'ALL'
 
-  /** Stores the component formats enabled by the user. */
-  formats_enabled: Set<string>
-
   /** Stores the route where the components are. */
   components_folder: string
   /** Stores the components found on the vault. */
   components_found: Record<string, ComponentFound>
+
+  /**
+   * Stores the component formats enabled by the user.
+   * - **present** means the format is enabled.
+   * - **missing** means the format is disabled.
+   */
+  enabled_formats: Set<string>
+  /**
+   * Stores the components enabled by the user.
+   * - **missing** means the component has default behavior.
+   * - `false` means the component is disabled.
+   * - `true` means the component is enabled.
+   */
+  enabled_components: Map<string, boolean>
 }
 
 /**
@@ -70,8 +85,6 @@ export interface ComponentFound {
   path: string
   /** Component format identifier. */
   format: string
-  /** Enforced state defined by the user. */
-  enabled: boolean | null
   /** User defined names */
   names: string
 }

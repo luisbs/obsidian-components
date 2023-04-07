@@ -39,6 +39,6 @@ export function isFormatEnabled(
 
   const formatId = typeof format === 'string' ? format : format.id
 
-  // if the format has been whitelisted
-  return settings.formats_enabled.has(formatId)
+  // check if the format has been whitelisted
+  return settings.enabled_formats.has(formatId)
 }
