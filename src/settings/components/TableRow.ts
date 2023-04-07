@@ -1,14 +1,10 @@
 export type SwitchState = boolean | null
 
 export class TableRow {
-  #trEl: HTMLElement
-
-  constructor(protected parentEl: HTMLTableElement | HTMLTableSectionElement) {
-    this.#trEl = parentEl.createEl('tr')
-  }
+  constructor(protected trEl: HTMLTableRowElement) {}
 
   addInfo(title: string, desc?: string | DocumentFragment): void {
-    const td = this.#trEl.createEl('td')
+    const td = this.trEl.createEl('td')
     td.createEl('div', 'setting-item-name').append(title)
     if (desc) {
       td.createEl('div', 'setting-item-description').append(desc)
@@ -16,12 +12,12 @@ export class TableRow {
   }
 
   addText(text: string | HTMLElement | DocumentFragment): void {
-    const td = this.#trEl.createEl('td')
+    const td = this.trEl.createEl('td')
     td.append(text)
   }
 
   addTextarea(value: string, update?: (value: string) => void): void {
-    const td = this.#trEl.createEl('td', 'text-center')
+    const td = this.trEl.createEl('td', 'text-center')
     const textarea = td.createEl('textarea')
     textarea.value = value
 
@@ -38,7 +34,7 @@ export class TableRow {
   }
 
   addSwitch(value: boolean, update?: (state: boolean) => void): void {
-    const td = this.#trEl.createEl('td', 'text-center')
+    const td = this.trEl.createEl('td', 'text-center')
     const label = td.createEl('label', 'checkbox-container')
     const input = label.createEl('input')
     input.type = 'checkbox'
@@ -64,7 +60,7 @@ export class TableRow {
     value: SwitchState,
     update?: (state: SwitchState) => void,
   ): void {
-    const td = this.#trEl.createEl('td', 'text-center')
+    const td = this.trEl.createEl('td', 'text-center')
     const select = td.createEl('select', 'dropdown')
 
     // prettier-ignore

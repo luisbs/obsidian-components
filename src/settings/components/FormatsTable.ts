@@ -3,9 +3,8 @@ import { isFormatEnabled, getSupportedFormats } from '@/utility'
 import { SettingsTable } from './SettingsTable'
 import { TableRow } from './TableRow'
 
-export class FormatsTable extends SettingsTable {
-  protected formats: ComponentFormat[] = []
-  protected enabled: PluginSettings['formats_enabled'] = []
+export class FormatsTable extends SettingsTable<ComponentFormat> {
+  protected enabledFormats: PluginSettings['enabled_formats']
 
   constructor(
     parentEl: HTMLElement,
@@ -13,38 +12,25 @@ export class FormatsTable extends SettingsTable {
     saveSettings: () => void,
   ) {
     super(parentEl, settings, saveSettings)
-    if (!settings.formats_enabled) settings.formats_enabled = []
-    this.enabled = settings.formats_enabled
-    this.formats = getSupportedFormats()
-    this.initialItems()
+    //* keep as a reference
+    if (!settings.enabled_formats) settings.enabled_formats = new Set()
+    this.enabledFormats = settings.enabled_formats
   }
 
-  protected initialItems(): void {
-    this.filtered = this.formats.map((item) => item.id)
-  }
-
-  protected filterItems(filter?: string): void {
-    if (!filter) this.initialItems()
-    else {
-      this.filtered = this.formats.reduce((collection, format) => {
-        if (format.id.contains(filter) || format.type.contains(filter)) {
-          collection.push(format.id)
-        }
-        return collection
-      }, [] as string[])
+  protected loadInitialItems(): void {
+    for (const format of getSupportedFormats()) {
+      this.items.set(format.id, format)
     }
-
-    this.refresh()
   }
 
-  render(): void {
+  protected renderHeader() {
     this.headerSetting.clear()
     this.headerSetting.setName('Format filter')
     this.headerSetting.setDesc('The entries are the supported formats.')
 
-    // filter input
+    // search input
     this.headerSetting.addSearch((input) => {
-      input.onChange(this.filterItems.bind(this))
+      input.onChange(this.renderItems.bind(this))
     })
 
     // disable all the filtered formats
@@ -52,7 +38,7 @@ export class FormatsTable extends SettingsTable {
       btn.setIcon('cross')
       btn.setTooltip('Disable All')
       btn.onClick(() => {
-        this.filtered.forEach((id) => this.enabled.remove(id))
+        this.forEachCurrentItem((id) => this.enabledFormats.delete(id))
         this.saveChanges()
       })
     })
@@ -62,57 +48,60 @@ export class FormatsTable extends SettingsTable {
       btn.setIcon('checkmark')
       btn.setTooltip('Enable All')
       btn.onClick(() => {
-        this.filtered.forEach((id) => {
-          if (this.enabled.includes(id)) return
-          this.enabled.push(id)
-        })
+        this.forEachCurrentItem((id) => this.enabledFormats.add(id))
         this.saveChanges()
       })
     })
 
-    //
-    // thead
+    // table header
     this.theadEl.replaceChildren()
     const tr = this.theadEl.createEl('tr')
     tr.createEl('th', { text: 'Format Id' })
     tr.createEl('th', { text: 'Type' })
     tr.createEl('th', { text: 'Regex' })
     tr.createEl('th', { text: 'Enabled by User?' })
-
-    //
-    // tbody
-    this.refresh()
   }
 
-  refresh(): void {
-    this.tbodyEl.replaceChildren()
+  protected itemShouldBeIncluded(
+    filter: string,
+    item: ComponentFormat,
+  ): boolean {
+    // on empty string, include all formats
+    if (!filter) return true
+    // otherwise check for matches on its id or type
+    return item.id.contains(filter) || item.type.contains(filter)
+  }
 
-    for (const id of this.filtered) {
-      const format = this.formats.find((format) => format.id === id)
-      if (!format) continue
-
-      const row = new TableRow(this.tbodyEl)
-      row.addInfo(id)
-      row.addText(format.type)
-      row.addText(format.ext.source)
-
-      const isEnabled = isFormatEnabled(format, this.settings)
-      row.addSwitch(isEnabled, this.#updateEnabledFormats.bind(this, id))
+  protected updateRows(): void {
+    for (const [id, format] of this.items) {
+      const trEl = this.cachedRows.get(id)
+      if (!trEl) continue
+      // force the update of the view
+      this.populateRow(trEl, format, id)
     }
   }
 
-  #updateEnabledFormats(id: string, enable: boolean): void {
-    if (enable) {
-      // if should be enabled add it
-      if (this.enabled.includes(id)) return
-      this.enabled.push(id)
-      this.saveChanges()
-      return
-    }
+  protected populateRow(
+    trEl: HTMLTableRowElement,
+    format: ComponentFormat,
+    id: string,
+  ): void {
+    trEl.replaceChildren()
 
-    // if should be disabled remove it
-    if (!this.enabled.includes(id)) return
-    this.enabled.remove(id)
+    const isEnabled = isFormatEnabled(format, this.settings)
+    const row = new TableRow(trEl)
+    row.addInfo(id)
+    row.addText(format.type)
+    row.addText(format.ext.source)
+    row.addSwitch(isEnabled, this.#updateFormatStatus.bind(this, id))
+  }
+
+  /**
+   * Update a format behavior individually.
+   */
+  #updateFormatStatus(id: string, status: boolean): void {
+    if (status) this.enabledFormats.add(id)
+    else this.enabledFormats.delete(id)
     this.saveChanges()
   }
 }

@@ -1,10 +1,15 @@
 import type { ComponentFound, ComponentsPlugin, PluginSettings } from '@/types'
-import { isComponentEnabled, isComponentEnabledByFormat } from '@/utility'
+import {
+  isComponentDisabledByUser,
+  isComponentEnabled,
+  isComponentEnabledByFormat,
+  isComponentEnabledByUser,
+} from '@/utility'
 import { SettingsTable } from './SettingsTable'
 import { TableRow } from './TableRow'
 
-export class ComponentsTable extends SettingsTable {
-  protected components: PluginSettings['components_found']
+export class ComponentsTable extends SettingsTable<ComponentFound> {
+  protected enabledComponents: PluginSettings['enabled_components']
 
   constructor(
     parentEl: HTMLElement,
@@ -13,40 +18,26 @@ export class ComponentsTable extends SettingsTable {
     protected refreshSettings: () => void,
   ) {
     super(parentEl, plugin.settings, saveSettings)
-
-    const settings = plugin.settings
-    if (!settings.components_found) settings.components_found = {}
-    this.components = settings.components_found
-    this.initialItems()
+    //* keep as a reference
+    if (!plugin.settings.enabled_components)
+      plugin.settings.enabled_components = new Map()
+    this.enabledComponents = plugin.settings.enabled_components
   }
 
-  protected initialItems(): void {
-    this.filtered = Object.values(this.settings.components_found) //
-      .map((item) => item.path)
-  }
-
-  protected filterItems(filter?: string): void {
-    if (!filter) this.initialItems()
-    else {
-      this.filtered = Object.values(this.settings.components_found) //
-        .reduce((colletion, item) => {
-          if (item.path.contains(filter) || item.format.contains(filter)) {
-            colletion.push(item.path)
-          }
-          return colletion
-        }, [] as string[])
+  protected loadInitialItems(): void {
+    for (const [id, component] of Object.entries(
+      this.settings.components_found,
+    )) {
+      this.items.set(id, component)
     }
-
-    this.refresh()
   }
 
-  #searchComponentOnVault(): void {
+  public refresh(): void {
     this.refreshSettings()
-    this.filterItems()
-    this.refresh()
+    this.updateRows()
   }
 
-  render(): void {
+  protected renderHeader(): void {
     this.headerSetting.clear()
     this.headerSetting.setName('Components filter')
     this.headerSetting.setDesc('The entries are components found on the vault.')
@@ -54,12 +45,12 @@ export class ComponentsTable extends SettingsTable {
     // refresh the components
     this.headerSetting.addExtraButton((btn) => {
       btn.setIcon('reset').setTooltip('Refresh')
-      btn.onClick(this.#searchComponentOnVault.bind(this))
+      btn.onClick(this.refresh.bind(this))
     })
 
-    // filter input
+    // search input
     this.headerSetting.addSearch((input) => {
-      input.onChange(this.filterItems.bind(this))
+      input.onChange(this.renderItems.bind(this))
     })
 
     // disable all the filtered components
@@ -67,23 +58,17 @@ export class ComponentsTable extends SettingsTable {
       btn.setIcon('cross')
       btn.setTooltip('Disable All')
       btn.onClick(() => {
-        this.filtered.forEach((id) => {
-          if (!this.components[id]) return
-          this.components[id].enabled = false
-        })
+        this.forEachCurrentItem((id) => this.enabledComponents.set(id, false))
         this.saveChanges()
       })
     })
 
-    // return all the filtered components to the default state
+    // reset all the filtered components
     this.headerSetting.addExtraButton((btn) => {
       btn.setIcon('trash')
       btn.setTooltip('Reset All')
       btn.onClick(() => {
-        this.filtered.forEach((id) => {
-          if (!this.components[id]) return
-          this.components[id].enabled = null
-        })
+        this.forEachCurrentItem((id) => this.enabledComponents.delete(id))
         this.saveChanges()
       })
     })
@@ -93,16 +78,12 @@ export class ComponentsTable extends SettingsTable {
       btn.setIcon('checkmark')
       btn.setTooltip('Enable All')
       btn.onClick(() => {
-        this.filtered.forEach((id) => {
-          if (!this.components[id]) return
-          this.components[id].enabled = true
-        })
+        this.forEachCurrentItem((id) => this.enabledComponents.set(id, true))
         this.saveChanges()
       })
     })
 
-    //
-    // thead
+    // table header
     this.theadEl.replaceChildren()
     const tr = this.theadEl.createEl('tr')
     tr.createEl('th', { text: 'Details' })
@@ -110,47 +91,70 @@ export class ComponentsTable extends SettingsTable {
     tr.createEl('th', { text: 'Enabled by Context?' })
     tr.createEl('th', { text: 'Enabled by User?' })
     tr.createEl('th', { text: 'Is enabled?' })
-
-    //
-    // tbody
-    this.refresh()
   }
 
-  refresh(): void {
-    this.tbodyEl.replaceChildren()
+  protected itemShouldBeIncluded(
+    filter: string,
+    item: ComponentFound,
+  ): boolean {
+    // on empty string, include all formats
+    if (!filter) return true
+    // otherwise check for matches on its path or format
+    return item.path.contains(filter) || item.format.contains(filter)
+  }
 
-    for (const id of this.filtered) {
-      const component = this.components[id] as ComponentFound | undefined
-      if (!component) continue
-
-      const names = this.plugin.state.components[id] ?? []
-
-      // construct the description of the component
-      const desc = createFragment()
-      desc.append(
-        'Use it as: ',
-        createEl('code', { text: names.map((v) => `'${v}'`).join(', ') }),
-      )
-
-      const row = new TableRow(this.tbodyEl)
-      row.addInfo(id, desc)
-
-      // check if enabled by parent
-      const isEnabledByContext =
-        this.settings.enable_components === 'ALL' ||
-        isComponentEnabledByFormat(id, this.settings)
-
-      row.addTextarea(component.names, (value) => {
-        component.names = value
-        this.saveChanges()
-      })
-
-      row.addSwitch(isEnabledByContext)
-      row.addBehaviorSelector(component.enabled, (value) => {
-        component.enabled = value
-        this.saveChanges()
-      })
-      row.addSwitch(isComponentEnabled(id, this.settings))
+  protected updateRows(): void {
+    for (const [id, component] of this.items) {
+      const trEl = this.cachedRows.get(id)
+      if (!trEl) continue
+      // force the update of the view
+      this.populateRow(trEl, component, id)
     }
+  }
+
+  // prettier-ignore
+  protected populateRow(
+    trEl: HTMLTableRowElement,
+    item: ComponentFound,
+    id: string,
+  ): void {
+
+    trEl.replaceChildren()
+    const row = new TableRow(trEl)
+
+    // construct the description of the component
+    const names = this.plugin.state.components[id] || []
+    const desc = createFragment()
+    desc.appendText('Use it as: ')
+    desc.createEl('code', { text: names.map((v) => `'${v}'`).join(', ') })
+
+    row.addInfo(id, desc)
+    row.addTextarea(item.names, (value) => {
+      item.names = value
+      this.saveChanges()
+    })
+
+    // check if enabled by context
+    const isEnabledByContext =
+      this.settings.enable_components === 'ALL' ||
+      isComponentEnabledByFormat(id, this.settings)
+
+    let isEnabledByUser = null
+    if (isComponentEnabledByUser(item, this.settings)) isEnabledByUser = true
+    if (isComponentDisabledByUser(item, this.settings)) isEnabledByUser = false
+
+    row.addSwitch(isEnabledByContext)
+    row.addBehaviorSelector(isEnabledByUser, this.#updateComponentStatus.bind(this, id))
+    row.addSwitch(isComponentEnabled(id, this.settings))
+  }
+
+  /**
+   * Update a component status individually.
+   */
+  #updateComponentStatus(id: string, status: null | boolean): void {
+    if (status === null) this.enabledComponents.delete(id)
+    else if (status) this.enabledComponents.set(id, true)
+    else this.enabledComponents.set(id, false)
+    this.saveChanges()
   }
 }

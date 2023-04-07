@@ -46,7 +46,7 @@ export class SettingsTab extends PluginSettingTab {
       this.containerEl,
       this.#plugin,
       this.saveChanges.bind(this),
-      async () => {
+      () => {
         const components = loadComponentsOnVault(
           this.#plugin.app.vault,
           this.settings,
@@ -78,7 +78,7 @@ export class SettingsTab extends PluginSettingTab {
             ALL: 'Allow all the components',
           })
           .setValue(this.settings.enable_components)
-          .onChange((value) => this.update('enable_components', value))
+          .onChange(this.update.bind(this, 'enable_components'))
       })
   }
 
@@ -106,7 +106,7 @@ export class SettingsTab extends PluginSettingTab {
           BOTH: 'Use both methods',
         })
         input.setValue(this.settings.naming_method)
-        input.onChange((value) => this.update('naming_method', value))
+        input.onChange(this.update.bind(this, 'naming_method'))
       })
 
     this.#newSetting()
@@ -114,7 +114,7 @@ export class SettingsTab extends PluginSettingTab {
       .setDesc('Defines the parameters used to identify a component')
       .addTextArea((input) => {
         input.setValue(this.settings.naming_params)
-        input.onChange((value) => this.update('naming_params', value))
+        input.onChange(this.update.bind(this, 'naming_params'))
       })
 
     this.#newSetting()
@@ -123,7 +123,7 @@ export class SettingsTab extends PluginSettingTab {
       .addToggle((input) => {
         input
           .setValue(this.settings.enable_codeblocks)
-          .onChange((value) => this.update('enable_codeblocks', value))
+          .onChange(this.update.bind(this, 'enable_codeblocks'))
       })
   }
 
@@ -136,7 +136,7 @@ export class SettingsTab extends PluginSettingTab {
         text
           .setPlaceholder('Example: folder1/folder2')
           .setValue(this.settings.components_folder)
-          .onChange((value) => this.update('components_folder', value))
+          .onChange(this.update.bind(this, 'components_folder'))
       })
 
     //
@@ -163,7 +163,7 @@ export class SettingsTab extends PluginSettingTab {
           ALL: 'Include all names',
         })
         input.setValue(this.settings.naming_strategy)
-        input.onChange((value) => this.update('naming_strategy', value))
+        input.onChange(this.update.bind(this, 'naming_strategy'))
       })
   }
 
