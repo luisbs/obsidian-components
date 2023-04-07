@@ -89,7 +89,7 @@ export function isComponentEnabledByFormat(
 
   // if the behavior allows the user whitelisted formats
   // check if the format has been whitelisted
-  return settings.formats_enabled.contains(component.format)
+  return settings.formats_enabled.has(component.format)
 }
 
 /** Check if the component is enabled by the user. */

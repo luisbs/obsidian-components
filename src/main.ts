@@ -1,18 +1,21 @@
-import type { PluginSettings, PluginState } from './types'
+import type {
+  PluginSettings,
+  PluginState,
+  PrimitivePluginSettings,
+  RawPluginSettings,
+} from './types'
 import { Plugin } from 'obsidian'
 import { CodeblockHandler } from './parsers'
 import { SettingsTab } from './settings/SettingsTab'
 import { preparePluginState } from './utility'
 
-export const DEFAULT_SETTINGS: PluginSettings = {
+export const DEFAULT_SETTINGS: PrimitivePluginSettings = {
   enable_components: 'STRICT',
   enable_codeblocks: false,
 
   naming_params: '__name',
   naming_method: 'INLINE',
   naming_strategy: 'LONG',
-
-  formats_enabled: [],
 
   components_folder: '',
   components_found: {},
@@ -31,15 +34,34 @@ export default class ComponentsPlugin extends Plugin {
   }
 
   async loadSettings() {
-    this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData())
+    const { formats_enabled, ...primitiveData } = (await this.loadData()) || {}
+
+    // load primitives
+    this.settings = Object.assign({}, DEFAULT_SETTINGS, primitiveData)
+
+    // load non-primitives
+    this.settings.formats_enabled = new Set(formats_enabled || [])
+
+    // load runtime configuration
     preparePluginState(this)
   }
 
   async saveSettings() {
-    await this.saveData(this.settings)
+    const { formats_enabled, ...primitiveData } = this.settings
 
-    // update procesors
+    // shallow copy primitives
+    const rawData = Object.assign({}, primitiveData) as RawPluginSettings
+
+    // convert non-primitives
+    rawData.formats_enabled = Array.from(formats_enabled)
+
+    // store the data
+    await this.saveData(rawData)
+
+    // load runtime configuration
     preparePluginState(this)
+
+    // register proccessors
     this.parser?.registerCustomCodeblocks()
   }
 }

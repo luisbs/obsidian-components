@@ -1,3 +1,8 @@
+export type PrimitivePluginSettings = Omit<PluginSettings, 'formats_enabled'>
+export type RawPluginSettings = PrimitivePluginSettings & {
+  formats_enabled: string[]
+}
+
 export interface PluginSettings {
   /**
    * Stores the plugin behavior about components discovery.
@@ -27,7 +32,7 @@ export interface PluginSettings {
   naming_strategy: 'SHORT' | 'LONG' | 'ALL'
 
   /** Stores the component formats enabled by the user. */
-  formats_enabled: string[]
+  formats_enabled: Set<string>
 
   /** Stores the route where the components are. */
   components_folder: string
