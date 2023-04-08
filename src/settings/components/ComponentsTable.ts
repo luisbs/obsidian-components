@@ -15,7 +15,7 @@ export class ComponentsTable extends SettingsTable<ComponentFound> {
     parentEl: HTMLElement,
     protected plugin: ComponentsPlugin,
     saveSettings: () => void,
-    protected refreshSettings: () => void,
+    protected loadComponentsOnVault: () => void,
   ) {
     super(parentEl, plugin.settings, saveSettings)
     //* keep as a reference
@@ -32,8 +32,8 @@ export class ComponentsTable extends SettingsTable<ComponentFound> {
     }
   }
 
-  public refresh(): void {
-    this.refreshSettings()
+  protected reloadComponents(): void {
+    this.loadComponentsOnVault()
     this.updateRows()
   }
 
@@ -45,7 +45,7 @@ export class ComponentsTable extends SettingsTable<ComponentFound> {
     // refresh the components
     this.headerSetting.addExtraButton((btn) => {
       btn.setIcon('reset').setTooltip('Refresh')
-      btn.onClick(this.refresh.bind(this))
+      btn.onClick(this.loadComponentsOnVault.bind(this))
     })
 
     // search input
