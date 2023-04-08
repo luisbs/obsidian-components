@@ -25,6 +25,7 @@ export class ComponentsTable extends SettingsTable<ComponentFound> {
   }
 
   protected loadInitialItems(): void {
+    this.items = new Map()
     for (const [id, component] of Object.entries(
       this.settings.components_found,
     )) {
@@ -49,7 +50,7 @@ export class ComponentsTable extends SettingsTable<ComponentFound> {
 
     // search input
     this.headerSetting.addSearch((input) => {
-      input.onChange(this.renderItems.bind(this))
+      input.onChange(this.applyFilter.bind(this))
     })
 
     // disable all the filtered components
@@ -103,7 +104,6 @@ export class ComponentsTable extends SettingsTable<ComponentFound> {
   }
 
   protected updateRows(): void {
-    console.debug('obsidian-components: updateRows executed')
     for (const [id, component] of this.items) {
       const trEl = this.cachedRows.get(id)
       if (!trEl) continue

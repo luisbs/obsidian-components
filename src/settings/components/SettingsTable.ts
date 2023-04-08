@@ -10,6 +10,9 @@ export abstract class SettingsTable<T> {
   protected items: Map<string, T> = new Map()
   protected cachedRows: Map<string, HTMLTableRowElement> = new Map()
 
+  protected filter = ''
+  protected filteredItems: string[] = []
+
   constructor(
     protected parentEl: HTMLElement,
     protected settings: PluginSettings,
@@ -37,14 +40,16 @@ export abstract class SettingsTable<T> {
    */
   public render(): void {
     this.renderHeader()
-    this.renderItems()
+    this.applyFilter()
   }
 
   /**
    * Refresh the data rendered on the component.
    */
   public refresh(): void {
+    this.loadInitialItems()
     this.updateRows()
+    this.applyFilter()
   }
 
   /**
@@ -54,21 +59,8 @@ export abstract class SettingsTable<T> {
     this.headerSetting.clear()
     this.headerSetting.setName('Items filter')
     this.headerSetting.addSearch((input) => {
-      input.onChange(this.renderItems.bind(this))
+      input.onChange(this.applyFilter.bind(this))
     })
-  }
-
-  /**
-   * Render the items that meets certain condition.
-   */
-  protected renderItems(filter = ''): void {
-    // clean the rows, before adding the filtered ones
-    this.tbodyEl.replaceChildren()
-    // check if each item should be included
-    for (const [id, item] of this.items) {
-      if (!this.itemShouldBeIncluded(filter, item)) continue
-      this.tbodyEl.appendChild(this.getRow(id, item))
-    }
   }
 
   /**
@@ -76,27 +68,6 @@ export abstract class SettingsTable<T> {
    */
   protected itemShouldBeIncluded(filter: string, item: T): boolean {
     return true
-  }
-
-  /**
-   * Return the ids of the items that are currently been shown on the table.
-   */
-  protected getCurrentIds(): string[] {
-    const ids = [] as string[]
-    this.tbodyEl.childNodes.forEach((trEl) => {
-      if (!(trEl instanceof HTMLTableRowElement)) return
-      ids.push(trEl.id)
-    })
-    return ids
-  }
-
-  /**
-   * Runs a callback on each item currently shown on the table.
-   */
-  protected forEachCurrentItem(
-    cb: (value: string, index: number, array: string[]) => void,
-  ) {
-    this.getCurrentIds().forEach(cb)
   }
 
   /**
@@ -132,4 +103,32 @@ export abstract class SettingsTable<T> {
     item: T,
     id: string,
   ): void
+
+  /**
+   * Apply the table filter, showing only the rows that match certain condition.
+   */
+  protected applyFilter(newFilter?: string): void {
+    // update the existing filter
+    if (newFilter) this.filter = newFilter
+
+    // cleans the state
+    this.filteredItems = []
+    this.tbodyEl.replaceChildren()
+
+    // include the matching items
+    for (const [id, item] of this.items) {
+      if (!this.itemShouldBeIncluded(this.filter, item)) continue
+      this.filteredItems.push(id)
+      this.tbodyEl.appendChild(this.getRow(id, item))
+    }
+  }
+
+  /**
+   * Runs a callback on each item currently shown on the table.
+   */
+  protected forEachCurrentItem(
+    cb: (value: string, index: number, array: string[]) => void,
+  ) {
+    this.filteredItems.forEach(cb)
+  }
 }

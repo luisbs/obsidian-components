@@ -18,6 +18,7 @@ export class FormatsTable extends SettingsTable<ComponentFormat> {
   }
 
   protected loadInitialItems(): void {
+    this.items = new Map()
     for (const format of getSupportedFormats()) {
       this.items.set(format.id, format)
     }
@@ -30,7 +31,7 @@ export class FormatsTable extends SettingsTable<ComponentFormat> {
 
     // search input
     this.headerSetting.addSearch((input) => {
-      input.onChange(this.renderItems.bind(this))
+      input.onChange(this.applyFilter.bind(this))
     })
 
     // disable all the filtered formats

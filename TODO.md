@@ -18,10 +18,12 @@
 ## Things to fix
 
 - [ ] El selector de carpeta, tiene el fondo transparente.
-- [ ] La pagina de settings no se actualiza correctamente al cambiar la configuracion en la tabla de componentes.
+- [x] La pagina de settings no se actualiza correctamente al cambiar la configuracion en la tabla de componentes.
+- [ ] La tabla de componentes no se actualiza al cambiar la tabla de formatos.
 - [ ] Cambiar la forma en que se cargan los archivos js, la forma actual (cargando el archivo directamente) carga el codigo a memoria, y si se hacen cambios al archivo estos no son actualizados en la version de la memoria, eso genera que los cambios hechos en caliente (con obsidian abierto) no se tomen en cuenta.
   - Idea: sacar hash del archivo (para poder identificar cuando cambia) y hacer un clone del archivo cambiando el nombre con cada actualizacion (eso hace que sean archivos distintos) antes de cargar el archivo a memoria.
   - Problema: puede generar que se cargue execivamente la memoria con versiones ligeramente distintas del mismo codigo.
+  - Solucion: obsidian agrega un has al cargar un script.
 
 ### Support
 
@@ -44,7 +46,7 @@
 ## Discarted Ideas
 
 > Add syntax highlight on _edit mode_.
-> R/ It seems the syntax highlight can not be easily be activated for custom codeblocks.
+> R/ It seems the syntax highlight can not easily be activated for custom codeblocks.
 
 > Add the posibility to use a separator inside `yaml`
 > to make easier the use of objects arrays.
