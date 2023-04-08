@@ -47,6 +47,7 @@ export class SettingsTab extends PluginSettingTab {
       this.#plugin,
       this.saveChanges.bind(this),
       () => {
+        // is expected that this callback refreshes the ComponentsTable
         const components = loadComponentsOnVault(
           this.#plugin.app.vault,
           this.settings,

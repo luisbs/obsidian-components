@@ -32,11 +32,6 @@ export class ComponentsTable extends SettingsTable<ComponentFound> {
     }
   }
 
-  protected reloadComponents(): void {
-    this.loadComponentsOnVault()
-    this.updateRows()
-  }
-
   protected renderHeader(): void {
     this.headerSetting.clear()
     this.headerSetting.setName('Components filter')
@@ -45,7 +40,11 @@ export class ComponentsTable extends SettingsTable<ComponentFound> {
     // refresh the components
     this.headerSetting.addExtraButton((btn) => {
       btn.setIcon('reset').setTooltip('Refresh')
-      btn.onClick(this.reloadComponents.bind(this))
+      btn.onClick(() => {
+        // is spected that this function executes
+        // the refresh method of this instance
+        this.loadComponentsOnVault()
+      })
     })
 
     // search input
