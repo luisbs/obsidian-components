@@ -34,8 +34,12 @@ export default class ComponentsPlugin extends Plugin {
   }
 
   async loadSettings() {
-    const { enabled_formats, enabled_components, ...primitiveData } =
-      (await this.loadData()) || {}
+    const rawData = (await this.loadData()) || {}
+
+    // console.debug('obsidian-components: Loading Data')
+    // console.debug(rawData)
+
+    const { enabled_formats, enabled_components, ...primitiveData } = rawData
 
     // load primitives
     this.settings = Object.assign({}, DEFAULT_SETTINGS, primitiveData)
@@ -44,11 +48,17 @@ export default class ComponentsPlugin extends Plugin {
     this.settings.enabled_formats = new Set(enabled_formats || [])
     this.settings.enabled_components = new Map(enabled_components || [])
 
+    console.debug('obsidian-components: Loaded Data')
+    console.debug(this.settings)
+
     // load runtime configuration
     preparePluginState(this)
   }
 
   async saveSettings() {
+    // console.debug('obsidian-components: Saving Data')
+    // console.debug(this.settings)
+
     const { enabled_formats, enabled_components, ...primitiveData } =
       this.settings
 
@@ -61,6 +71,9 @@ export default class ComponentsPlugin extends Plugin {
 
     // store the data
     await this.saveData(rawData)
+
+    console.debug('obsidian-components: Saved Data')
+    console.debug(rawData)
 
     // load runtime configuration
     preparePluginState(this)
