@@ -109,7 +109,7 @@ export abstract class SettingsTable<T> {
     if (trEl) return trEl
 
     // if is not found, create a new one
-    trEl = document.createEl('tr')
+    trEl = createEl('tr')
     trEl.id = id
     this.populateRow(trEl, item, id)
 
