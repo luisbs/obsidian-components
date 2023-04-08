@@ -32,6 +32,8 @@ export function loadComponentsOnVault(
     }
   }
 
+  console.debug('obsidian-components: Found components on vault')
+  console.debug(components)
   return components
 }
 

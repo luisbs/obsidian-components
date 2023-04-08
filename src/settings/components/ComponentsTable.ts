@@ -45,7 +45,7 @@ export class ComponentsTable extends SettingsTable<ComponentFound> {
     // refresh the components
     this.headerSetting.addExtraButton((btn) => {
       btn.setIcon('reset').setTooltip('Refresh')
-      btn.onClick(this.loadComponentsOnVault.bind(this))
+      btn.onClick(this.reloadComponents.bind(this))
     })
 
     // search input
@@ -104,6 +104,7 @@ export class ComponentsTable extends SettingsTable<ComponentFound> {
   }
 
   protected updateRows(): void {
+    console.debug('obsidian-components: updateRows executed')
     for (const [id, component] of this.items) {
       const trEl = this.cachedRows.get(id)
       if (!trEl) continue
