@@ -29,6 +29,7 @@ export abstract class Renderer {
     // catch problems during execution
     try {
       await this.runRenderer()
+      console.debug(`Rendered '${this.component.path}'`)
     } catch (error) {
       const pre = this.element.createEl('pre')
 
@@ -74,7 +75,7 @@ export abstract class Renderer {
     const module = await this.requireFileModule()
     if (typeof module === 'function') return module
     if (!isRecord(module) || typeof module.render !== 'function') {
-      throw new CodeblockError('missing-component-renderer')
+      throw new CodeblockError('missing-component-render-function')
     }
     return module.render
   }

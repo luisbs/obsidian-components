@@ -14,13 +14,11 @@ import {
 } from './BasicRenderers'
 
 export function getRenderer(
+  element: HTMLElement,
   plugin: ComponentsPlugin,
-  component: ComponentFound | null,
+  component: ComponentFound,
+  data: unknown,
 ): Renderer {
-  if (!component) {
-    throw new CodeblockError('unknown-component')
-  }
-
   if (!isComponentEnabled(component, plugin.settings)) {
     throw new CodeblockError('disabled-component')
   }
@@ -30,16 +28,16 @@ export function getRenderer(
 
   switch (format.id) {
     case 'html':
-      return new HTMLRenderer(plugin, component)
+      return new HTMLRenderer(element, plugin, component, data)
     case 'markdown':
-      return new MarkdownRenderer(plugin, component)
+      return new MarkdownRenderer(element, plugin, component, data)
 
     case 'javascript_html':
-      return new JavascriptHTMLRenderer(plugin, component)
+      return new JavascriptHTMLRenderer(element, plugin, component, data)
     case 'javascript_markdown':
-      return new JavascriptMarkdownRenderer(plugin, component)
+      return new JavascriptMarkdownRenderer(element, plugin, component, data)
     case 'javascript_code':
-      return new JavascriptCodeRenderer(plugin, component)
+      return new JavascriptCodeRenderer(element, plugin, component, data)
   }
 
   throw new CodeblockError('missing-component-renderer')

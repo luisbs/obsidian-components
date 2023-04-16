@@ -8,12 +8,13 @@ import { createHmac } from 'crypto'
 import { parseYaml } from 'obsidian'
 import { getComponentById, isRecord } from '@/utility'
 import { CodeblockError } from './CodeblockError'
-import { getRenderer } from './renders'
+import { Renderer, getRenderer } from './renders'
 
 export class CodeblockHandler {
   #plugin: ComponentsPlugin
 
   #registered: string[] = []
+  #rendered: Map<string, Renderer[]> = new Map()
 
   constructor(plugin: ComponentsPlugin) {
     this.#plugin = plugin
@@ -22,24 +23,39 @@ export class CodeblockHandler {
   }
 
   public clear(): void {
+    this.#rendered = new Map()
     // todo check a way to un-register the processors
+  }
+
+  protected storeRenderer(filePath: string, renderer: Renderer): void {
+    const rendered = this.#rendered.get(filePath) || []
+    rendered.push(renderer)
+    this.#rendered.set(filePath, rendered.unique())
+  }
+
+  public refresh(filePath: string): void {
+    console.log(`Refreshing '${filePath}' components`)
+    for (const renderer of this.#rendered.get(filePath) || []) {
+      renderer.render()
+    }
   }
 
   public registerBaseCodeblock(): void {
     this.#plugin.registerMarkdownCodeBlockProcessor(
       'use',
       (source, el, ctx) => {
-        console.log('obsidian-components: procesing base codeblock')
+        console.log('Procesing base codeblock')
 
-        this.#catchErrors(source, el, async () => {
+        this.#catchErrors(source, el, () => {
           const content = this.#parseCodeblock(source)
           const { name, component } = this.#getComponent(content, el, ctx)
-          const renderer = getRenderer(this.#plugin, component)
-
+          if (!component) throw new CodeblockError('unknown-component')
           el.classList.add('component', `${name}-component`)
 
-          console.log('obsidian-components: rendering base codeblock')
-          await renderer.render(el, content.data)
+          // prettier-ignore
+          const renderer = getRenderer(el, this.#plugin, component, content.data)
+          this.storeRenderer(component.path, renderer)
+          renderer.render()
         })
       },
       -1,
@@ -58,17 +74,18 @@ export class CodeblockHandler {
         this.#plugin.registerMarkdownCodeBlockProcessor(
           name,
           (source, el, ctx) => {
-            console.log(`obsidian-components: procesing '${name}' codeblock`)
+            console.log(`Procesing '${name}' codeblock`)
 
-            return this.#catchErrors(source, el, async () => {
+            return this.#catchErrors(source, el, () => {
               const content = this.#parseCodeblock(source)
               const component = getComponentById(componentId, settings)
-              const renderer = getRenderer(this.#plugin, component)
-
+              if (!component) throw new CodeblockError('unknown-component')
               el.classList.add('component', `${name}-component`)
 
-              console.log(`obsidian-components: rendering '${name}' codeblock`)
-              await renderer.render(el, content.data)
+              // prettier-ignore
+              const renderer = getRenderer(el, this.#plugin, component, content.data)
+              this.storeRenderer(component.path, renderer)
+              renderer.render()
             })
           },
           -1,
@@ -80,20 +97,19 @@ export class CodeblockHandler {
   async #catchErrors(
     source: string,
     element: HTMLElement,
-    callback: () => Promise<void>,
+    callback: () => void,
   ): Promise<void> {
     try {
-      await callback()
+      callback()
     } catch (error) {
-      const isError = error instanceof CodeblockError
-      if (isError && error.source) {
-        return element.createEl('pre').append(String(error.source))
-      }
-
       const pre = element.createEl('pre')
-      pre.append(source)
-      if (isError) {
-        pre.classList.add(error.code)
+
+      const isError = error instanceof CodeblockError
+      if (isError) pre.classList.add(error.code)
+      if (isError && error.source) {
+        pre.append(String(error.source))
+      } else {
+        pre.append(source)
       }
     }
   }

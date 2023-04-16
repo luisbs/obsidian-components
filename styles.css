@@ -21,11 +21,13 @@
 }
 
 .invalid-codeblock-syntax,
-.invalid-component-syntax,
 .missing-component-name,
-.missing-component-renderer,
-.missing-component-file,
 .unknown-component,
-.disabled-component {
+.disabled-component,
+.missing-component-renderer,
+.invalid-component-params,
+.missing-component-file,
+.invalid-component-syntax,
+.missing-component-render-function {
   border: 1px solid orangered;
 }
