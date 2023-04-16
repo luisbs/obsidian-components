@@ -100,17 +100,6 @@ export abstract class Renderer {
    */
   protected getModulePath(filePath?: string | null): string {
     filePath = filePath ?? this.component.path
-
-    //? simplier implementation
-    //? not used cause `basePath` is not public/documentated
-    //? so it may change as an internal implementation
-    // return path.resolve(this.vault.adapter.basePath, filePath)
-
-    //? `getResourcePath` adds a prefix and a postfix to identify file version
-    //? it needs to be removed to be recognized as a real route
-    return this.vault.adapter
-      .getResourcePath(filePath)
-      .replace('app://local', '')
-      .replace(/\?\d+$/i, '')
+    return this.plugin.cache?.getRealPath(filePath) ?? ''
   }
 }

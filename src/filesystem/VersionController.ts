@@ -64,8 +64,8 @@ export class VersionController {
     if (this.isFileVersionStored(baseFile.path, version)) return
 
     const versionPath = this.getVersionPath(baseFile, version)
-    await this.plugin.cache?.cacheFile(baseFile, versionPath)
     this.storeVersion(baseFile.path, version)
+    await this.plugin.cache?.cacheFile(baseFile, versionPath)
     console.debug(`Stored version '${version}' of "${baseFile.path}"`)
 
     // force the refresh of the components

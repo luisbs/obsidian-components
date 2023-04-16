@@ -102,9 +102,29 @@ All the **Codeblocks** support the use of `JSON` too. Example:
 }
 ```
 
+---
+
+### Design mode
+
+The design mode is a setting that can be enabled on the _SettingsTab_.
+
+> **TL;DR** activate the _design mode_ when you're designing/editing the code of your components and want to see the result of those changes on _Obsidian_ on runtime.
+
+The change when enable, is that each change on the component files are stored, that allows the plugin to refresh the view/rendered component on _Obsidian_, while you edit the file (**runtime reload**).
+
+This feature is always disabled, until the user manually enables it, and when you close the app it returns to be disabled.
+
+The reason of this behavior is because it can generate a lot of memory and storage usage (both are temporal until the app closes).
+
+The reason for all of this is they way the plugin works, the plugin executes yout components code, with `require()` the plugin can't reload the changes on the components because in the first load they are loaded to memory and any new `require()` executions will return the same output, to allow hot-reload the plugin makes a temporal copy of the file with different names on each modification, and then loads those temporal files.
+
+---
+
 ### Styling
 
 Each component/codeblock is assigned two classes `component` and `<component-name>-component` (the component-name is the word you are using to reference the component)
+
+> This examples are should be checked on _edit-mode_.
 
 Example:
 

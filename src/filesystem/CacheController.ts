@@ -69,7 +69,7 @@ export class CacheController {
    * Creates a copy of a file, and
    * returns its file name inside the cache folder.
    */
-  async cacheFile(
+  public async cacheFile(
     baseFile: TFile,
     newFilePath?: string,
   ): Promise<string | null> {
@@ -79,14 +79,56 @@ export class CacheController {
     )
 
     await this.vault.adapter.copy(baseFile.path, tempPath)
+    await this.updateReferences(baseFile, tempPath)
     return tempPath
+  }
+
+  /**
+   * Updates the references to other files.
+   */
+  public async updateReferences(
+    baseFile: TFile,
+    newFilePath: string,
+  ): Promise<void> {
+    const baseFileFolderPath = this.getRealPath(baseFile.path) //
+      .replace(baseFile.name, '')
+
+    // load the original content
+    let content = await this.vault.adapter.read(newFilePath)
+
+    // replace references to real routes
+    content = content.replaceAll(
+      /require *\( *['"`](.+)['"`] *\)/g,
+      (_, $1) => `require("${Path.join(baseFileFolderPath, $1)}")`,
+    )
+
+    // update the content
+    await this.vault.adapter.write(newFilePath, content)
+    console.log(`Updated the references on '${newFilePath}'`)
   }
 
   /**
    * Removes a file from the cache folder.
    */
-  async removeFile(filePath: string): Promise<void> {
+  public async removeFile(filePath: string): Promise<void> {
     const file = this.vault.getAbstractFileByPath(this.getCachePath(filePath))
     if (file) await this.vault.delete(file, true)
+  }
+
+  /**
+   * @returns the real path of the file on the os.
+   */
+  public getRealPath(filePath: string): string {
+    //? simplier implementation
+    //? not used cause `basePath` is not public/documentated
+    //? so it may change as an internal implementation
+    // return path.resolve(this.vault.adapter.basePath, filePath)
+
+    //? `getResourcePath` adds a prefix and a postfix to identify file version
+    //? it needs to be removed to be recognized as a real route
+    return this.vault.adapter
+      .getResourcePath(filePath)
+      .replace('app://local', '')
+      .replace(/\?\d+$/i, '')
   }
 }
