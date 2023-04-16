@@ -23,7 +23,6 @@
 - [ ] Cambiar la forma en que se cargan los archivos js, la forma actual (cargando el archivo directamente) carga el codigo a memoria, y si se hacen cambios al archivo estos no son actualizados en la version de la memoria, eso genera que los cambios hechos en caliente (con obsidian abierto) no se tomen en cuenta.
   - Idea: sacar hash del archivo (para poder identificar cuando cambia) y hacer un clone del archivo cambiando el nombre con cada actualizacion (eso hace que sean archivos distintos) antes de cargar el archivo a memoria.
   - Problema: puede generar que se cargue execivamente la memoria con versiones ligeramente distintas del mismo codigo.
-  - Solucion: obsidian agrega un has al cargar un script.
 
 ### Support
 

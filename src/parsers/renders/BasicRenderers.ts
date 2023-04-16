@@ -1,4 +1,3 @@
-import { CodeblockError } from '../CodeblockError'
 import { Renderer } from './Renderer'
 
 type TextRenderer = (data: unknown) => string
@@ -16,29 +15,29 @@ export class MarkdownRenderer extends Renderer {
   async render(element: HTMLElement, data: unknown): Promise<void> {
     const content = await this.getFileContent()
     const markdown = this.replaceData(content, data)
-    this.renderMDContent(element, markdown)
+    this.renderMarkdownContent(element, markdown)
   }
 }
 
 export class JavascriptHTMLRenderer extends Renderer {
   async render(element: HTMLElement, data: unknown): Promise<void> {
-    const render = this.requireRenderFn() as TextRenderer
+    const render = (await this.requireRenderFn()) as TextRenderer
     const html = render(data)
-    this.renderMDContent(element, html)
+    this.renderMarkdownContent(element, html)
   }
 }
 
 export class JavascriptMarkdownRenderer extends Renderer {
   async render(element: HTMLElement, data: unknown): Promise<void> {
-    const render = this.requireRenderFn() as TextRenderer
+    const render = (await this.requireRenderFn()) as TextRenderer
     const markdown = render(data)
-    this.renderMDContent(element, markdown)
+    this.renderMarkdownContent(element, markdown)
   }
 }
 
 export class JavascriptCodeRenderer extends Renderer {
   async render(element: HTMLElement, data: unknown): Promise<void> {
-    const render = this.requireRenderFn() as CodeRenderer
+    const render = (await this.requireRenderFn()) as CodeRenderer
     render(element, data)
   }
 }

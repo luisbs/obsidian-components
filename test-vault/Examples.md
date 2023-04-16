@@ -28,7 +28,7 @@ author: 'F. Scott Fitzgerald'
 The **custom Codeblocks** allow a user to use **components** avoiding the `use` word.
 It uses the **components** custom names defined by the user instead. Example:
 
-```yarn book
+```book
 title: 'Cien años de Soledad'
 author: 'Gabriel García Márquez'
 ```

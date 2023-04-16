@@ -23,13 +23,17 @@ export class CodeblockHandler {
     this.#plugin.registerMarkdownCodeBlockProcessor(
       'use',
       (source, el, ctx) => {
-        this.#printErrors(source, el, () => {
+        console.log('obsidian-components: procesing base codeblock')
+
+        this.#catchErrors(source, el, async () => {
           const content = this.#parseCodeblock(source)
           const { name, component } = this.#getComponent(content, el, ctx)
           const renderer = getRenderer(this.#plugin, component)
 
           el.classList.add('component', `${name}-component`)
-          renderer.render(el, content.data)
+
+          console.log('obsidian-components: rendering base codeblock')
+          await renderer.render(el, content.data)
         })
       },
       -1,
@@ -44,13 +48,17 @@ export class CodeblockHandler {
         this.#plugin.registerMarkdownCodeBlockProcessor(
           name,
           (source, el, ctx) => {
-            return this.#printErrors(source, el, () => {
+            console.log(`obsidian-components: procesing '${name}' codeblock`)
+
+            return this.#catchErrors(source, el, async () => {
               const content = this.#parseCodeblock(source)
               const component = getComponentById(componentId, settings)
               const renderer = getRenderer(this.#plugin, component)
 
               el.classList.add('component', `${name}-component`)
-              renderer.render(el, content.data)
+
+              console.log(`obsidian-components: rendering '${name}' codeblock`)
+              await renderer.render(el, content.data)
             })
           },
           -1,
@@ -59,13 +67,13 @@ export class CodeblockHandler {
     }
   }
 
-  #printErrors(
+  async #catchErrors(
     source: string,
     element: HTMLElement,
-    callback: () => void,
-  ): void {
+    callback: () => Promise<void>,
+  ): Promise<void> {
     try {
-      callback()
+      await callback()
     } catch (error) {
       const isError = error instanceof CodeblockError
       if (isError && error.source) {

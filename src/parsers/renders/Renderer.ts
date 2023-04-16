@@ -1,7 +1,6 @@
 import type { ComponentFound, ComponentsPlugin, PluginSettings } from '@/types'
-import path from 'path'
 import { isRecord } from '@/utility'
-import { MarkdownRenderer, TFile, Vault } from 'obsidian'
+import { MarkdownRenderer, TAbstractFile, TFile, Vault } from 'obsidian'
 import { CodeblockError } from '../CodeblockError'
 
 export abstract class Renderer {
@@ -16,7 +15,7 @@ export abstract class Renderer {
     this.settings = plugin.settings
   }
 
-  // abstract render(element: HTMLElement, data: unknown): Promise<void>
+  abstract render(element: HTMLElement, data: unknown): Promise<void>
 
   protected replaceData(
     source: string,
@@ -33,7 +32,7 @@ export abstract class Renderer {
     element.innerHTML = content
   }
 
-  protected renderMDContent(element: HTMLElement, content: string): void {
+  protected renderMarkdownContent(element: HTMLElement, content: string): void {
     // @ts-expect-error unknown parameter
     // TODO change the the path, to avoid bad link generation of relative links
     MarkdownRenderer.renderMarkdown(content, element, this.component.path, null)
@@ -45,8 +44,8 @@ export abstract class Renderer {
     throw new CodeblockError('missing-component-file')
   }
 
-  protected requireRenderFn(): unknown {
-    const module = this.requireFileModule()
+  protected async requireRenderFn(): Promise<unknown> {
+    const module = await this.requireFileModule()
     if (typeof module === 'function') return module
     if (!isRecord(module) || typeof module.render !== 'function') {
       throw new CodeblockError('invalid-component-syntax')
