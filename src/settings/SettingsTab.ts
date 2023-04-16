@@ -81,6 +81,25 @@ export class SettingsTab extends PluginSettingTab {
           .setValue(this.settings.enable_components)
           .onChange(this.update.bind(this, 'enable_components'))
       })
+
+    this.#newSetting()
+      .setName('Enable design mode')
+      .setDesc(
+        [
+          'On design mode the changes on the components files are tracked,',
+          'this allows to show the changes on the component on runtime,',
+          'but at the same time it generates a bigger usage of memory and storage (both temporarly)',
+          'to disable it, the app should be reopened.',
+        ].join('\n'),
+      )
+      .addToggle((input) => {
+        input.setValue(this.settings.versioning_enabled).onChange((value) => {
+          // allows only enable in it
+          if (this.settings.versioning_enabled) return
+          this.update('versioning_enabled', true)
+          input.setDisabled(true)
+        })
+      })
   }
 
   #displayUsageSettings(): void {

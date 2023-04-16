@@ -22,7 +22,8 @@ export class VersionController {
         file instanceof TFile &&
         file.path.contains(plugin.settings.components_folder)
       ) {
-        console.debug(`components: listening changes on "${file.path}"`)
+        // prettier-ignore
+        console.debug(`obsidian-components: listening changes on "${file.path}"`)
         this.updateFileVersion(file)
       }
     }
@@ -53,17 +54,15 @@ export class VersionController {
 
     if (this.isFileVersionStored(baseFile.path, version)) return
 
-    console.debug(
-      `components: storing version '${version}' of "${baseFile.path}"`,
-    )
+    // prettier-ignore
+    console.debug(`obsidian-components: storing version '${version}' of "${baseFile.path}"`)
 
     const versionPath = this.getVersionPath(baseFile, version)
     this.storeVersion(baseFile.path, version)
     await this.plugin.cache?.cacheFile(baseFile, versionPath)
 
-    console.debug(
-      `components: stored version '${version}' of "${baseFile.path}"`,
-    )
+    // prettier-ignore
+    console.debug(`obsidian-components: stored version '${version}' of "${baseFile.path}"`)
   }
 
   protected isFileVersionStored(fileName: string, hash: string): boolean {

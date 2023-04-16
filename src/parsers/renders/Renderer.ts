@@ -60,7 +60,7 @@ export abstract class Renderer {
       const versionFile = await this.plugin.versions?.getLastCachedVersion(baseFile as TFile)
       const modulePath = this.getModulePath(versionFile || baseFile)
 
-      console.log(`components: executing 'require("${modulePath}")'`)
+      console.log(`obsidian-components: executing 'require("${modulePath}")'`)
       return require(modulePath)
     } catch (error) {
       throw new CodeblockError('invalid-component-syntax', error)
