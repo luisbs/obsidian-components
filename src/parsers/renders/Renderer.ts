@@ -1,6 +1,6 @@
 import type { ComponentFound, ComponentsPlugin, PluginSettings } from '@/types'
 import { isRecord } from '@/utility'
-import { MarkdownRenderer, TAbstractFile, TFile, Vault } from 'obsidian'
+import { MarkdownRenderer, TFile, Vault } from 'obsidian'
 import { CodeblockError } from '../CodeblockError'
 
 export abstract class Renderer {
@@ -8,21 +8,47 @@ export abstract class Renderer {
   protected vault: Vault
 
   constructor(
+    protected element: HTMLElement,
     protected plugin: ComponentsPlugin,
     protected component: ComponentFound,
+    protected data: unknown,
   ) {
     this.vault = plugin.app.vault
     this.settings = plugin.settings
   }
 
-  abstract render(element: HTMLElement, data: unknown): Promise<void>
+  protected abstract runRenderer(): Promise<void>
+
+  /**
+   * Execute the renderer with the passed params during construction.
+   */
+  public async render(): Promise<void> {
+    // clear the element
+    this.element.replaceChildren()
+
+    // catch problems during execution
+    try {
+      await this.runRenderer()
+    } catch (error) {
+      const pre = this.element.createEl('pre')
+
+      const isError = error instanceof CodeblockError
+      if (isError) pre.classList.add(error.code)
+
+      if (isError && error.source) {
+        pre.append(String(error.source))
+      } else {
+        pre.append(String(error))
+      }
+    }
+  }
 
   protected replaceData(
     source: string,
     data: unknown,
     fallback = '[missing]',
   ): string {
-    if (!isRecord(data)) throw new CodeblockError('invalid-codeblock-syntax')
+    if (!isRecord(data)) throw new CodeblockError('invalid-component-params')
     return source.replace(/\{\{ *(\w+) *\}\}/gi, (match, key) => {
       return key in data ? String(data[key]) : fallback
     })
@@ -48,7 +74,7 @@ export abstract class Renderer {
     const module = await this.requireFileModule()
     if (typeof module === 'function') return module
     if (!isRecord(module) || typeof module.render !== 'function') {
-      throw new CodeblockError('invalid-component-syntax')
+      throw new CodeblockError('missing-component-renderer')
     }
     return module.render
   }
@@ -60,15 +86,19 @@ export abstract class Renderer {
       const versionFile = await this.plugin.versions?.getLastCachedVersion(baseFile as TFile)
       const modulePath = this.getModulePath(versionFile || baseFile)
 
-      console.log(`obsidian-components: executing 'require("${modulePath}")'`)
+      console.log(`Executing 'require("${modulePath}")'`)
       return require(modulePath)
     } catch (error) {
+      console.error(error)
       throw new CodeblockError('invalid-component-syntax', error)
     }
   }
 
-  protected getModulePath(file: TAbstractFile | null): string {
-    const filePath = file?.path ?? this.component.path
+  /**
+   * @returns the real path of the file on the os.
+   */
+  protected getModulePath(filePath?: string | null): string {
+    filePath = filePath ?? this.component.path
 
     //? simplier implementation
     //? not used cause `basePath` is not public/documentated
