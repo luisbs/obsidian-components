@@ -30,13 +30,7 @@ export default class ComponentsPlugin extends Plugin {
 
   public cache: CacheController | null = null
   public versions: VersionController | null = null
-  protected parser: CodeblockHandler | null = null
-
-  async onunload(): Promise<void> {
-    this.cache?.clear()
-    this.versions?.clear()
-    this.parser?.clear()
-  }
+  public parser: CodeblockHandler | null = null
 
   async onload(): Promise<void> {
     await this.loadSettings()
@@ -47,10 +41,16 @@ export default class ComponentsPlugin extends Plugin {
     this.parser = new CodeblockHandler(this)
   }
 
+  async onunload(): Promise<void> {
+    this.cache?.clear()
+    this.versions?.clear()
+    this.parser?.clear()
+  }
+
   async loadSettings(): Promise<void> {
     const rawData = (await this.loadData()) || {}
 
-    console.debug('obsidian-components: Loading Data')
+    console.debug('Loading Settings')
     console.debug(rawData)
 
     const {
@@ -69,7 +69,7 @@ export default class ComponentsPlugin extends Plugin {
     this.settings.enabled_formats = new Set(enabled_formats || [])
     this.settings.enabled_components = new Map(enabled_components || [])
 
-    console.log('obsidian-components: Loaded Data')
+    console.log('Loaded Settings')
     console.debug(this.settings)
 
     // load runtime configuration
@@ -77,7 +77,7 @@ export default class ComponentsPlugin extends Plugin {
   }
 
   async saveSettings(): Promise<void> {
-    console.debug('obsidian-components: Saving Data')
+    console.debug('Saving Settings')
     console.debug(this.settings)
 
     const {
@@ -99,7 +99,7 @@ export default class ComponentsPlugin extends Plugin {
     // store the data
     await this.saveData(rawData)
 
-    console.log('obsidian-components: Saved Data')
+    console.log('Saved Settings')
     console.debug(rawData)
 
     // load runtime configuration
