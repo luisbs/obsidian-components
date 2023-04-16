@@ -13,6 +13,8 @@ import { getRenderer } from './renders'
 export class CodeblockHandler {
   #plugin: ComponentsPlugin
 
+  #registered: string[] = []
+
   constructor(plugin: ComponentsPlugin) {
     this.#plugin = plugin
     this.registerBaseCodeblock()
@@ -45,6 +47,10 @@ export class CodeblockHandler {
 
     for (const [componentId, names] of Object.entries(state.codeblocks)) {
       for (const name of names) {
+        // avoid re-registering a processor
+        if (this.#registered.includes(name)) continue
+        this.#registered.push(name)
+
         this.#plugin.registerMarkdownCodeBlockProcessor(
           name,
           (source, el, ctx) => {
