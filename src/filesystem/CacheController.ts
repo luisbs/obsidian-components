@@ -8,6 +8,7 @@ export class CacheController {
 
   constructor(plugin: ComponentsPlugin) {
     this.vault = plugin.app.vault
+    this.clear()
   }
 
   /**
@@ -27,7 +28,7 @@ export class CacheController {
    * Destroys the folder cache and generates a new one
    * ready to be used.
    */
-  async clearCache(vault: Vault): Promise<void> {
+  async clear(): Promise<void> {
     const path = this.getCachePath()
     const folder = this.vault.getAbstractFileByPath(path)
 

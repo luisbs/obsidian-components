@@ -21,7 +21,11 @@ export class CodeblockHandler {
     this.registerCustomCodeblocks()
   }
 
-  registerBaseCodeblock(): void {
+  public clear(): void {
+    // todo check a way to un-register the processors
+  }
+
+  public registerBaseCodeblock(): void {
     this.#plugin.registerMarkdownCodeBlockProcessor(
       'use',
       (source, el, ctx) => {
@@ -42,7 +46,7 @@ export class CodeblockHandler {
     )
   }
 
-  registerCustomCodeblocks(): void {
+  public registerCustomCodeblocks(): void {
     const { settings, state } = this.#plugin
 
     for (const [componentId, names] of Object.entries(state.codeblocks)) {

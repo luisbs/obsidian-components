@@ -16,20 +16,24 @@ export class VersionController {
     this.vault = plugin.app.vault
     this.settings = plugin.settings
 
-    const listener = (file: TAbstractFile): void => {
-      // listen only the files on the blocks folder
-      if (
-        file instanceof TFile &&
-        file.path.contains(plugin.settings.components_folder)
-      ) {
-        // prettier-ignore
-        console.debug(`obsidian-components: listening changes on "${file.path}"`)
-        this.updateFileVersion(file)
-      }
-    }
+    this.vault.on('modify', this.handleFileModification.bind(this))
+  }
 
-    this.vault.on('modify', listener)
-    // this.vault.off('modify', listener)
+  public clear(): void {
+    this.versions = new Map()
+    this.vault.off('modify', this.handleFileModification.bind(this))
+  }
+
+  protected handleFileModification(file: TAbstractFile): void {
+    // listen only the files on the blocks folder
+    if (
+      file instanceof TFile &&
+      file.path.contains(this.settings.components_folder)
+    ) {
+      // prettier-ignore
+      console.debug(`obsidian-components: listening changes on "${file.path}"`)
+      this.updateFileVersion(file)
+    }
   }
 
   public async getLastCachedVersion(baseFile: TFile): Promise<TFile | null> {

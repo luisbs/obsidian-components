@@ -32,7 +32,13 @@ export default class ComponentsPlugin extends Plugin {
   public versions: VersionController | null = null
   protected parser: CodeblockHandler | null = null
 
-  async onload() {
+  async onunload(): Promise<void> {
+    this.cache?.clear()
+    this.versions?.clear()
+    this.parser?.clear()
+  }
+
+  async onload(): Promise<void> {
     await this.loadSettings()
     this.addSettingTab(new SettingsTab(this))
 
@@ -41,7 +47,7 @@ export default class ComponentsPlugin extends Plugin {
     this.parser = new CodeblockHandler(this)
   }
 
-  async loadSettings() {
+  async loadSettings(): Promise<void> {
     const rawData = (await this.loadData()) || {}
 
     console.debug('obsidian-components: Loading Data')
@@ -70,7 +76,7 @@ export default class ComponentsPlugin extends Plugin {
     preparePluginState(this)
   }
 
-  async saveSettings() {
+  async saveSettings(): Promise<void> {
     console.debug('obsidian-components: Saving Data')
     console.debug(this.settings)
 
