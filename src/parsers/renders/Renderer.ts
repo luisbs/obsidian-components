@@ -84,8 +84,8 @@ export abstract class Renderer {
     try {
       const baseFile = this.vault.getAbstractFileByPath(this.component.path)
       // prettier-ignore
-      const versionFile = await this.plugin.versions?.getLastCachedVersion(baseFile as TFile)
-      const modulePath = this.getModulePath(versionFile || baseFile)
+      const versionPath = await this.plugin.versions?.getLastCachedVersion(baseFile as TFile)
+      const modulePath = this.getModulePath(versionPath)
 
       console.log(`Executing 'require("${modulePath}")'`)
       return require(modulePath)

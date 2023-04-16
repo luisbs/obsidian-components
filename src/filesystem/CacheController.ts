@@ -1,6 +1,5 @@
 import { ComponentsPlugin } from '@/types'
-import { createHash } from 'crypto'
-import { TFile, TFolder, Vault } from 'obsidian'
+import { TFile, TFolder, Vault, normalizePath } from 'obsidian'
 import Path from 'path'
 
 export class CacheController {
@@ -16,11 +15,9 @@ export class CacheController {
    * if no params are passed the route of the
    * cache folder is generated.
    */
-  getCachePath(...paths: string[]): string {
-    return Path.resolve(
-      this.vault.configDir,
-      'plugins/components/.temp',
-      ...paths,
+  public getCachePath(...paths: string[]): string {
+    return normalizePath(
+      Path.join(this.vault.configDir, 'plugins/components/.temp', ...paths),
     )
   }
 
@@ -30,12 +27,21 @@ export class CacheController {
    */
   async clear(): Promise<void> {
     const path = this.getCachePath()
-    const folder = this.vault.getAbstractFileByPath(path)
+    console.debug(`Clearing cache on '${path}'`)
 
-    if (!folder) return
+    try {
+      // remove existing cache folder
+      if (await this.vault.adapter.exists(path)) {
+        await this.vault.adapter.rmdir(path, true)
+      }
 
-    await this.vault.delete(folder, true)
-    await this.vault.createFolder(path)
+      // create an empty cache folder
+      await this.vault.createFolder(path)
+
+      console.log('Cleared cache')
+    } catch (error) {
+      console.error(error)
+    }
   }
 
   /**
@@ -67,12 +73,13 @@ export class CacheController {
     baseFile: TFile,
     newFilePath?: string,
   ): Promise<string | null> {
-    const tempPath =
+    const tempPath = this.getCachePath(
       newFilePath ||
-      baseFile.basename + '-' + baseFile.stat.mtime + '.' + baseFile.extension
+        `${baseFile.basename}-${baseFile.stat.mtime}.${baseFile.extension}`,
+    )
 
-    const tempFile = await this.vault.copy(baseFile, tempPath)
-    return tempFile.name
+    await this.vault.adapter.copy(baseFile.path, tempPath)
+    return tempPath
   }
 
   /**
@@ -81,12 +88,5 @@ export class CacheController {
   async removeFile(filePath: string): Promise<void> {
     const file = this.vault.getAbstractFileByPath(this.getCachePath(filePath))
     if (file) await this.vault.delete(file, true)
-  }
-
-  public async getFileHash(file: TFile): Promise<string> {
-    const content = await this.vault.read(file)
-    const hash = createHash('sha256').update(content).digest('hex')
-    // use the first 10 characters only
-    return hash.substring(0, 10)
   }
 }

@@ -1,4 +1,5 @@
 type ErrorCode =
+  // throwed on `codeblockProcessors`
   | 'invalid-codeblock-syntax'
   | 'missing-component-name'
   | 'unknown-component'
