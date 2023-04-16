@@ -98,7 +98,6 @@ export default class ComponentsPlugin extends Plugin {
     console.debug(rawData)
 
     // load runtime configuration
-    this.versions?.setEnabled(this.settings.versioning_enabled)
     preparePluginState(this)
 
     // register proccessors

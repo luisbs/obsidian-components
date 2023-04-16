@@ -1,16 +1,10 @@
 import { TAbstractFile, TFile, Vault } from 'obsidian'
-import { ComponentsPlugin } from '@/types'
+import { ComponentsPlugin, PluginSettings } from '@/types'
 
 export class VersionController {
   protected vault: Vault
   protected plugin: ComponentsPlugin
-
-  /**
-   * This variable tracks when ot enable the versioning,
-   * since it can generate a lot of memory usage
-   * and consumes more storage space, is recomended to keep it disabled
-   */
-  protected enabled: boolean
+  protected settings: PluginSettings
 
   /**
    * Relates a user filePath with it stored versions
@@ -20,7 +14,7 @@ export class VersionController {
   constructor(plugin: ComponentsPlugin) {
     this.plugin = plugin
     this.vault = plugin.app.vault
-    this.enabled = plugin.settings.versioning_enabled
+    this.settings = plugin.settings
 
     const listener = (file: TAbstractFile): void => {
       // listen only the files on the blocks folder
@@ -28,7 +22,7 @@ export class VersionController {
         file instanceof TFile &&
         file.path.contains(plugin.settings.components_folder)
       ) {
-        console.debug(`components: storing new version of "${file.path}"`)
+        console.debug(`components: listening changes on "${file.path}"`)
         this.updateFileVersion(file)
       }
     }
@@ -37,12 +31,8 @@ export class VersionController {
     // this.vault.off('modify', listener)
   }
 
-  public setEnabled(value: boolean): void {
-    this.enabled = value
-  }
-
   public async getLastCachedVersion(baseFile: TFile): Promise<TFile | null> {
-    if (!this.enabled) return baseFile
+    if (!this.settings.versioning_enabled) return baseFile
     if (!(baseFile instanceof TFile)) return baseFile
 
     let version = this.getLastFileVersion(baseFile.path)
@@ -57,16 +47,23 @@ export class VersionController {
   }
 
   protected async updateFileVersion(baseFile: TFile): Promise<void> {
+    if (!this.settings.versioning_enabled) return
+
     const version = (await this.plugin.cache?.getFileHash(baseFile)) || ''
 
     if (this.isFileVersionStored(baseFile.path, version)) return
 
-    const versionPath = this.getVersionPath(baseFile, version)
-    this.plugin.cache?.cacheFile(baseFile, versionPath)
-    this.storeVersion(baseFile.path, version)
+    console.debug(
+      `components: storing version '${version}' of "${baseFile.path}"`,
+    )
 
-    // prettier-ignore
-    console.debug(`components: stored version '${version}' of "${baseFile.path}"`)
+    const versionPath = this.getVersionPath(baseFile, version)
+    this.storeVersion(baseFile.path, version)
+    await this.plugin.cache?.cacheFile(baseFile, versionPath)
+
+    console.debug(
+      `components: stored version '${version}' of "${baseFile.path}"`,
+    )
   }
 
   protected isFileVersionStored(fileName: string, hash: string): boolean {
