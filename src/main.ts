@@ -8,8 +8,12 @@ import { Plugin } from 'obsidian'
 import { CodeblockHandler } from './parsers'
 import { SettingsTab } from './settings/SettingsTab'
 import { preparePluginState } from './utility'
+import { CacheController } from './filesystem/CacheController'
+import { VersionController } from './filesystem/VersionController'
 
 export const DEFAULT_SETTINGS: PrimitivePluginSettings = {
+  versioning_enabled: false,
+
   enable_components: 'STRICT',
   enable_codeblocks: false,
 
@@ -25,21 +29,33 @@ export default class ComponentsPlugin extends Plugin {
   public settings = {} as PluginSettings
   public state = {} as PluginState
 
+  public cache: CacheController | null = null
+  public versions: VersionController | null = null
   protected parser: CodeblockHandler | null = null
 
   async onload() {
     await this.loadSettings()
     this.addSettingTab(new SettingsTab(this))
+
+    this.cache = new CacheController(this)
+    this.versions = new VersionController(this)
     this.parser = new CodeblockHandler(this)
   }
 
   async loadSettings() {
     const rawData = (await this.loadData()) || {}
 
-    // console.log('obsidian-components: Loading Data')
-    // console.debug(rawData)
+    console.debug('obsidian-components: Loading Data')
+    console.debug(rawData)
 
-    const { enabled_formats, enabled_components, ...primitiveData } = rawData
+    const {
+      // prevent loading `versioning_enabled`
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      versioning_enabled,
+      enabled_formats,
+      enabled_components,
+      ...primitiveData
+    } = rawData
 
     // load primitives
     this.settings = Object.assign({}, DEFAULT_SETTINGS, primitiveData)
@@ -56,11 +72,17 @@ export default class ComponentsPlugin extends Plugin {
   }
 
   async saveSettings() {
-    // console.log('obsidian-components: Saving Data')
-    // console.debug(this.settings)
+    console.debug('obsidian-components: Saving Data')
+    console.debug(this.settings)
 
-    const { enabled_formats, enabled_components, ...primitiveData } =
-      this.settings
+    const {
+      // prevent storing `versioning_enabled`
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      versioning_enabled,
+      enabled_formats,
+      enabled_components,
+      ...primitiveData
+    } = this.settings
 
     // shallow copy primitives
     const rawData = Object.assign({}, primitiveData) as RawPluginSettings
@@ -76,6 +98,7 @@ export default class ComponentsPlugin extends Plugin {
     console.debug(rawData)
 
     // load runtime configuration
+    this.versions?.setEnabled(this.settings.versioning_enabled)
     preparePluginState(this)
 
     // register proccessors
