@@ -54,28 +54,33 @@ export abstract class Renderer {
     return module.render
   }
 
-  // TODO test in windows system
-  protected requireFileModule(): unknown {
-    // try {
-    // construct the real filepath on the user system
-    // const modulePath = this.vault.adapter
-    //   .getResourcePath(this.component.path)
-    //   .replace('app://local', '')
-    //   .replace(/\?\d+$/i, '')
+  protected async requireFileModule(): Promise<unknown> {
+    try {
+      const baseFile = this.vault.getAbstractFileByPath(this.component.path)
+      // prettier-ignore
+      const versionFile = await this.plugin.versions?.getLastCachedVersion(baseFile as TFile)
+      const modulePath = this.getModulePath(versionFile || baseFile)
 
-    const modulePath = path.resolve(
-      this.vault.adapter.basePath,
-      this.component.path,
-    )
+      console.log(`components: executing 'require("${modulePath}")'`)
+      return require(modulePath)
+    } catch (error) {
+      throw new CodeblockError('invalid-component-syntax', error)
+    }
+  }
 
-    // console.log({
-    //   modulePath,
-    //   module: require(modulePath),
-    //   basePath: this.vault.adapter.basePath,
-    // })
-    return require(modulePath)
-    // } catch (error) {
-    //   throw new CodeblockError('invalid-component-syntax', error)
-    // }
+  protected getModulePath(file: TAbstractFile | null): string {
+    const filePath = file?.path ?? this.component.path
+
+    //? simplier implementation
+    //? not used cause `basePath` is not public/documentated
+    //? so it may change as an internal implementation
+    // return path.resolve(this.vault.adapter.basePath, filePath)
+
+    //? `getResourcePath` adds a prefix and a postfix to identify file version
+    //? it needs to be removed to be recognized as a real route
+    return this.vault.adapter
+      .getResourcePath(filePath)
+      .replace('app://local', '')
+      .replace(/\?\d+$/i, '')
   }
 }
