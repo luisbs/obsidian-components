@@ -5,7 +5,7 @@ export type PrimitivePluginSettings = Omit<
 
 export type RawPluginSettings = Omit<
   PrimitivePluginSettings,
-  'versioning_enabled'
+  'enable_versioning'
 > & {
   enabled_formats: string[]
   enabled_components: [string, boolean][]
@@ -20,7 +20,7 @@ export interface PluginSettings {
    * > storage usage, so it should be **disabled always**
    * > until the user enables it **manually**
    */
-  versioning_enabled: boolean
+  enable_versioning: boolean
 
   /**
    * Stores the plugin behavior about components discovery.

@@ -33,7 +33,7 @@ export class VersionController {
   }
 
   public async getLastCachedVersion(baseFile: TFile): Promise<TFile | null> {
-    if (!this.settings.versioning_enabled) return baseFile
+    if (!this.settings.enable_versioning) return baseFile
     if (!(baseFile instanceof TFile)) return baseFile
 
     let version = this.getLastFileVersion(baseFile.path)
@@ -48,7 +48,7 @@ export class VersionController {
   }
 
   protected async updateFileVersion(baseFile: TFile): Promise<void> {
-    if (!this.settings.versioning_enabled) return
+    if (!this.settings.enable_versioning) return
 
     const version = (await this.plugin.cache?.getFileHash(baseFile)) || ''
 

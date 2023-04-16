@@ -12,9 +12,8 @@ import { CacheController } from './filesystem/CacheController'
 import { VersionController } from './filesystem/VersionController'
 
 export const DEFAULT_SETTINGS: PrimitivePluginSettings = {
-  versioning_enabled: false,
-
   enable_components: 'STRICT',
+  enable_versioning: false,
   enable_codeblocks: false,
 
   naming_params: '__name',
@@ -49,9 +48,9 @@ export default class ComponentsPlugin extends Plugin {
     console.debug(rawData)
 
     const {
-      // prevent loading `versioning_enabled`
+      // prevent loading `enable_versioning`
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      versioning_enabled,
+      enable_versioning,
       enabled_formats,
       enabled_components,
       ...primitiveData
@@ -76,9 +75,9 @@ export default class ComponentsPlugin extends Plugin {
     console.debug(this.settings)
 
     const {
-      // prevent storing `versioning_enabled`
+      // prevent storing `enable_versioning`
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      versioning_enabled,
+      enable_versioning,
       enabled_formats,
       enabled_components,
       ...primitiveData

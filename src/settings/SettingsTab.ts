@@ -93,10 +93,10 @@ export class SettingsTab extends PluginSettingTab {
         ].join('\n'),
       )
       .addToggle((input) => {
-        input.setValue(this.settings.versioning_enabled).onChange((value) => {
+        input.setValue(this.settings.enable_versioning).onChange((value) => {
           // allows only enable in it
-          if (this.settings.versioning_enabled) return
-          this.update('versioning_enabled', true)
+          if (this.settings.enable_versioning) return
+          this.update('enable_versioning', true)
           input.setDisabled(true)
         })
       })
