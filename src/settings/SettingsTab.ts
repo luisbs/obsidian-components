@@ -82,16 +82,24 @@ export class SettingsTab extends PluginSettingTab {
           .onChange(this.update.bind(this, 'enable_components'))
       })
 
+    // construct the `design mode` description
+    const modeDesc = createFragment()
+    const modeDescP = modeDesc.createEl('p')
+    // prettier-ignore
+    modeDescP.appendText("Enable design mode only if you're editing your components code.")
+    modeDescP.createEl('br')
+    modeDescP.appendText('It will not disabled until you close the app.')
+    modeDescP.createEl('br')
+    modeDescP.createEl('br')
+    modeDescP.appendText('For more details see ')
+    modeDescP.createEl('a', {
+      text: 'design mode details',
+      href: 'https://github.com/luisbs/obsidian-components/README.md#design-mode',
+    })
+
     this.#newSetting()
       .setName('Enable design mode')
-      .setDesc(
-        [
-          'On design mode the changes on the components files are tracked,',
-          'this allows to show the changes on the component on runtime,',
-          'but at the same time it generates a bigger usage of memory and storage (both temporarly)',
-          'to disable it, the app should be reopened.',
-        ].join('\n'),
-      )
+      .setDesc(modeDesc)
       .addToggle((input) => {
         input.setValue(this.settings.enable_versioning).onChange((value) => {
           // allows only enable in it
