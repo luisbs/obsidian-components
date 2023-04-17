@@ -17,7 +17,11 @@ export class CacheController {
    */
   public getCachePath(...paths: string[]): string {
     return normalizePath(
-      Path.join(this.vault.configDir, 'plugins/components/.temp', ...paths),
+      Path.join(
+        this.vault.configDir,
+        'plugins/obsidian-components/.temp',
+        ...paths,
+      ),
     )
   }
 
