@@ -94,8 +94,7 @@ export class CacheController {
     baseFile: TFile,
     newFilePath: string,
   ): Promise<void> {
-    const baseFileFolderPath = this.getRealPath(baseFile.path) //
-      .replace(baseFile.name, '')
+    const parentPath = baseFile.parent?.path || ''
 
     // load the original content
     let content = await this.vault.adapter.read(newFilePath)
@@ -103,7 +102,11 @@ export class CacheController {
     // replace references to real routes
     content = content.replaceAll(
       /require *\( *['"`](.+)['"`] *\)/g,
-      (_, $1) => `require("${Path.join(baseFileFolderPath, $1)}")`,
+      // use a method to dynamically resolve the dependencies
+      (_, $1) => {
+        const path = normalizePath(Path.join(parentPath, $1))
+        return `require(app.plugins.plugins['obsidian-components'].resolvePath("${path}"))`
+      },
     )
 
     // update the content
@@ -117,25 +120,5 @@ export class CacheController {
   public async removeFile(filePath: string): Promise<void> {
     const file = this.vault.getAbstractFileByPath(this.getCachePath(filePath))
     if (file) await this.vault.delete(file, true)
-  }
-
-  /**
-   * @returns the real path of the file on the os.
-   */
-  public getRealPath(filePath: string): string {
-    //? simplier implementation
-    //? not used cause `basePath` is not public/documentated
-    //? so it may change as an internal implementation
-    return Path.resolve(this.vault.adapter.basePath, filePath)
-
-    //! replaced by above, cause it make changes as URL
-    //! like replaces ' ' (space) to '%20'
-    //? `getResourcePath` adds a prefix and a postfix to identify file version
-    //? it needs to be removed to be recognized as a real route
-    return this.vault.adapter
-      .getResourcePath(filePath)
-      .replace(/app:\/\/local/i, '') // removes the prefix
-      .replace(/^\/(?=[\w]+:)/i, '') // fix route for windows systems
-      .replace(/\?\d+$/i, '') // removes the postfix
   }
 }

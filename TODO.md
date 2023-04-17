@@ -14,7 +14,7 @@
 
 - [ ] Add a donations page.
 - [ ] Selector de folder tiene fondo transparente
-- [ ] Ya se reflejan los cambios de los componentes en runtime, trackear tambien los cambios en dependencias `require( ... )`
+- [ ] Remover los console.log en la version de produccion
 
 ### Support
 

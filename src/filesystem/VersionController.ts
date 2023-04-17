@@ -37,6 +37,17 @@ export class VersionController {
     }
   }
 
+  public resolveLastCachedVersion(baseFilePath: string): string {
+    const version = this.getLastFileVersion(baseFilePath)
+    if (!version) return baseFilePath
+
+    // if a version is found
+    // return the path to that fileVersion
+    const baseFile = this.vault.getAbstractFileByPath(baseFilePath)
+    if (!(baseFile instanceof TFile)) return baseFilePath
+    return this.prepareVersionPath(baseFile, version, true)
+  }
+
   /**
    * @returns the full-path of the more recent file version.
    */
@@ -51,7 +62,7 @@ export class VersionController {
     }
 
     if (!version) return null
-    return this.getVersionPath(baseFile, version, true)
+    return this.prepareVersionPath(baseFile, version, true)
   }
 
   /**
@@ -63,7 +74,7 @@ export class VersionController {
     const version = await this.getFileVersion(baseFile)
     if (this.isFileVersionStored(baseFile.path, version)) return
 
-    const versionPath = this.getVersionPath(baseFile, version)
+    const versionPath = this.prepareVersionPath(baseFile, version)
     this.storeVersion(baseFile.path, version)
     await this.plugin.cache?.cacheFile(baseFile, versionPath)
     console.debug(`Stored version '${version}' of "${baseFile.path}"`)
@@ -105,10 +116,20 @@ export class VersionController {
   }
 
   /**
+   * @returns an identifier of the file state.
+   */
+  public async getFileVersion(file: TFile): Promise<string> {
+    const content = await this.vault.read(file)
+    const hash = createHash('sha256').update(content).digest('hex')
+    // use the first 10 characters only
+    return hash.substring(0, 10)
+  }
+
+  /**
    * @param {boolean} full make the result a full path.
    * @returns the path of a version file on the cache folder.
    */
-  protected getVersionPath(
+  protected prepareVersionPath(
     baseFile: TFile,
     version: string,
     full = false,
@@ -122,15 +143,5 @@ export class VersionController {
         `${baseFile.basename}-${version}.${baseFile.extension}`,
       ) || `${baseFile.basename}-${version}.${baseFile.extension}`
     )
-  }
-
-  /**
-   * @returns an identifier of the file state.
-   */
-  public async getFileVersion(file: TFile): Promise<string> {
-    const content = await this.vault.read(file)
-    const hash = createHash('sha256').update(content).digest('hex')
-    // use the first 10 characters only
-    return hash.substring(0, 10)
   }
 }

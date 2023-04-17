@@ -4,6 +4,7 @@ import type {
   PrimitivePluginSettings,
   RawPluginSettings,
 } from './types'
+import path from 'path'
 import { Plugin } from 'obsidian'
 import { CodeblockHandler } from './parsers'
 import { SettingsTab } from './settings/SettingsTab'
@@ -107,5 +108,31 @@ export default class ComponentsPlugin extends Plugin {
 
     // register proccessors
     this.parser?.registerCustomCodeblocks()
+  }
+
+  /**
+   * @returns the real path of the file on the os.
+   */
+  public getRealPath(filePath: string): string {
+    //? simplier implementation
+    //? not used cause `basePath` is not public/documentated
+    //? so it may change as an internal implementation
+    return path.resolve(this.app.vault.adapter.basePath, filePath)
+
+    //! replaced by above, cause it make changes as URL
+    //! like replaces ' ' (space) to '%20'
+    //? `getResourcePath` adds a prefix and a postfix to identify file version
+    //? it needs to be removed to be recognized as a real route
+    return this.app.vault.adapter
+      .getResourcePath(filePath)
+      .replace(/app:\/\/local/i, '') // removes the prefix
+      .replace(/^\/(?=[\w]+:)/i, '') // fix route for windows systems
+      .replace(/\?\d+$/i, '') // removes the postfix
+  }
+
+  // external API
+  public resolvePath(path: string): string {
+    const resolvedPath = this.versions?.resolveLastCachedVersion(path) ?? path
+    return this.getRealPath(resolvedPath)
   }
 }
