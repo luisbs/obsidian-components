@@ -1,26 +1,18 @@
 # obsidian-component
 
-## Features for v1.0.0
+## Features for v1.0
 
-- [x] Add a real documentation.
-- [x] Add settings page to control all the plugin variables.
-- [x] Add granular control over which component are allow to run.
-- [x] Add error feedback.
-- [x] Add alternative to inline component name method.
-- [x] Reload the component when the file is updated
-- [x] Add support for custom codeblocks name.
-- [x] Isolate the html related component formats to custom renders.
-- [x] Change all the references of the name **fragment** to **component** for better naming
-- [x] Change the 3way-switch into a select input for a simplier design.
-- [x] Isolate the plugin state out of the plugin settings.
-- [x] Add a setting to allow the user to set the the parameters to use on names.
-- [x] Add a **design mode** that allows runtime reload of components on changes.
+- [x] Documentation.
+- [x] SettingsTab to control the plugin.
+- [x] Granular control over which component are allow to run.
+- [x] Multiple methods to name and identify a component.
+- [x] Support for **custom codeblocks name**.
+- [x] Error output handling.
+- [x] Reload the component when the **component file** is modified (**design mode** only).
 
-## Things to fix
+## Things to do before v1.0
 
-- [ ] El selector de carpeta, tiene el fondo transparente.
-- [x] La pagina de settings no se actualiza correctamente al cambiar la configuracion en la tabla de componentes.
-- [ ] La tabla de componentes no se actualiza al cambiar la tabla de formatos.
+- [ ] Add a donations page.
 - [ ] Ya se reflejan los cambios de los componentes en runtime, trackear tambien los cambios en dependencias `require( ... )`
 
 ### Support
@@ -36,6 +28,8 @@
 
 ## Ideas for the future
 
+- [ ] Add **API** to allow integration with other plugins.
+  - For example use **Dataview** to collect data and **Components** to render the output.
 - [ ] Add cache of `'html' | 'md'` component types.
 - [ ] Add support for other codeblock content syntax (e.g. **JS objects**)
 - [ ] Add support for other codeblock content syntax (e.g. **TOML**)

@@ -4,6 +4,11 @@ import { FolderSuggester } from 'obsidian-fnc'
 import { loadComponentsOnVault } from '@/utility'
 import { FormatsTable, ComponentsTable } from './components'
 
+// prettier-ignore
+function getDocumentationUrl(id: string): string {
+  return "https://github.com/luisbs/obsidian-components/blob/main/README.md#" + id;
+}
+
 export class SettingsTab extends PluginSettingTab {
   #plugin: ComponentsPlugin
   settings: PluginSettings
@@ -76,7 +81,7 @@ export class SettingsTab extends PluginSettingTab {
     behaviorDescP.appendText('For more details see ')
     behaviorDescP.createEl('a', {
       text: 'execution behavior setting',
-      href: 'https://github.com/luisbs/obsidian-components/README.md#execution-behavior-setting',
+      href: getDocumentationUrl('execution-behavior-setting'),
     })
 
     this.#newSetting()
@@ -106,7 +111,7 @@ export class SettingsTab extends PluginSettingTab {
     modeDescP.appendText('For more details see ')
     modeDescP.createEl('a', {
       text: 'design mode',
-      href: 'https://github.com/luisbs/obsidian-components/README.md#design-mode-setting',
+      href: getDocumentationUrl('design-mode-setting'),
     })
 
     this.#newSetting()
@@ -132,7 +137,7 @@ export class SettingsTab extends PluginSettingTab {
     codeblocksDescP.appendText('For more details see ')
     codeblocksDescP.createEl('a', {
       text: 'design mode',
-      href: 'https://github.com/luisbs/obsidian-components/README.md#custom-codeblocks-setting',
+      href: getDocumentationUrl('custom-codeblocks-setting'),
     })
 
     this.#newSetting()
