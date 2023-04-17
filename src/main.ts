@@ -9,7 +9,6 @@ import { Plugin } from 'obsidian'
 import { CodeblockHandler } from './parsers'
 import { SettingsTab } from './settings/SettingsTab'
 import { preparePluginState } from './utility'
-import { CacheController } from './filesystem/CacheController'
 import { VersionController } from './filesystem/VersionController'
 
 export const DEFAULT_SETTINGS: PrimitivePluginSettings = {
@@ -29,7 +28,6 @@ export default class ComponentsPlugin extends Plugin {
   public settings = {} as PluginSettings
   public state = {} as PluginState
 
-  public cache: CacheController | null = null
   public versions: VersionController | null = null
   public parser: CodeblockHandler | null = null
 
@@ -37,13 +35,11 @@ export default class ComponentsPlugin extends Plugin {
     await this.loadSettings()
     this.addSettingTab(new SettingsTab(this))
 
-    this.cache = new CacheController(this)
     this.versions = new VersionController(this)
     this.parser = new CodeblockHandler(this)
   }
 
   async onunload(): Promise<void> {
-    this.cache?.clear()
     this.versions?.clear()
     this.parser?.clear()
   }
@@ -133,6 +129,7 @@ export default class ComponentsPlugin extends Plugin {
   // external API
   public resolvePath(path: string): string {
     const resolvedPath = this.versions?.resolveLastCachedVersion(path) ?? path
+    console.debug(`Resolved '${path}' to '${resolvedPath}'`)
     return this.getRealPath(resolvedPath)
   }
 }

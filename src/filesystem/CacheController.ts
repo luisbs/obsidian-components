@@ -83,35 +83,7 @@ export class CacheController {
     )
 
     await this.vault.adapter.copy(baseFile.path, tempPath)
-    await this.updateReferences(baseFile, tempPath)
     return tempPath
-  }
-
-  /**
-   * Updates the references to other files.
-   */
-  public async updateReferences(
-    baseFile: TFile,
-    newFilePath: string,
-  ): Promise<void> {
-    const parentPath = baseFile.parent?.path || ''
-
-    // load the original content
-    let content = await this.vault.adapter.read(newFilePath)
-
-    // replace references to real routes
-    content = content.replaceAll(
-      /require *\( *['"`](.+)['"`] *\)/g,
-      // use a method to dynamically resolve the dependencies
-      (_, $1) => {
-        const path = normalizePath(Path.join(parentPath, $1))
-        return `require(app.plugins.plugins['obsidian-components'].resolvePath("${path}"))`
-      },
-    )
-
-    // update the content
-    await this.vault.adapter.write(newFilePath, content)
-    console.log(`Updated the references on '${newFilePath}'`)
   }
 
   /**

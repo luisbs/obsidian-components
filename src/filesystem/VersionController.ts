@@ -1,21 +1,33 @@
-import { TAbstractFile, TFile, Vault } from 'obsidian'
-import { ComponentsPlugin, PluginSettings } from '@/types'
+import Path from 'path'
 import { createHash } from 'crypto'
+import { TAbstractFile, TFile, Vault, normalizePath } from 'obsidian'
+import { ComponentsPlugin, PluginSettings } from '@/types'
+import { CacheController } from './CacheController'
 
 export class VersionController {
   protected vault: Vault
   protected plugin: ComponentsPlugin
   protected settings: PluginSettings
 
+  protected cache: CacheController
+
   /**
-   * Relates a user filePath with it stored versions
+   * Relates a filePath with it stored versions
    */
   protected versions: Map<string, string[]> = new Map()
+
+  /**
+   * Relates a filePath with it dependencies
+   * stored as <dependency, dependents>
+   */
+  protected dependencies: Map<string, string[]> = new Map()
 
   constructor(plugin: ComponentsPlugin) {
     this.plugin = plugin
     this.vault = plugin.app.vault
     this.settings = plugin.settings
+
+    this.cache = new CacheController(plugin)
 
     this.vault.on('modify', this.handleFileModification.bind(this))
   }
@@ -75,12 +87,90 @@ export class VersionController {
     if (this.isFileVersionStored(baseFile.path, version)) return
 
     const versionPath = this.prepareVersionPath(baseFile, version)
+
+    await this.cache.cacheFile(baseFile, versionPath)
+    await this.updateReferences(baseFile, this.cache.getCachePath(versionPath))
+
     this.storeVersion(baseFile.path, version)
-    await this.plugin.cache?.cacheFile(baseFile, versionPath)
     console.debug(`Stored version '${version}' of "${baseFile.path}"`)
 
     // force the refresh of the components
-    this.plugin.parser?.refresh(baseFile.path)
+    this.refreshRender(baseFile.path)
+  }
+
+  /**
+   * Updates the references to other files.
+   */
+  public async updateReferences(
+    baseFile: TFile,
+    newFilePath: string,
+  ): Promise<void> {
+    const parentPath = baseFile.parent?.path || ''
+
+    // load the original content
+    let content = await this.vault.adapter.read(newFilePath)
+
+    // replace references to real routes
+    content = content.replaceAll(
+      /require *\( *['"`](.+)['"`] *\)/g,
+      // use a method to dynamically resolve the dependencies
+      (_, $1) => {
+        const path = normalizePath(Path.join(parentPath, $1))
+        this.storeDependency(baseFile.path, path)
+        return `require(app.plugins.plugins['obsidian-components'].resolvePath("${path}"))`
+      },
+    )
+
+    // update the content
+    await this.vault.adapter.write(newFilePath, content)
+    console.log(`Updated the references on '${newFilePath}'`)
+  }
+
+  /**
+   * Forces a refresh on the rendered components
+   * @param {string[]} called stores the already called refreshs
+   */
+  protected refreshRender(baseFilePath: string, called: string[] = []): void {
+    // use `called` to avoid calling a refresh twice
+
+    // first refresh direct components of the file
+    if (!called.includes(baseFilePath)) {
+      this.plugin.parser?.refresh(baseFilePath)
+      called.push(baseFilePath)
+    }
+
+    // then update components that depende on the file
+    for (const filePath of this.getFileDependents(baseFilePath)) {
+      // TODO: create a new version before calling
+      // TODO: because when the `require` is global
+      // it return is stored in memory
+
+      // the recursivity allows to refresh all the chain of files
+      if (!called.includes(filePath)) {
+        this.refreshRender(filePath, called)
+        called.push(filePath)
+      }
+    }
+  }
+
+  /**
+   * Store dependecy relations.
+   */
+  protected storeDependency(
+    dependentPath: string,
+    dependencyPath: string,
+  ): void {
+    const dependents = this.getFileDependents(dependencyPath)
+    if (dependents.includes(dependentPath)) return
+    dependents.push(dependentPath)
+    this.dependencies.set(dependencyPath, dependents)
+  }
+
+  /**
+   * @returns the array of stored versions of a file.
+   */
+  protected getFileDependents(filePath: string): string[] {
+    return this.dependencies.get(filePath) || []
   }
 
   /**
@@ -97,8 +187,8 @@ export class VersionController {
   /**
    * Checks if the version has been stored already.
    */
-  protected isFileVersionStored(fileName: string, version: string): boolean {
-    return this.getFileVersions(fileName).some((stored) => stored === version)
+  protected isFileVersionStored(filePath: string, version: string): boolean {
+    return this.getFileVersions(filePath).some((stored) => stored === version)
   }
 
   /**
@@ -111,8 +201,8 @@ export class VersionController {
   /**
    * @returns the array of stored versions of a file.
    */
-  protected getFileVersions(fileName: string): string[] {
-    return this.versions.get(fileName) || []
+  protected getFileVersions(filePath: string): string[] {
+    return this.versions.get(filePath) || []
   }
 
   /**
@@ -138,10 +228,8 @@ export class VersionController {
       return `${baseFile.basename}-${version}.${baseFile.extension}`
     }
 
-    return (
-      this.plugin.cache?.getCachePath(
-        `${baseFile.basename}-${version}.${baseFile.extension}`,
-      ) || `${baseFile.basename}-${version}.${baseFile.extension}`
+    return this.cache.getCachePath(
+      `${baseFile.basename}-${version}.${baseFile.extension}`,
     )
   }
 }
