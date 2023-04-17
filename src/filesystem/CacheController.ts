@@ -40,7 +40,7 @@ export class CacheController {
 
       console.log('Cleared cache')
     } catch (error) {
-      console.error(error)
+      console.debug(error)
     }
   }
 

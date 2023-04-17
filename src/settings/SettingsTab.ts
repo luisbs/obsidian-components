@@ -68,9 +68,20 @@ export class SettingsTab extends PluginSettingTab {
   }
 
   #displayGeneralSettings(): void {
+    const behaviorDesc = createFragment()
+    const behaviorDescP = behaviorDesc.createEl('p')
+    behaviorDescP.appendText('Security behavior when runing the components.')
+    behaviorDescP.createEl('br')
+    behaviorDescP.createEl('br')
+    behaviorDescP.appendText('For more details see ')
+    behaviorDescP.createEl('a', {
+      text: 'execution behavior setting',
+      href: 'https://github.com/luisbs/obsidian-components/README.md#execution-behavior-setting',
+    })
+
     this.#newSetting()
-      .setName('Default execution behavior')
-      .setDesc('Security behavior when runing the components.')
+      .setName('Execution behavior')
+      .setDesc(behaviorDesc)
       .addDropdown((input) => {
         input
           .addOptions({
@@ -82,7 +93,8 @@ export class SettingsTab extends PluginSettingTab {
           .onChange(this.update.bind(this, 'enable_components'))
       })
 
-    // construct the `design mode` description
+    //
+    // Design mode setting
     const modeDesc = createFragment()
     const modeDescP = modeDesc.createEl('p')
     // prettier-ignore
@@ -93,12 +105,12 @@ export class SettingsTab extends PluginSettingTab {
     modeDescP.createEl('br')
     modeDescP.appendText('For more details see ')
     modeDescP.createEl('a', {
-      text: 'design mode details',
-      href: 'https://github.com/luisbs/obsidian-components/README.md#design-mode',
+      text: 'design mode',
+      href: 'https://github.com/luisbs/obsidian-components/README.md#design-mode-setting',
     })
 
     this.#newSetting()
-      .setName('Enable design mode')
+      .setName('Design mode')
       .setDesc(modeDesc)
       .addToggle((input) => {
         input.setValue(this.settings.enable_versioning).onChange((value) => {
@@ -107,6 +119,29 @@ export class SettingsTab extends PluginSettingTab {
           this.update('enable_versioning', true)
           input.setDisabled(true)
         })
+      })
+
+    //
+    // Custom codeblocks setting
+    const codeblocksDesc = createFragment()
+    const codeblocksDescP = codeblocksDesc.createEl('p')
+    // prettier-ignore
+    codeblocksDescP.appendText('Allows the usage of the components custom names as codeblocks identifiers.')
+    codeblocksDescP.createEl('br')
+    codeblocksDescP.createEl('br')
+    codeblocksDescP.appendText('For more details see ')
+    codeblocksDescP.createEl('a', {
+      text: 'design mode',
+      href: 'https://github.com/luisbs/obsidian-components/README.md#custom-codeblocks-setting',
+    })
+
+    this.#newSetting()
+      .setName('Custom Codeblocks')
+      .setDesc('')
+      .addToggle((input) => {
+        input
+          .setValue(this.settings.enable_codeblocks)
+          .onChange(this.update.bind(this, 'enable_codeblocks'))
       })
   }
 
@@ -144,15 +179,6 @@ export class SettingsTab extends PluginSettingTab {
         input.setValue(this.settings.naming_params)
         input.onChange(this.update.bind(this, 'naming_params'))
       })
-
-    this.#newSetting()
-      .setName('Enable custom Codeblocks?')
-      .setDesc('Allows to use the components custom names as codeblocks')
-      .addToggle((input) => {
-        input
-          .setValue(this.settings.enable_codeblocks)
-          .onChange(this.update.bind(this, 'enable_codeblocks'))
-      })
   }
 
   #displayComponentsSettings(): void {
@@ -187,7 +213,7 @@ export class SettingsTab extends PluginSettingTab {
       .addDropdown((input) => {
         input.addOptions({
           SHORT: 'Only the shortest names.',
-          LONG: 'Include the short and long names (recomended).',
+          LONG: 'Short and long names.',
           ALL: 'Include all names',
         })
         input.setValue(this.settings.naming_strategy)
