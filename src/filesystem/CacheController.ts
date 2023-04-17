@@ -126,13 +126,16 @@ export class CacheController {
     //? simplier implementation
     //? not used cause `basePath` is not public/documentated
     //? so it may change as an internal implementation
-    // return path.resolve(this.vault.adapter.basePath, filePath)
+    return Path.resolve(this.vault.adapter.basePath, filePath)
 
+    //! replaced by above, cause it make changes as URL
+    //! like replaces ' ' (space) to '%20'
     //? `getResourcePath` adds a prefix and a postfix to identify file version
     //? it needs to be removed to be recognized as a real route
     return this.vault.adapter
       .getResourcePath(filePath)
-      .replace('app://local', '')
-      .replace(/\?\d+$/i, '')
+      .replace(/app:\/\/local/i, '') // removes the prefix
+      .replace(/^\/(?=[\w]+:)/i, '') // fix route for windows systems
+      .replace(/\?\d+$/i, '') // removes the postfix
   }
 }
