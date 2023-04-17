@@ -17,7 +17,7 @@ function resolveOnDist(...paths) {
 
 /** @param {string[]} paths */
 function resolveOnVault(...paths) {
-  return resolve('test-vault/.obsidian/plugins/components/', ...paths)
+  return resolve('test-vault/.obsidian/plugins/obsidian-components/', ...paths)
 }
 
 /** @type {esbuild.BuildOptions} */

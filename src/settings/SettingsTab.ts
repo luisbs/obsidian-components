@@ -4,6 +4,11 @@ import { FolderSuggester } from 'obsidian-fnc'
 import { loadComponentsOnVault } from '@/utility'
 import { FormatsTable, ComponentsTable } from './components'
 
+// prettier-ignore
+function getDocumentationUrl(id: string): string {
+  return "https://github.com/luisbs/obsidian-components/blob/main/README.md#" + id;
+}
+
 export class SettingsTab extends PluginSettingTab {
   #plugin: ComponentsPlugin
   settings: PluginSettings
@@ -68,9 +73,20 @@ export class SettingsTab extends PluginSettingTab {
   }
 
   #displayGeneralSettings(): void {
+    const behaviorDesc = createFragment()
+    const behaviorDescP = behaviorDesc.createEl('p')
+    behaviorDescP.appendText('Security behavior when runing the components.')
+    behaviorDescP.createEl('br')
+    behaviorDescP.createEl('br')
+    behaviorDescP.appendText('For more details see ')
+    behaviorDescP.createEl('a', {
+      text: 'execution behavior setting',
+      href: getDocumentationUrl('execution-behavior-setting'),
+    })
+
     this.#newSetting()
-      .setName('Default execution behavior')
-      .setDesc('Security behavior when runing the components.')
+      .setName('Execution behavior')
+      .setDesc(behaviorDesc)
       .addDropdown((input) => {
         input
           .addOptions({
@@ -80,6 +96,57 @@ export class SettingsTab extends PluginSettingTab {
           })
           .setValue(this.settings.enable_components)
           .onChange(this.update.bind(this, 'enable_components'))
+      })
+
+    //
+    // Design mode setting
+    const modeDesc = createFragment()
+    const modeDescP = modeDesc.createEl('p')
+    // prettier-ignore
+    modeDescP.appendText("Enable design mode only if you're editing your components code.")
+    modeDescP.createEl('br')
+    modeDescP.appendText('It will not disabled until you close the app.')
+    modeDescP.createEl('br')
+    modeDescP.createEl('br')
+    modeDescP.appendText('For more details see ')
+    modeDescP.createEl('a', {
+      text: 'design mode',
+      href: getDocumentationUrl('design-mode-setting'),
+    })
+
+    this.#newSetting()
+      .setName('Design mode')
+      .setDesc(modeDesc)
+      .addToggle((input) => {
+        input.setValue(this.settings.enable_versioning).onChange((value) => {
+          // allows only enable in it
+          if (this.settings.enable_versioning) return
+          this.update('enable_versioning', true)
+          input.setDisabled(true)
+        })
+      })
+
+    //
+    // Custom codeblocks setting
+    const codeblocksDesc = createFragment()
+    const codeblocksDescP = codeblocksDesc.createEl('p')
+    // prettier-ignore
+    codeblocksDescP.appendText('Allows the usage of the components custom names as codeblocks identifiers.')
+    codeblocksDescP.createEl('br')
+    codeblocksDescP.createEl('br')
+    codeblocksDescP.appendText('For more details see ')
+    codeblocksDescP.createEl('a', {
+      text: 'design mode',
+      href: getDocumentationUrl('custom-codeblocks-setting'),
+    })
+
+    this.#newSetting()
+      .setName('Custom Codeblocks')
+      .setDesc('')
+      .addToggle((input) => {
+        input
+          .setValue(this.settings.enable_codeblocks)
+          .onChange(this.update.bind(this, 'enable_codeblocks'))
       })
   }
 
@@ -117,15 +184,6 @@ export class SettingsTab extends PluginSettingTab {
         input.setValue(this.settings.naming_params)
         input.onChange(this.update.bind(this, 'naming_params'))
       })
-
-    this.#newSetting()
-      .setName('Enable custom Codeblocks?')
-      .setDesc('Allows to use the components custom names as codeblocks')
-      .addToggle((input) => {
-        input
-          .setValue(this.settings.enable_codeblocks)
-          .onChange(this.update.bind(this, 'enable_codeblocks'))
-      })
   }
 
   #displayComponentsSettings(): void {
@@ -160,7 +218,7 @@ export class SettingsTab extends PluginSettingTab {
       .addDropdown((input) => {
         input.addOptions({
           SHORT: 'Only the shortest names.',
-          LONG: 'Include the short and long names (recomended).',
+          LONG: 'Short and long names.',
           ALL: 'Include all names',
         })
         input.setValue(this.settings.naming_strategy)

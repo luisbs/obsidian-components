@@ -1,5 +1,4 @@
 import type { ComponentFound, ComponentsPlugin, PluginSettings } from '@/types'
-import path from 'path'
 import { isRecord } from '@/utility'
 import { MarkdownRenderer, TFile, Vault } from 'obsidian'
 import { CodeblockError } from '../CodeblockError'
@@ -9,21 +8,48 @@ export abstract class Renderer {
   protected vault: Vault
 
   constructor(
+    protected element: HTMLElement,
     protected plugin: ComponentsPlugin,
     protected component: ComponentFound,
+    protected data: unknown,
   ) {
     this.vault = plugin.app.vault
     this.settings = plugin.settings
   }
 
-  // abstract render(element: HTMLElement, data: unknown): Promise<void>
+  protected abstract runRenderer(): Promise<void>
+
+  /**
+   * Execute the renderer with the passed params during construction.
+   */
+  public async render(): Promise<void> {
+    // clear the element
+    this.element.replaceChildren()
+
+    // catch problems during execution
+    try {
+      await this.runRenderer()
+      console.debug(`Rendered '${this.component.path}'`)
+    } catch (error) {
+      const pre = this.element.createEl('pre')
+
+      const isError = error instanceof CodeblockError
+      if (isError) pre.classList.add(error.code)
+
+      if (isError && error.source) {
+        pre.append(String(error.source))
+      } else {
+        pre.append(String(error))
+      }
+    }
+  }
 
   protected replaceData(
     source: string,
     data: unknown,
     fallback = '[missing]',
   ): string {
-    if (!isRecord(data)) throw new CodeblockError('invalid-codeblock-syntax')
+    if (!isRecord(data)) throw new CodeblockError('invalid-component-params')
     return source.replace(/\{\{ *(\w+) *\}\}/gi, (match, key) => {
       return key in data ? String(data[key]) : fallback
     })
@@ -33,7 +59,7 @@ export abstract class Renderer {
     element.innerHTML = content
   }
 
-  protected renderMDContent(element: HTMLElement, content: string): void {
+  protected renderMarkdownContent(element: HTMLElement, content: string): void {
     // @ts-expect-error unknown parameter
     // TODO change the the path, to avoid bad link generation of relative links
     MarkdownRenderer.renderMarkdown(content, element, this.component.path, null)
@@ -45,37 +71,35 @@ export abstract class Renderer {
     throw new CodeblockError('missing-component-file')
   }
 
-  protected requireRenderFn(): unknown {
-    const module = this.requireFileModule()
+  protected async requireRenderFn(): Promise<unknown> {
+    const module = await this.requireFileModule()
     if (typeof module === 'function') return module
     if (!isRecord(module) || typeof module.render !== 'function') {
-      throw new CodeblockError('invalid-component-syntax')
+      throw new CodeblockError('missing-component-render-function')
     }
     return module.render
   }
 
-  // TODO test in windows system
-  protected requireFileModule(): unknown {
-    // try {
-    // construct the real filepath on the user system
-    // const modulePath = this.vault.adapter
-    //   .getResourcePath(this.component.path)
-    //   .replace('app://local', '')
-    //   .replace(/\?\d+$/i, '')
+  protected async requireFileModule(): Promise<unknown> {
+    try {
+      const baseFile = this.vault.getAbstractFileByPath(this.component.path)
+      // prettier-ignore
+      const versionPath = await this.plugin.versions?.getLastCachedVersion(baseFile as TFile)
+      const modulePath = this.getModulePath(versionPath)
 
-    const modulePath = path.resolve(
-      this.vault.adapter.basePath,
-      this.component.path,
-    )
+      console.log(`Executing 'require("${modulePath}")'`)
+      return require(modulePath)
+    } catch (error) {
+      console.error(error)
+      throw new CodeblockError('invalid-component-syntax', error)
+    }
+  }
 
-    // console.log({
-    //   modulePath,
-    //   module: require(modulePath),
-    //   basePath: this.vault.adapter.basePath,
-    // })
-    return require(modulePath)
-    // } catch (error) {
-    //   throw new CodeblockError('invalid-component-syntax', error)
-    // }
+  /**
+   * @returns the real path of the file on the os.
+   */
+  protected getModulePath(filePath?: string | null): string {
+    filePath = filePath ?? this.component.path
+    return this.plugin.cache?.getRealPath(filePath) ?? ''
   }
 }

@@ -2,12 +2,26 @@ export type PrimitivePluginSettings = Omit<
   PluginSettings,
   'enabled_formats' | 'enabled_components'
 >
-export type RawPluginSettings = PrimitivePluginSettings & {
+
+export type RawPluginSettings = Omit<
+  PrimitivePluginSettings,
+  'enable_versioning'
+> & {
   enabled_formats: string[]
   enabled_components: [string, boolean][]
 }
 
 export interface PluginSettings {
+  /**
+   * Controls when to enable the block file versioning.
+   * > `Warning:` The versioning stores each edition of a file
+   * > to provide a way to load the file changes on runtime
+   * > this behavior will cause an increase on memory usage and
+   * > storage usage, so it should be **disabled always**
+   * > until the user enables it **manually**
+   */
+  enable_versioning: boolean
+
   /**
    * Stores the plugin behavior about components discovery.
    * - `'STRICT'` allow only components enabled by the user.
