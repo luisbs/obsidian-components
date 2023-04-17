@@ -34,6 +34,8 @@ export class VersionController {
 
   public clear(): void {
     this.versions = new Map()
+    this.dependencies = new Map()
+    this.clear()
     this.vault.off('modify', this.handleFileModification.bind(this))
   }
 
@@ -84,12 +86,14 @@ export class VersionController {
     if (!this.settings.enable_versioning) return
 
     const version = await this.getFileVersion(baseFile)
-    if (this.isFileVersionStored(baseFile.path, version)) return
 
-    const versionPath = this.prepareVersionPath(baseFile, version)
-
-    await this.cache.cacheFile(baseFile, versionPath)
-    await this.updateReferences(baseFile, this.cache.getCachePath(versionPath))
+    // ensure the file is stored
+    if (!this.isFileVersionStored(baseFile.path, version)) {
+      let versionPath = this.prepareVersionPath(baseFile, version)
+      versionPath = await this.cache.cacheFile(baseFile, versionPath)
+      console.debug(`Cached "${versionPath}"`)
+      await this.updateReferences(baseFile, versionPath)
+    }
 
     this.storeVersion(baseFile.path, version)
     console.debug(`Stored version '${version}' of "${baseFile.path}"`)
@@ -99,9 +103,59 @@ export class VersionController {
   }
 
   /**
+   * Forces a refresh on the rendered components
+   * @param {string[]} called stores the already called refreshs
+   */
+  protected async refreshRender(
+    baseFilePath: string,
+    called: string[] = [],
+  ): Promise<void> {
+    // use `called` to avoid calling a refresh twice
+
+    // first refresh direct components of the file
+    if (!called.includes(baseFilePath)) {
+      this.plugin.parser?.refresh(baseFilePath)
+      called.push(baseFilePath)
+    }
+
+    // then update components that depende on the file
+    for (const filePath of this.getFileDependents(baseFilePath)) {
+      // the recursivity allows to refresh all the chain of files
+      if (!called.includes(filePath)) {
+        await this.cloneVersion(filePath)
+        this.refreshRender(filePath, called)
+        called.push(filePath)
+      }
+    }
+  }
+
+  /**
+   * Creates a clone of a file with a name based on date and not on content.
+   * This behavior is to ensure it is placed on top of the versions list
+   */
+  protected async cloneVersion(baseFilePath: string): Promise<void> {
+    const baseFile = this.vault.getAbstractFileByPath(baseFilePath)
+
+    const sourceVersion = this.getLastFileVersion(baseFilePath)
+    if (!sourceVersion) {
+      // if the file is not been tracked already, fires it
+      return this.updateFileVersion(baseFile as TFile)
+    }
+    const version = Date.now().toString()
+    const versionPath = this.prepareVersionPath(baseFile as TFile, version)
+
+    const sourcePath = this.prepareVersionPath(baseFile as TFile, sourceVersion)
+    const sourceFile = this.vault.getAbstractFileByPath(sourcePath)
+    await this.cache.cacheFile(sourceFile as TFile, versionPath)
+
+    this.storeVersion(baseFilePath, version)
+    console.debug(`Cloned version '${version}' from "${baseFilePath}"`)
+  }
+
+  /**
    * Updates the references to other files.
    */
-  public async updateReferences(
+  protected async updateReferences(
     baseFile: TFile,
     newFilePath: string,
   ): Promise<void> {
@@ -117,40 +171,13 @@ export class VersionController {
       (_, $1) => {
         const path = normalizePath(Path.join(parentPath, $1))
         this.storeDependency(baseFile.path, path)
-        return `require(app.plugins.plugins['obsidian-components'].resolvePath("${path}"))`
+        return `app.plugins.plugins['obsidian-components'].require("${path}")`
       },
     )
 
     // update the content
     await this.vault.adapter.write(newFilePath, content)
-    console.log(`Updated the references on '${newFilePath}'`)
-  }
-
-  /**
-   * Forces a refresh on the rendered components
-   * @param {string[]} called stores the already called refreshs
-   */
-  protected refreshRender(baseFilePath: string, called: string[] = []): void {
-    // use `called` to avoid calling a refresh twice
-
-    // first refresh direct components of the file
-    if (!called.includes(baseFilePath)) {
-      this.plugin.parser?.refresh(baseFilePath)
-      called.push(baseFilePath)
-    }
-
-    // then update components that depende on the file
-    for (const filePath of this.getFileDependents(baseFilePath)) {
-      // TODO: create a new version before calling
-      // TODO: because when the `require` is global
-      // it return is stored in memory
-
-      // the recursivity allows to refresh all the chain of files
-      if (!called.includes(filePath)) {
-        this.refreshRender(filePath, called)
-        called.push(filePath)
-      }
-    }
+    console.debug(`Adpated '${newFilePath}'`)
   }
 
   /**

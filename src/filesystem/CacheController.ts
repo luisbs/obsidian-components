@@ -76,7 +76,7 @@ export class CacheController {
   public async cacheFile(
     baseFile: TFile,
     newFilePath?: string,
-  ): Promise<string | null> {
+  ): Promise<string> {
     const tempPath = this.getCachePath(
       newFilePath ||
         `${baseFile.basename}-${baseFile.stat.mtime}.${baseFile.extension}`,

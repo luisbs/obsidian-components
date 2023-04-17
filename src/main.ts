@@ -127,9 +127,9 @@ export default class ComponentsPlugin extends Plugin {
   }
 
   // external API
-  public resolvePath(path: string): string {
+  public require(path: string): unknown {
     const resolvedPath = this.versions?.resolveLastCachedVersion(path) ?? path
     console.debug(`Resolved '${path}' to '${resolvedPath}'`)
-    return this.getRealPath(resolvedPath)
+    return require(this.getRealPath(resolvedPath))
   }
 }
