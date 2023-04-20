@@ -1,42 +1,37 @@
-import Path from 'path'
-import { createHash } from 'crypto'
-import { TAbstractFile, TFile, Vault, normalizePath } from 'obsidian'
-import { ComponentsPlugin, PluginSettings } from '@/types'
-import { CacheController } from './CacheController'
+import type { ComponentsPlugin, PluginSettings } from '@/types'
+import { TAbstractFile, TFile } from 'obsidian'
+import FilesystemAdapter from './FilesystemAdapter'
+import MapStore from './MapStore'
 
 export class VersionController {
-  protected vault: Vault
   protected plugin: ComponentsPlugin
   protected settings: PluginSettings
+  protected fs: FilesystemAdapter
 
-  protected cache: CacheController
-
-  /**
-   * Relates a filePath with it stored versions
-   */
-  protected versions: Map<string, string[]> = new Map()
-
-  /**
-   * Relates a filePath with it dependencies
-   * stored as <dependency, dependents>
-   */
-  protected dependencies: Map<string, string[]> = new Map()
+  protected versions = new MapStore<string>()
+  protected dependencies = new MapStore<string>()
 
   constructor(plugin: ComponentsPlugin) {
     this.plugin = plugin
-    this.vault = plugin.app.vault
     this.settings = plugin.settings
 
-    this.cache = new CacheController(plugin)
+    this.fs = plugin.fs
+    this.clearCache()
 
-    this.vault.on('modify', this.handleFileModification.bind(this))
+    this.plugin.app.vault.on('modify', this.handleFileModification.bind(this))
   }
 
   public clear(): void {
-    this.versions = new Map()
-    this.dependencies = new Map()
-    this.clear()
-    this.vault.off('modify', this.handleFileModification.bind(this))
+    this.plugin.app.vault.off('modify', this.handleFileModification.bind(this))
+
+    this.dependencies.clear()
+    this.versions.clear()
+    this.clearCache()
+  }
+
+  public async clearCache(): Promise<void> {
+    await this.fs.renewFolder(this.fs.getCachePath())
+    console.log('Cleared cache')
   }
 
   protected handleFileModification(file: TAbstractFile): void {
@@ -47,59 +42,34 @@ export class VersionController {
     ) {
       // prettier-ignore
       console.debug(`Listening changes on "${file.path}"`)
-      this.updateFileVersion(file)
+      this.update(file)
     }
   }
 
-  public resolveLastCachedVersion(baseFilePath: string): string {
-    const version = this.getLastFileVersion(baseFilePath)
-    if (!version) return baseFilePath
+  /**
+   * Resolves a file into its more revent cached version.
+   */
+  public resolveLastCachedVersion(filePath: string): string {
+    if (!this.settings.enable_versioning) return filePath
 
-    // if a version is found
-    // return the path to that fileVersion
-    const baseFile = this.vault.getAbstractFileByPath(baseFilePath)
-    if (!(baseFile instanceof TFile)) return baseFilePath
-    return this.prepareVersionPath(baseFile, version, true)
+    const versionName = this.versions.getFirst(filePath)
+    return !versionName ? filePath : this.fs.getCachePath(versionName)
   }
 
   /**
-   * @returns the full-path of the more recent file version.
+   * Gets the full-path of the more recent file version.
    */
-  public async getLastCachedVersion(baseFile: TFile): Promise<string | null> {
+  public async getLastCachedVersion(file: TFile): Promise<string | null> {
     if (!this.settings.enable_versioning) return null
-    if (!(baseFile instanceof TFile)) return null
 
-    let version = this.getLastFileVersion(baseFile.path)
-    if (!version) {
-      await this.updateFileVersion(baseFile)
-      version = this.getLastFileVersion(baseFile.path)
+    let versionName = this.versions.getFirst(file.path)
+    if (!versionName) {
+      await this.update(file)
+      versionName = this.versions.getFirst(file.path)
     }
 
-    if (!version) return null
-    return this.prepareVersionPath(baseFile, version, true)
-  }
-
-  /**
-   * Tracks the modifications on a file.
-   */
-  protected async updateFileVersion(baseFile: TFile): Promise<void> {
-    if (!this.settings.enable_versioning) return
-
-    const version = await this.getFileVersion(baseFile)
-
-    // ensure the file is stored
-    if (!this.isFileVersionStored(baseFile.path, version)) {
-      let versionPath = this.prepareVersionPath(baseFile, version)
-      versionPath = await this.cache.cacheFile(baseFile, versionPath)
-      console.debug(`Cached "${versionPath}"`)
-      await this.updateReferences(baseFile, versionPath)
-    }
-
-    this.storeVersion(baseFile.path, version)
-    console.debug(`Stored version '${version}' of "${baseFile.path}"`)
-
-    // force the refresh of the components
-    this.refreshRender(baseFile.path)
+    if (!versionName) return null
+    return this.fs.getCachePath(versionName)
   }
 
   /**
@@ -107,156 +77,114 @@ export class VersionController {
    * @param {string[]} called stores the already called refreshs
    */
   protected async refreshRender(
-    baseFilePath: string,
+    filePath: string,
     called: string[] = [],
   ): Promise<void> {
     // use `called` to avoid calling a refresh twice
 
     // first refresh direct components of the file
-    if (!called.includes(baseFilePath)) {
-      this.plugin.parser?.refresh(baseFilePath)
-      called.push(baseFilePath)
+    if (!called.includes(filePath)) {
+      this.plugin.parser.refresh(filePath)
+      called.push(filePath)
     }
 
     // then update components that depende on the file
-    for (const filePath of this.getFileDependents(baseFilePath)) {
+    for (const dependentPath of this.dependencies.get(filePath)) {
       // the recursivity allows to refresh all the chain of files
-      if (!called.includes(filePath)) {
-        await this.cloneVersion(filePath)
-        this.refreshRender(filePath, called)
-        called.push(filePath)
+      if (!called.includes(dependentPath)) {
+        await this.clone(dependentPath)
+        this.refreshRender(dependentPath, called)
+        called.push(dependentPath)
       }
     }
   }
 
   /**
-   * Creates a clone of a file with a name based on date and not on content.
-   * This behavior is to ensure it is placed on top of the versions list
+   * Tracks the modifications on a file.
    */
-  protected async cloneVersion(baseFilePath: string): Promise<void> {
-    const baseFile = this.vault.getAbstractFileByPath(baseFilePath)
+  protected async update(file: TFile): Promise<void>
+  protected async update(filePath: string): Promise<void>
+  protected async update(source: TFile | string): Promise<void> {
+    if (!this.settings.enable_versioning) return
+    const file = this.fs.resolveFile(source)
+    if (!file) return
 
-    const sourceVersion = this.getLastFileVersion(baseFilePath)
-    if (!sourceVersion) {
-      // if the file is not been tracked already, fires it
-      return this.updateFileVersion(baseFile as TFile)
-    }
-    const version = Date.now().toString()
-    const versionPath = this.prepareVersionPath(baseFile as TFile, version)
+    const hash = await this.fs.getFileHash(file)
+    const versionName = await this.cacheFile(file, hash)
+    if (!versionName) return console.debug(`Not cached "${file.path}"`)
+    console.debug(`Cached "${versionName}"`)
 
-    const sourcePath = this.prepareVersionPath(baseFile as TFile, sourceVersion)
-    const sourceFile = this.vault.getAbstractFileByPath(sourcePath)
-    await this.cache.cacheFile(sourceFile as TFile, versionPath)
+    await this.injectResolver(versionName, file.parent.path)
+    this.versions.prepend(file.path, versionName)
+    console.log(`Stored version "${versionName}"`)
 
-    this.storeVersion(baseFilePath, version)
-    console.debug(`Cloned version '${version}' from "${baseFilePath}"`)
+    // force the refresh of the components
+    this.refreshRender(file.path)
   }
 
   /**
-   * Updates the references to other files.
+   * Creates a clone of file last version.
    */
-  protected async updateReferences(
-    baseFile: TFile,
-    newFilePath: string,
+  protected async clone(filePath: string): Promise<void> {
+    if (!this.settings.enable_versioning) return
+
+    // if the file is not been tracked, init the tracking
+    const versionName = this.versions.getFirst(filePath)
+    if (!versionName) return this.update(filePath)
+
+    const hash = Date.now().toString()
+    const versionPath = this.fs.getCachePath(versionName)
+
+    // is expected that it already has been injected the resolver
+    const cloneName = await this.cacheFile(versionPath, hash)
+    if (!cloneName) return console.debug(`Not cloned "${filePath}"`)
+    console.debug(`Cloned "${cloneName}"`)
+
+    this.versions.prepend(filePath, cloneName)
+    console.log(`Cloned version "${cloneName}"`)
+  }
+
+  /**
+   * Creates a temporal copy of the file on the cache folder.
+   * If the file already exists nothing is made.
+   * @returns the file name on the cache folder.
+   */
+  // prettier-ignore
+  protected async cacheFile(file: TFile, hash: string): Promise<string | null>
+  // prettier-ignore
+  protected async cacheFile(filePath: string, hash: string): Promise<string | null>
+  protected async cacheFile(
+    source: TFile | string,
+    hash: string,
+  ): Promise<string | null> {
+    const file = this.fs.resolveFile(source)
+    if (!file) return null
+
+    const cachedFileName = `${file.basename}-${hash}.${file.extension}`
+    const cachedFilePath = this.fs.getCachePath(cachedFileName)
+
+    if (await this.fs.missing(cachedFilePath)) {
+      await this.fs.copy(file, cachedFilePath)
+    }
+
+    return cachedFileName
+  }
+
+  /**
+   * Inject a custom dependency resolver to help with versioning.
+   */
+  public async injectResolver(
+    filePath: string,
+    parentPath: string,
   ): Promise<void> {
-    const parentPath = baseFile.parent?.path || ''
-
-    // load the original content
-    let content = await this.vault.adapter.read(newFilePath)
-
-    // replace references to real routes
-    content = content.replaceAll(
-      /require *\( *['"`](.+)['"`] *\)/g,
-      // use a method to dynamically resolve the dependencies
-      (_, $1) => {
-        const path = normalizePath(Path.join(parentPath, $1))
-        this.storeDependency(baseFile.path, path)
-        return `app.plugins.plugins['obsidian-components'].require("${path}")`
-      },
+    await this.fs.edit(filePath, (component) =>
+      component.replaceAll(/require *\( *['"`](.+)['"`] *\)/g, (_, $1) => {
+        const path = this.fs.join(parentPath, $1)
+        this.dependencies.push(filePath, path)
+        return `app.plugins.plugins['obsidian-components'].resolve("${path}")`
+      }),
     )
 
-    // update the content
-    await this.vault.adapter.write(newFilePath, content)
-    console.debug(`Adpated '${newFilePath}'`)
-  }
-
-  /**
-   * Store dependecy relations.
-   */
-  protected storeDependency(
-    dependentPath: string,
-    dependencyPath: string,
-  ): void {
-    const dependents = this.getFileDependents(dependencyPath)
-    if (dependents.includes(dependentPath)) return
-    dependents.push(dependentPath)
-    this.dependencies.set(dependencyPath, dependents)
-  }
-
-  /**
-   * @returns the array of stored versions of a file.
-   */
-  protected getFileDependents(filePath: string): string[] {
-    return this.dependencies.get(filePath) || []
-  }
-
-  /**
-   * Adds an entry in the version control relating to the baseFile.
-   */
-  protected storeVersion(filePath: string, version: string): void {
-    const versions = this.getFileVersions(filePath)
-    // store the versions on a DESC way for easy access to the more recent
-    versions.unshift(version)
-    // ensure that each version only appears ones (the more recent one)
-    this.versions.set(filePath, versions.unique())
-  }
-
-  /**
-   * Checks if the version has been stored already.
-   */
-  protected isFileVersionStored(filePath: string, version: string): boolean {
-    return this.getFileVersions(filePath).some((stored) => stored === version)
-  }
-
-  /**
-   * @return the most recent version of a file.
-   */
-  protected getLastFileVersion(filePath: string): string | undefined {
-    return this.getFileVersions(filePath).first()
-  }
-
-  /**
-   * @returns the array of stored versions of a file.
-   */
-  protected getFileVersions(filePath: string): string[] {
-    return this.versions.get(filePath) || []
-  }
-
-  /**
-   * @returns an identifier of the file state.
-   */
-  public async getFileVersion(file: TFile): Promise<string> {
-    const content = await this.vault.read(file)
-    const hash = createHash('sha256').update(content).digest('hex')
-    // use the first 10 characters only
-    return hash.substring(0, 10)
-  }
-
-  /**
-   * @param {boolean} full make the result a full path.
-   * @returns the path of a version file on the cache folder.
-   */
-  protected prepareVersionPath(
-    baseFile: TFile,
-    version: string,
-    full = false,
-  ): string {
-    if (!full) {
-      return `${baseFile.basename}-${version}.${baseFile.extension}`
-    }
-
-    return this.cache.getCachePath(
-      `${baseFile.basename}-${version}.${baseFile.extension}`,
-    )
+    console.debug(`Injected resolver on "${filePath}"`)
   }
 }
