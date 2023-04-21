@@ -100,6 +100,6 @@ export abstract class Renderer {
    */
   protected getModulePath(filePath?: string | null): string {
     filePath = filePath ?? this.component.path
-    return this.plugin.fs.getRealPath(filePath) ?? ''
+    return this.plugin.fs.getRealPath(filePath)
   }
 }

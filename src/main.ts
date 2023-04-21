@@ -43,6 +43,8 @@ export default class ComponentsPlugin extends Plugin {
   async onload(): Promise<void> {
     await this.loadSettings()
     this.addSettingTab(new SettingsTab(this))
+
+    this.parser.registerCodeblocks()
   }
 
   async onunload(): Promise<void> {

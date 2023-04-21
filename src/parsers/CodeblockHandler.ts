@@ -18,6 +18,9 @@ export class CodeblockHandler {
 
   constructor(plugin: ComponentsPlugin) {
     this.#plugin = plugin
+  }
+
+  public registerCodeblocks() {
     this.registerBaseCodeblock()
     this.registerCustomCodeblocks()
   }

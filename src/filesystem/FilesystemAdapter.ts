@@ -33,7 +33,7 @@ export default class FilesystemAdapter {
     //? not used cause `basePath` is not public/documentated
     //? so it may change as an internal implementation
     // @ts-expect-error not-public-api-usage
-    return this.join(this.vault.adapter.basePath, ...paths)
+    return Path.resolve(this.vault.adapter.basePath, ...paths)
 
     //! replaced by above, cause it make changes as URL
     //! like replaces ' ' (space) to '%20'
