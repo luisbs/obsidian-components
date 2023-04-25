@@ -12,8 +12,8 @@
 
 ## Things to do before v1.0
 
-- [ ] Add a donations page.
-- [ ] Ya se reflejan los cambios de los componentes en runtime, trackear tambien los cambios en dependencias `require( ... )`
+- [ ] Add a showcase video.
+- [ ] Add the plugin to the obsidian plugins repository.
 
 ### Support
 

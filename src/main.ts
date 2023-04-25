@@ -4,12 +4,12 @@ import type {
   PrimitivePluginSettings,
   RawPluginSettings,
 } from './types'
-import { Plugin } from 'obsidian'
+import { App, Plugin, PluginManifest } from 'obsidian'
 import { CodeblockHandler } from './parsers'
 import { SettingsTab } from './settings/SettingsTab'
 import { preparePluginState } from './utility'
-import { CacheController } from './filesystem/CacheController'
 import { VersionController } from './filesystem/VersionController'
+import FilesystemAdapter from './filesystem/FilesystemAdapter'
 
 export const DEFAULT_SETTINGS: PrimitivePluginSettings = {
   enable_components: 'STRICT',
@@ -28,23 +28,28 @@ export default class ComponentsPlugin extends Plugin {
   public settings = {} as PluginSettings
   public state = {} as PluginState
 
-  public cache: CacheController | null = null
-  public versions: VersionController | null = null
-  public parser: CodeblockHandler | null = null
+  public fs: FilesystemAdapter
+  public parser: CodeblockHandler
+  public versions: VersionController
+
+  constructor(app: App, manifest: PluginManifest) {
+    super(app, manifest)
+
+    this.fs = new FilesystemAdapter(this)
+    this.parser = new CodeblockHandler(this)
+    this.versions = new VersionController(this)
+  }
 
   async onload(): Promise<void> {
     await this.loadSettings()
     this.addSettingTab(new SettingsTab(this))
 
-    this.cache = new CacheController(this)
-    this.versions = new VersionController(this)
-    this.parser = new CodeblockHandler(this)
+    this.parser.registerCodeblocks()
   }
 
   async onunload(): Promise<void> {
-    this.cache?.clear()
-    this.versions?.clear()
-    this.parser?.clear()
+    this.versions.clear()
+    this.parser.clear()
   }
 
   async loadSettings(): Promise<void> {
@@ -106,6 +111,13 @@ export default class ComponentsPlugin extends Plugin {
     preparePluginState(this)
 
     // register proccessors
-    this.parser?.registerCustomCodeblocks()
+    this.parser.registerCustomCodeblocks()
+  }
+
+  // external API
+  public resolve(path: string): unknown {
+    const resolvedPath = this.versions.resolveLastCachedVersion(path)
+    console.debug(`Resolved "${resolvedPath}"`)
+    return require(this.fs.getRealPath(resolvedPath))
   }
 }

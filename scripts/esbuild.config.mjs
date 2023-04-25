@@ -77,6 +77,7 @@ const DEV_CONFIG = {
 /** @type {esbuild.BuildOptions} */
 const PROD_CONFIG = {
   ...BASE_CONFIG,
+  drop: ['debugger', 'console'],
   watch: false,
   outdir: 'dist',
   logLevel: 'error',
