@@ -13,7 +13,6 @@
 ## Things to do before v1.0
 
 - [ ] Add a donations page.
-- [ ] Remover los console.log en la version de produccion
 
 ### Support
 
