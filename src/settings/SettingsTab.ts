@@ -6,7 +6,7 @@ import { FormatsTable, ComponentsTable } from './components'
 
 // prettier-ignore
 function getDocumentationUrl(id: string): string {
-  return "https://github.com/luisbs/obsidian-components/blob/main/README.md#" + id;
+  return "https://github.com/luisbs/obsidian-components/blob/main/docs/settings.md#" + id;
 }
 
 export class SettingsTab extends PluginSettingTab {

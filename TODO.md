@@ -12,7 +12,8 @@
 
 ## Things to do before v1.0
 
-- [ ] Add a donations page.
+- [ ] Add a showcase video.
+- [ ] Add the plugin to the obsidian plugins repository.
 
 ### Support
 
