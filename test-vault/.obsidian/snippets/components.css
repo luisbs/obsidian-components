@@ -1,0 +1,174 @@
+.content-component code {
+  display: inline-block;
+  overflow: initial;
+  white-space: nowrap;
+}
+
+.flex-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.flex-tags > * {
+  flex: 0 1 auto;
+}
+
+/* mobile-first */
+
+.cards-collection {
+  margin: var(--size-4-4) auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--size-4-4);
+}
+.cards-list {
+  margin: var(--size-4-4) auto;
+  display: flex;
+  flex-direction: column;
+}
+
+:is(.cards-collection, .cards-list) > * {
+  flex: 0 0 100%;
+  height: min-content;
+  margin: 0 !important;
+}
+.cards-collection > * {
+  max-width: 340px;
+}
+
+/*  */
+
+.vault-card {
+  display: flex;
+  flex-direction: column;
+  margin: var(--size-4-4) auto;
+  gap: 1px;
+  border: 2px solid var(--table-border-color);
+  background-color: var(--table-border-color);
+}
+
+.vault-card > * {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: var(--size-4-2) var(--size-4-4);
+  background-color: var(--background-secondary);
+}
+.vault-card > *:hover {
+  background-color: var(--table-row-background-hover);
+}
+
+.card-header * {
+  display: inline-block;
+  margin: 0 !important;
+}
+.card-header {
+  grid-area: header;
+  text-align: center;
+}
+.card-tags {
+  grid-area: tags;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: var(--size-2-2);
+}
+.card-summary {
+  grid-area: summary;
+}
+.card-links {
+  grid-area: links;
+}
+.card-media {
+  grid-area: media;
+  padding: 0;
+}
+
+@media (min-width: 440px) {
+  .vault-card {
+    display: grid;
+  }
+  .content-card {
+    grid-template:
+      "header header"
+      "media  tags"
+      "media  summary"
+      "media  links"
+      / 1fr 1fr;
+  }
+  .simple-content-card {
+    grid-template:
+      "header header"
+      "tags   tags"
+      "summary links"
+      / 1fr 1fr;
+  }
+
+  .cards-collection .music-card {
+    grid-template:
+      "header header"
+      "links  links"
+      "media  media"
+      / 7fr 5fr;
+  }
+  .cards-list .music-card {
+    grid-template:
+      "header links media"
+      /  7fr 3fr 5fr;
+  }
+
+  .card-links {
+    align-items: flex-start;
+  }
+
+  .content-card .card-tags {
+    justify-content: start;
+  }
+  .content-card .card-summary {
+    align-items: flex-start;
+  }
+  .simple-content-card .card-summary {
+    align-items: flex-end;
+  }
+
+  .music-card .card-links {
+    align-items: center;
+  }
+}
+
+@media (min-width: 600px) {
+  .content-card {
+    grid-template:
+      "media header header"
+      "media tags   tags"
+      "media summary links"
+      / min(40%, 200px) 3fr 5fr;
+  }
+  .simple-content-card {
+    grid-template:
+      "header header"
+      "tags   tags"
+      "summary links"
+      / 1fr 1fr;
+  }
+
+  .content-card .card-summary {
+    align-items: flex-end;
+  }
+  .card-media {
+    position: relative;
+  }
+  .card-media img {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+
+    height: 100%;
+    transition: transform 50ms ease-in-out;
+  }
+  /* .card-media:hover img {
+    transform: translate(-50%, -50%) scale(2);
+  } */
+}
