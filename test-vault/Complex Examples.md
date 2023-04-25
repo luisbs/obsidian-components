@@ -1,139 +1,133 @@
-# Real life usage of comples components
+> Real life usage of complex components.
 
 ## Content
 
-```dataviewjs
-dv.view('contentTable', [{
-	chapters: 141,
-	volumes: 34,
-	label: 'Manga',
-	title: 'Shingeki no Kyojin',
-	ap: 'https://www.anime-planet.com/manga/attack-on-titan',
-	mal: 'https://myanimelist.net/manga/23390',
-	read: 'https://mangas.in/manga/shingeki-no-kyojin',
-	cover: 'https://cdn.myanimelist.net/images/manga/2/37846l.jpg',
-}])
+```content
+chapters: 141
+volumes: 34
+label: Manga
+title: Shingeki no Kyojin
+ap: https://www.anime-planet.com/manga/attack-on-titan
+mal: https://myanimelist.net/manga/23390
+read: https://mangas.in/manga/shingeki-no-kyojin
+cover: https://cdn.myanimelist.net/images/manga/2/37846l.jpg
 ```
 
 ### Animated by Wit Studio
 
-```dataviewjs
-dv.view('contentTable', [{
-	episodes: 25,
-	label: 'Season 1',
-	title: 'Shingeki no Kyojin',
-	tags: 'season/2013/spring',
-	mal: 'https://myanimelist.net/anime/16498',
-	watch: 'https://jkanime.net/shingeki-no-kyojin',
-	sources: 'https://younime.net/shingeki-no-kyojin',
-	download: 'https://www.fireload.com/folder/20799',
-	cover: 'https://cdn.myanimelist.net/images/anime/5/44560l.jpg',
-}, {
-	episodes: 3,
-	label: 'Season 1 - OVA',
-	title: 'Shingeki no Kyojin OVA',
-	mal: 'https://myanimelist.net/anime/18397',
-	watch: 'https://jkanime.net/shingeki-no-kyojin-ova',
-	sources: 'https://younime.net/shingeki-no-kyojin',
-	download: 'https://www.fireload.com/folder/20799',
-	cover: 'https://cdn.myanimelist.net/images/anime/9/59221l.jpg',
-}, {
-	episodes: 2,
-	label: 'Season 1 - OVA',
-	title: 'Shingeki no Kyojin: Kuinaki Sentaku',
-	mal: 'https://myanimelist.net/anime/25781',
-	watch: 'https://jkanime.net/shingeki-no-kyojin-kuinaki-sentaku',
-	cover: 'https://cdn.myanimelist.net/images/anime/8/69497l.jpg',
-}, {
-	episodes: 12,
-	label: 'Season 2',
-	title: 'Shingeki no Kyojin Season 2',
-	tags: 'season/2017/spring',
-	mal: 'https://myanimelist.net/anime/25777',
-	watch: 'https://jkanime.net/shingeki-no-kyojin-season-2',
-	sources: 'https://younime.net/shingeki-no-kyojin-season-2',
-	download: 'https://www.mediafire.com/folder/13wtphngm1e2d',
-	cover: 'https://cdn.myanimelist.net/images/anime/4/84177l.jpg',
-}, {
-	episodes: 3,
-	label: 'Season 2 - OVA',
-	title: 'Shingeki no Kyojin: Lost Girls',
-	mal: 'https://myanimelist.net/anime/36106',
-	cover: 'https://cdn.myanimelist.net/images/anime/1039/91943l.jpg',
-}, {
-	episodes: 12,
-	label: 'Season 3 - Part 1',
-	title: 'Shingeki no Kyojin Season 3',
-	tags: 'season/2018/summer',
-	mal: 'https://myanimelist.net/anime/35760',
-	watch: 'https://jkanime.net/shingeki-no-kyojin-season-3',
-	sources: 'https://younime.net/shingeki-no-kyojin-season-3',
-	download: 'https://www.mediafire.com/folder/1njoagf6jma7l',
-	cover: 'https://cdn.myanimelist.net/images/anime/1173/92110l.jpg',
-}, {
-	episodes: 7,
-	label: 'Season 3 - Part 1 - Specials',
-	title: 'Shingeki no Kyojin Season 3 Specials',
-	mal: 'https://myanimelist.net/anime/39477',
-}, {
-	episodes: 10,
-	label: 'Season 3 - Part 2',
-	title: 'Shingeki no Kyojin Season 3 Part 2',
-	tags: 'season/2019/spring',
-	mal: 'https://myanimelist.net/anime/38524',
-	watch: 'https://jkanime.net/shingeki-no-kyojin-season-3-part-2',
-	sources: 'https://younime.net/shingeki-no-kyojin-season-3-part-2',
-	download: 'https://www.mediafire.com/folder/t99kniwc5zccf',
-	cover: 'https://cdn.myanimelist.net/images/anime/1159/95649l.jpg',
-}])
+```content
+- episodes: 25
+  label: Season 1
+  title: Shingeki no Kyojin
+  tags: season/2013/spring
+  mal: https://myanimelist.net/anime/16498
+  watch: https://jkanime.net/shingeki-no-kyojin
+  sources: https://younime.net/shingeki-no-kyojin
+  download: https://www.fireload.com/folder/20799
+  cover: https://cdn.myanimelist.net/images/anime/5/44560l.jpg
+
+- episodes: 3
+  label: Season 1 - OVA
+  title: Shingeki no Kyojin OVA
+  mal: https://myanimelist.net/anime/18397
+  watch: https://jkanime.net/shingeki-no-kyojin-ova
+  sources: https://younime.net/shingeki-no-kyojin
+  download: https://www.fireload.com/folder/20799
+  cover: https://cdn.myanimelist.net/images/anime/9/59221l.jpg
+
+- episodes: 2
+  label: Season 1 - OVA
+  title: 'Shingeki no Kyojin: Kuinaki Sentaku'
+  mal: https://myanimelist.net/anime/25781
+  watch: https://jkanime.net/shingeki-no-kyojin-kuinaki-sentaku
+  cover: https://cdn.myanimelist.net/images/anime/8/69497l.jpg
+
+- episodes: 12
+  label: Season 2
+  title: Shingeki no Kyojin Season 2
+  tags: season/2017/spring
+  mal: https://myanimelist.net/anime/25777
+  watch: https://jkanime.net/shingeki-no-kyojin-season-2
+  sources: https://younime.net/shingeki-no-kyojin-season-2
+  download: https://www.mediafire.com/folder/13wtphngm1e2d
+  cover: https://cdn.myanimelist.net/images/anime/4/84177l.jpg
+
+- episodes: 3
+  label: Season 2 - OVA
+  title: 'Shingeki no Kyojin: Lost Girls'
+  mal: https://myanimelist.net/anime/36106
+  cover: https://cdn.myanimelist.net/images/anime/1039/91943l.jpg
+
+- episodes: 12
+  label: Season 3 - Part 1
+  title: Shingeki no Kyojin Season 3
+  tags: season/2018/summer
+  mal: https://myanimelist.net/anime/35760
+  watch: https://jkanime.net/shingeki-no-kyojin-season-3
+  sources: https://younime.net/shingeki-no-kyojin-season-3
+  download: https://www.mediafire.com/folder/1njoagf6jma7l
+  cover: https://cdn.myanimelist.net/images/anime/1173/92110l.jpg
+
+- episodes: 7
+  label: Season 3 - Part 1 - Specials
+  title: Shingeki no Kyojin Season 3 Specials
+  mal: https://myanimelist.net/anime/39477
+
+- episodes: 10
+  label: Season 3 - Part 2
+  title: Shingeki no Kyojin Season 3 Part 2
+  tags: season/2019/spring
+  mal: https://myanimelist.net/anime/38524
+  watch: https://jkanime.net/shingeki-no-kyojin-season-3-part-2
+  sources: https://younime.net/shingeki-no-kyojin-season-3-part-2
+  download: https://www.mediafire.com/folder/t99kniwc5zccf
+  cover: https://cdn.myanimelist.net/images/anime/1159/95649l.jpg
 ```
 
 ### Animated by MAPPA
 
-```dataviewjs
-dv.view('contentTable', [{
-	episodes: 16,
-	label: 'Season 4 - Part 1',
-	title: 'Shingeki no Kyojin: The Final Season',
-	tags: 'season/2021/winter',
-	mal: 'https://myanimelist.net/anime/40028',
-	watch: 'https://jkanime.net/shingeki-no-kyojin-the-final-season',
-	sources: 'https://younime.net/shingeki-no-kyojin-the-final-season',
-	download: 'https://www.mediafire.com/folder/9cnh2ylqdsgsb',
-	cover: 'https://cdn.myanimelist.net/images/anime/1773/109409l.jpg',
-}, {
-	episodes: 2,
-	label: 'Season 4 - Part 1 - Specials',
-	title: 'Shingeki no Kyojin: The Final Season Specials',
-	mal: 'https://myanimelist.net/anime/49627',
-}, {
-	episodes: 12,
-	label: 'Season 4 - Part 2',
-	title: 'Shingeki no Kyojin: The Final Season Part 2',
-	tags: 'season/2022/winter',
-	mal: 'https://myanimelist.net/anime/48583',
-	watch: 'https://jkanime.net/shingeki-no-kyojin-the-final-season-part-2',
-	sources: 'https://younime.net/shingeki-no-kyojin-the-final-season-part-2',
-	download: 'https://www.fireload.com/folder/24669',
-	cover: 'https://cdn.myanimelist.net/images/anime/1396/125398l.jpg',
-}, {
-	episodes: '1 (movie)',
-	label: 'Season 5 - Part 1',
-	title: 'Shingeki no Kyojin: The Final Season - Kanketsu-hen',
-	tags: 'season/2023',
-	mal: 'https://myanimelist.net/anime/51535',
-	sources: 'https://younime.net/shingeki-no-kyojin-the-final-season-kanketsu-hen',
-	download: 'https://www.fireload.com/folder/39205',
-	cover: 'https://cdn.myanimelist.net/images/anime/1101/122343l.jpg',
-}, {
-	episodes: '--',
-	label: 'Season 5 - Part 2'
-}])
+```content
+- episodes: 16
+  label: Season 4 - Part 1
+  title: 'Shingeki no Kyojin: The Final Season'
+  tags: season/2021/winter
+  mal: https://myanimelist.net/anime/40028
+  watch: https://jkanime.net/shingeki-no-kyojin-the-final-season
+  sources: https://younime.net/shingeki-no-kyojin-the-final-season
+  download: https://www.mediafire.com/folder/9cnh2ylqdsgsb
+  cover: https://cdn.myanimelist.net/images/anime/1773/109409l.jpg
+
+- episodes: 2
+  label: Season 4 - Part 1 - Specials
+  title: 'Shingeki no Kyojin: The Final Season Specials'
+  mal: https://myanimelist.net/anime/49627
+
+- episodes: 12
+  label: Season 4 - Part 2
+  title: 'Shingeki no Kyojin: The Final Season Part 2'
+  tags: season/2022/winter
+  mal: https://myanimelist.net/anime/48583
+  watch: https://jkanime.net/shingeki-no-kyojin-the-final-season-part-2
+  sources: https://younime.net/shingeki-no-kyojin-the-final-season-part-2
+  download: https://www.fireload.com/folder/24669
+  cover: https://cdn.myanimelist.net/images/anime/1396/125398l.jpg
+
+- episodes: 1 (movie)
+  label: Season 5 - Part 1
+  title: 'Shingeki no Kyojin: The Final Season - Kanketsu-hen'
+  tags: season/2023
+  mal: https://myanimelist.net/anime/51535
+  sources: https://younime.net/shingeki-no-kyojin-the-final-season-kanketsu-hen
+  download: https://www.fireload.com/folder/39205
+  cover: https://cdn.myanimelist.net/images/anime/1101/122343l.jpg
+
+- episodes: '--'
+  label: 'Season 5 - Part 2'
 ```
 
 ## Soundtracks
 
-```music
+```soundtrack
 - label: Season 1 Soundtrack
   author: Hiroyuki Sawano
   spotify: album/3WDkuVqT1OfkTdCyYQ2gXa
@@ -155,7 +149,7 @@ dv.view('contentTable', [{
 
 ### Season 1
 
-```music_list
+```music
 - label: Season 1 - OP E1-13
   title: [Guren no Yumiya, (紅蓮の弓矢)]
   author: Linked Horizon
@@ -180,7 +174,7 @@ dv.view('contentTable', [{
 
 ### Season 2
 
-```music_list
+```music
 - label: Season 2 - OP
   title: [Shinzou wo Sasageyo!, (心臓を捧げよ！)]
   author: Linked Horizon
@@ -194,7 +188,7 @@ dv.view('contentTable', [{
 
 ### Season 3
 
-```music_list
+```music
 - label: Season 3 Part 1 - ED
   title: [Akatsuki no Chinkonka, (暁の鎮魂歌)]
   author: Linked Horizon
@@ -214,7 +208,7 @@ dv.view('contentTable', [{
 
 ### Season 4
 
-```music_list
+```music
 - label: Season 4 Part 1 - OP
   title: Boku no Sensou
   author: Shinsei Kamattechan
