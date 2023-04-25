@@ -1,6 +1,7 @@
 .suggestions-tooltip {
   position: absolute;
   border: var(--input-border-width) solid var(--background-modifier-border);
+  background: var(--background-modifier-form-field);
 }
 
 .components-table {
