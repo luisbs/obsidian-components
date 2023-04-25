@@ -142,7 +142,7 @@ export class SettingsTab extends PluginSettingTab {
 
     this.#newSetting()
       .setName('Custom Codeblocks')
-      .setDesc('')
+      .setDesc(codeblocksDesc)
       .addToggle((input) => {
         input
           .setValue(this.settings.enable_codeblocks)
