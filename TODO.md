@@ -13,7 +13,8 @@
 ## Things to do before v1.0
 
 - [ ] Add a donations page.
-- [ ] Ya se reflejan los cambios de los componentes en runtime, trackear tambien los cambios en dependencias `require( ... )`
+- [ ] Selector de folder tiene fondo transparente
+- [ ] Remover los console.log en la version de produccion
 
 ### Support
 

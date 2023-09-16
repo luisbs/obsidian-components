@@ -1,0 +1,6 @@
+printWidth: 100
+arrowParens: always
+endOfLine: lf
+useTabs: false
+singleQuote: true
+semi: true
