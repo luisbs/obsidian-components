@@ -41,7 +41,9 @@ cover: https://cdn.myanimelist.net/images/manga/2/37846l.jpg
   mal: https://myanimelist.net/anime/25781
   watch: https://jkanime.net/shingeki-no-kyojin-kuinaki-sentaku
   cover: https://cdn.myanimelist.net/images/anime/8/69497l.jpg
+```
 
+```content
 - episodes: 12
   label: Season 2
   title: Shingeki no Kyojin Season 2
@@ -57,7 +59,9 @@ cover: https://cdn.myanimelist.net/images/manga/2/37846l.jpg
   title: 'Shingeki no Kyojin: Lost Girls'
   mal: https://myanimelist.net/anime/36106
   cover: https://cdn.myanimelist.net/images/anime/1039/91943l.jpg
+```
 
+```content
 - episodes: 12
   label: Season 3 - Part 1
   title: Shingeki no Kyojin Season 3
@@ -111,7 +115,9 @@ cover: https://cdn.myanimelist.net/images/manga/2/37846l.jpg
   sources: https://younime.net/shingeki-no-kyojin-the-final-season-part-2
   download: https://www.fireload.com/folder/24669
   cover: https://cdn.myanimelist.net/images/anime/1396/125398l.jpg
+```
 
+```content
 - episodes: 1 (movie)
   label: Season 5 - Part 1
   title: 'Shingeki no Kyojin: The Final Season - Kanketsu-hen'
