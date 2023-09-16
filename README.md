@@ -1,8 +1,10 @@
 # [obsidian-components](https://github.com/luisbs/obsidian-components)
 
+![example on the test-vault](./docs/example.mkv)
+
 ## Usage
 
-### Codeblock syntas
+### Codeblock syntax
 
 All the **Codeblocks** support the use of `YAML` and `JSON`. So the next to **Codeblocks** will generate the same output.
 

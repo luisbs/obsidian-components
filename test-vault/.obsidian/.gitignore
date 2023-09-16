@@ -2,6 +2,9 @@
 !.gitignore
 !community-plugins.json
 
+# files of templates
+!snippets/components.css
+
 # plugins suit
 !plugins
 !plugins/hot-reload-master
