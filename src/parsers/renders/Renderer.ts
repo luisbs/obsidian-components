@@ -60,9 +60,14 @@ export abstract class Renderer {
   }
 
   protected renderMarkdownContent(element: HTMLElement, content: string): void {
-    // @ts-expect-error unknown parameter
-    // TODO change the the path, to avoid bad link generation of relative links
-    MarkdownRenderer.renderMarkdown(content, element, this.component.path, null)
+    // TODO: change the path, to avoid bad link generation of relative links
+    MarkdownRenderer.render(
+      this.plugin.app,
+      content,
+      element,
+      this.component.path,
+      this.plugin,
+    )
   }
 
   protected async getFileContent(): Promise<string> {
