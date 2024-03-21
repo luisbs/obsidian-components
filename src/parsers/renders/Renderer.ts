@@ -37,8 +37,10 @@ export abstract class Renderer {
       if (isError) pre.classList.add(error.code)
 
       if (isError && error.source) {
+        console.error(error.source)
         pre.append(String(error.source))
       } else {
+        console.error(error)
         pre.append(String(error))
       }
     }
