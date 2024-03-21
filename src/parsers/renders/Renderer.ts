@@ -1,7 +1,7 @@
 import type { ComponentFound, ComponentsPlugin, PluginSettings } from '@/types'
 import { isRecord } from '@/utility'
 import { MarkdownRenderer, TFile, Vault } from 'obsidian'
-import { CodeblockError } from '../CodeblockError'
+import { ComponentError } from '../ComponentError'
 
 export abstract class Renderer {
   protected settings: PluginSettings
@@ -33,16 +33,9 @@ export abstract class Renderer {
     } catch (error) {
       const pre = this.element.createEl('pre')
 
-      const isError = error instanceof CodeblockError
+      const isError = error instanceof ComponentError
       if (isError) pre.classList.add(error.code)
-
-      if (isError && error.source) {
-        console.error(error.source)
-        pre.append(String(error.source))
-      } else {
-        console.error(error)
-        pre.append(String(error))
-      }
+      pre.append(String(error))
     }
   }
 
@@ -51,7 +44,7 @@ export abstract class Renderer {
     data: unknown,
     fallback = '[missing]',
   ): string {
-    if (!isRecord(data)) throw new CodeblockError('invalid-component-params')
+    if (!isRecord(data)) throw new ComponentError('invalid-component-params')
     return source.replace(/\{\{ *(\w+) *\}\}/gi, (match, key) => {
       return key in data ? String(data[key]) : fallback
     })
@@ -75,14 +68,14 @@ export abstract class Renderer {
   protected async getFileContent(): Promise<string> {
     const file = this.vault.getAbstractFileByPath(this.component.path)
     if (file instanceof TFile) return await this.vault.read(file)
-    throw new CodeblockError('missing-component-file')
+    throw new ComponentError('missing-component-file')
   }
 
   protected async requireRenderFn(): Promise<unknown> {
     const module = await this.requireFileModule()
     if (typeof module === 'function') return module
     if (!isRecord(module) || typeof module.render !== 'function') {
-      throw new CodeblockError('missing-component-render-function')
+      throw new ComponentError('missing-component-render-function')
     }
     return module.render
   }
@@ -98,7 +91,7 @@ export abstract class Renderer {
       return require(modulePath)
     } catch (error) {
       console.error(error)
-      throw new CodeblockError('invalid-component-syntax', error)
+      throw new ComponentError('invalid-component-syntax', error)
     }
   }
 

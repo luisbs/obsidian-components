@@ -23,7 +23,7 @@ export class JavascriptHTMLRenderer extends Renderer {
   async runRenderer(): Promise<void> {
     const render = (await this.requireRenderFn()) as TextRenderer
     const html = render(this.data)
-    this.renderMarkdownContent(this.element, html)
+    this.renderHTMLContent(this.element, html)
   }
 }
 
