@@ -1,54 +1,47 @@
-const { toArray } = require('../utility/array.cjs');
-const { collection, group, h, img, link, div } = require('../utility/html.cjs');
+const { onEach, stringify } = require('../utility/types.cjs');
+const { normalizeURI } = require('../utility/filesystem.cjs');
+const { match: tagCleaner } = require('../utility/tags.cjs');
+const Renderer = require('../utility/Renderer.cjs');
+const { serializeGroup, serializeItem } = require('./gallery.cjs');
 
 /**
- * @typedef {Object} Column
- * @property {?string} tag
- * @property {?string} text
- * @property {?string} fallback
- *
- * @typedef {Object} Row
- * @property {?string} day
- * @property {?number} volumes
- * @property {?number} chapters
- * @property {?number} episodes
- * @property {?string} rating
- * @property {?string|string[]} tags
- * @property {?string|string[]} label
- * @property {?string|string[]} title
- * @property {?string|string[]} alias
- * @property {?string} ap
- * @property {?string} mal
- * @property {?string} read
- * @property {?string} watch
- * @property {?string} sources
- * @property {?string} download
- * @property {?string} cover
- *
- * @typedef {keyof Row} ColumnKey
+ * @typedef {keyof ContentRow} ColumnKey
  */
 
 /** @type {Record<ColumnKey, Column>} */
 const ATTRS = {
-  day: {},
-  volumes: { text: 'Volumes' },
-  chapters: { text: 'Chapters' },
-  episodes: { text: 'Episodes' },
-
-  author: { text: 'Author' },
-  studio: { text: 'Studio' },
-  magazine: { text: 'Magazine' },
-
+  // header
   label: { tag: 'strong' },
   title: { tag: 'h2', fallback: '«No Title»' },
   alias: { tag: 'h6' },
-  rating: { tag: 'code' },
   tags: { tag: 'code' },
   cover: { text: 'Cover' },
+  gallery: {},
+
+  // metadata
+  art: { tag: 'code', text: 'Ilustrator' },
+  story: { tag: 'code', text: 'Author' },
+  mangaka: { tag: 'code', text: 'Mangaka' },
+  author: { tag: 'code', text: 'Author' },
+  studio: { tag: 'code', text: 'Studio' },
+  magazine: { tag: 'code', text: 'Magazine' },
+
+  // opinion
+  rating: { tag: 'code' },
+  comment: { tag: 'code', text: 'Comments' },
+  comments: { tag: 'code', text: 'Comments' },
+
+  // progress
+  day: { tag: 'code' },
+  volumes: { tag: 'code', text: ' Volumes' },
+  chapters: { tag: 'code', text: ' Chapters' },
+  episodes: { tag: 'code', text: ' Episodes' },
 
   // links
   ap: { text: 'Anime Planet' },
   mal: { text: 'My Anime List' },
+  mangadex: { text: 'MangaDex' },
+
   read: { text: 'Read' },
   watch: { text: 'Watch' },
   sources: { text: 'Sources' },
@@ -56,82 +49,92 @@ const ATTRS = {
 };
 
 /** @type {ColumnKey[]} */
-const HEADER_ATTRS = ['label', 'title', 'alias', 'rating'];
+const HEADER_ATTRS = ['label', 'title', 'alias'];
 /** @type {ColumnKey[]} */
-const PROGRES_ATTRS = ['volumes', 'chapters', 'episodes'];
+const METADATA_ATTRS = ['author', 'story', 'art', 'mangaka', 'magazine', 'studio'];
 /** @type {ColumnKey[]} */
-const METADATA_ATTRS = ['day', 'author', 'studio', 'magazine'];
+const OPINION_ATTRS = ['rating', 'comment', 'comments'];
 /** @type {ColumnKey[]} */
-const LINKS_ATTRS = ['read', 'watch', 'sources', 'download', 'ap', 'mal'];
-
-const SUMMARY_ATTRS = [...PROGRES_ATTRS, ...METADATA_ATTRS];
-
-module.exports = { ATTRS, HEADER_ATTRS, PROGRES_ATTRS, METADATA_ATTRS, LINKS_ATTRS, SUMMARY_ATTRS };
-
-//
-//
-//
+const PROGRESS_ATTRS = ['volumes', 'chapters', 'episodes', 'day'];
+/** @type {ColumnKey[]} */
+const LINKS_ATTRS = ['read', 'watch', 'sources', 'download', 'ap', 'mal', 'mangadex'];
+/** @type {ColumnKey[]} */
+const DETAILS_ATTRS = ['rating', ...METADATA_ATTRS, ...OPINION_ATTRS];
+module.exports = {
+  ATTRS,
+  HEADER_ATTRS,
+  METADATA_ATTRS,
+  OPINION_ATTRS,
+  PROGRESS_ATTRS,
+  LINKS_ATTRS,
+  DETAILS_ATTRS,
+};
 
 /**
+ * @param {Renderer} render
  * @param {string} wrapperCls
- * @param {string|(record: Record<string, unknown>) => string} innerCls
- * @param {Row|Row[]} input
+ * @param {string|(record: ComponentData) => string} innerCls
+ * @param {ContentRow|ContentRow[]} input
  */
-module.exports.render = (wrapperCls, innerCls, input) => {
-  if (typeof input !== 'object' || !input) return '';
+module.exports.content = (render, wrapperCls, innerCls, input) => {
+  if (typeof input !== 'object' || !input) return;
+  // TODO: agregar elemento cuando no hay conenido que mostrar
 
-  return collection(wrapperCls, innerCls, input, (record, append) => {
-    // header
-    append(
-      group('card-header', HEADER_ATTRS, record, (key, value) => {
-        const attr = ATTRS[key] || {};
-        return h(attr.tag, value || attr.fallback || '');
-      })
-    );
+  render.collection(wrapperCls, innerCls, input, (record) => {
+    render.group('card-header', HEADER_ATTRS, record, (key, value) => {
+      const attr = ATTRS[key] || {};
+      onEach(value, (val) => render.el(attr.tag, val || attr.fallback || ''));
+    });
 
-    // tags
-    if ('tags' in record) {
-      append(
-        div('card-tags', (append2) => {
-          for (const tag of toArray(record['tags'])) {
-            append2(h('code', `#${tag}`));
-          }
-        })
-      );
+    render.group('card-tags', ['tags'], record, (_, value) => {
+      onEach(tagCleaner(value), (tag) => render.ilink(tag, tag, 'tag'));
+    });
+
+    render.group('card-details', DETAILS_ATTRS, record, (key, value) => {
+      const attr = ATTRS[key] || {};
+
+      if (!METADATA_ATTRS.includes(key)) {
+        render.el(attr.tag, value, 'lb-sky');
+        return;
+      }
+
+      render.div(null, () => {
+        render.el('span', (attr?.text || key) + ': ');
+        onEach(value, (val) => render.clink(val, val, 'lb-sky'));
+      });
+    });
+
+    render.group('card-summary', PROGRESS_ATTRS, record, (key, value) => {
+      const attr = ATTRS[key] || {};
+      render.el(attr.tag, `${value}${stringify(attr.text)}`, 'lb-teal');
+    });
+
+    render.group('card-links', LINKS_ATTRS, record, (key, value) => {
+      onEach(value, (val) => render.link(val, ATTRS[key]?.text));
+    });
+
+    const images = serializeGroup(record.gallery).images;
+    const cover = serializeItem(record.cover) || (images.length === 1 && images[0]) || null;
+    if (cover) {
+      render.div('card-cover', () => {
+        // used as background to easier size manipulation
+        render.el('div', null, null, `background-image: url('${cover.url}')`);
+        render.image(cover.url, cover.title);
+        render.el('span', cover.title);
+      });
     }
 
-    // cover
-    if ((record['cover'] || '').length > 0) {
-      append(
-        div('card-media', (append2) => {
-          const attr = ATTRS['cover'] || {};
-          append2(img(record['cover'], record.title || attr.text || ''));
-        })
-      );
-    }
-
-    console.log('c');
-
-    // summary
-    if (SUMMARY_ATTRS.some((key) => key in record)) {
-      append(
-        group('card-summary', SUMMARY_ATTRS, record, (key, value) => {
-          const label = ATTRS[key]?.text || key;
-          return PROGRES_ATTRS.includes(key) //
-            ? h('code', `${value} ${label}`)
-            : h('span', `${label}: ${value}`);
-        })
-      );
-    }
-
-    // links
-    if (LINKS_ATTRS.some((key) => key in record)) {
-      append(
-        group('card-links', LINKS_ATTRS, record, (key, value) => {
-          const attr = ATTRS[key] || {};
-          return link(value, attr.text);
-        })
-      );
+    if (images.length > 1) {
+      render.div('card-gallery', () => {
+        render.div(null, () => {
+          onEach(images, (image) => {
+            render.div('gallery-image w' + image.width, () => {
+              render.image(normalizeURI(image.url), image.title);
+              render.el('span', image.title);
+            });
+          });
+        });
+      });
     }
   });
 };
