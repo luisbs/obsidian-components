@@ -16,8 +16,8 @@ function resolveOnDist(...paths) {
 }
 
 /** @param {string[]} paths */
-function resolveOnVault(...paths) {
-  return resolve('test-vault/.obsidian/plugins/obsidian-components/', ...paths)
+function resolveOnDemo(...paths) {
+  return resolve('demo/.obsidian/plugins/obsidian-components/', ...paths)
 }
 
 /** @type {esbuild.BuildOptions} */
@@ -60,15 +60,15 @@ const BASE_CONFIG = {
 const DEV_CONFIG = {
   ...BASE_CONFIG,
   watch: true,
-  outdir: resolveOnVault(),
+  outdir: resolveOnDemo(),
   logLevel: 'info',
   sourcemap: 'inline',
   plugins: [
     copy({
       resolveFrom: resolve(),
       assets: [
-        { from: 'manifest.json', to: resolveOnVault('manifest.json') },
-        { from: 'styles.css', to: resolveOnVault('styles.css') },
+        { from: 'manifest.json', to: resolveOnDemo('manifest.json') },
+        { from: 'styles.css', to: resolveOnDemo('styles.css') },
       ],
     }),
   ],
