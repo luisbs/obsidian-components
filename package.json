@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "obsidian-components",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "license": "MIT",
   "description": "Plugin to use template components on render time",
   "keywords": [
