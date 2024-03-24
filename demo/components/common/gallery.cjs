@@ -19,37 +19,37 @@ module.exports.strip = (url) => {
  * @returns {string}
  */
 module.exports.title = (url) => {
-  const [path, ...params] = url.split(/[\?\&]/gi);
+  const [path, ...params] = url.split(/[?&]/gi);
 
   if (params.length === 1 && !params[0].includes('=')) {
     return params[0];
   }
 
   for (const param of params) {
-    if (/^(title|label|name)\=/gi.test(param)) {
+    if (/^(title|label|name)=/gi.test(param)) {
       return param.split('=').pop() || '';
     }
   }
 
   // no params, use path filename
-  return path.split(/[\\\/]/gi).pop() || '';
+  return path.split(/[\\/]/gi).pop() || '';
 };
 
 /**
- * Extracts the title of an image.
+ * Extracts the width of an image.
  *
  * @param {string} url
  * @returns {string}
  */
 module.exports.width = (url) => {
-  const [path, ...params] = url.split(/[\?\&]/gi);
+  const [_, ...params] = url.split(/[?&]/gi);
 
   if (params.length === 1 && !params[0].includes('=')) {
     return params[0].replace(/^(width|size|w|s)/gi, '');
   }
 
   for (const param of params) {
-    if (/^(width|size|w|s)\=/gi.test(param)) {
+    if (/^(width|size|w|s)=/gi.test(param)) {
       return param.split('=').pop() || '1';
     }
   }
@@ -122,6 +122,7 @@ module.exports.serialize = (data) => {
  * @param {ContentRow|ContentRow[]} input
  */
 module.exports.gallery = (render, wrapperCls, innerCls, input) => {
+  if (!(render instanceof Renderer)) return;
   // console.log(input);
   // console.log(this.serialize(input));
 

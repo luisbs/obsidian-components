@@ -77,6 +77,7 @@ module.exports = {
  * @param {ContentRow|ContentRow[]} input
  */
 module.exports.content = (render, wrapperCls, innerCls, input) => {
+  if (!(render instanceof Renderer)) return;
   if (typeof input !== 'object' || !input) return;
   // TODO: agregar elemento cuando no hay conenido que mostrar
 
