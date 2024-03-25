@@ -116,8 +116,9 @@ export default class ComponentsPlugin extends Plugin {
 
   // external API
   public resolve(path: string): unknown {
-    const resolvedPath = this.versions.resolveLastCachedVersion(path)
-    console.debug(`Resolved "${resolvedPath}"`)
-    return require(this.fs.getRealPath(resolvedPath))
+    const versionName = this.versions.resolveFile(path)
+    const versionPath = versionName ? this.fs.getCachePath(versionName) : path
+    console.debug(`Resolved as "${versionPath}"`)
+    return require(this.fs.getRealPath(versionPath))
   }
 }

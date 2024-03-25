@@ -7,6 +7,8 @@ export abstract class Renderer {
   protected settings: PluginSettings
   protected vault: Vault
 
+  static trackedByRenderer: string[] = []
+
   constructor(
     protected element: HTMLElement,
     protected plugin: ComponentsPlugin,
@@ -83,11 +85,26 @@ export abstract class Renderer {
   protected async requireFileModule(): Promise<unknown> {
     try {
       const baseFile = this.vault.getAbstractFileByPath(this.component.path)
-      // prettier-ignore
-      const versionPath = await this.plugin.versions.getLastCachedVersion(baseFile as TFile)
+      if (!(baseFile instanceof TFile)) {
+        throw new ComponentError('missing-component-file')
+      }
+
+      if (!Renderer.trackedByRenderer.includes(baseFile.path)) {
+        // opening a note with multiple references to a single component
+        // will execute this method each time, soooo...
+        // it should be tracked only once, at the end of trackFile
+        // a refresh is executed on the renderer of all instances
+        Renderer.trackedByRenderer.push(baseFile.path)
+        await this.plugin.versions.trackFile(baseFile)
+      }
+
+      const versionName = this.plugin.versions.resolveFile(baseFile)
+      const versionPath = versionName
+        ? this.plugin.fs.getCachePath(versionName)
+        : undefined
       const modulePath = this.getModulePath(versionPath)
 
-      console.log(`Executing 'require("${modulePath}")'`)
+      console.debug(`Executing <${versionName || this.component.path}>`)
       return require(modulePath)
     } catch (error) {
       console.error(error)
@@ -99,7 +116,7 @@ export abstract class Renderer {
    * @returns the real path of the file on the os.
    */
   protected getModulePath(filePath?: string | null): string {
-    filePath = filePath ?? this.component.path
+    filePath = filePath || this.component.path
     return this.plugin.fs.getRealPath(filePath)
   }
 }
