@@ -1,27 +1,50 @@
+import { MapStore } from './utility'
+
+export { default as ComponentsPlugin } from './main'
+
+//#region Runtime
+
+export interface PluginState {
+  /** Stores the currently parameters that can be used to define a component name. */
+  params: string[]
+  /** Stores the currently enabled component references. */
+  components: MapStore<string>
+  /** Stores the currently enabled codeblock references. */
+  codeblocks: MapStore<string>
+}
+
+export interface CodeblockContent {
+  /** Hash result of the codeblock content. (used for cache) */
+  hash: string
+  /** Syntax of the codeblock. */
+  syntax: 'json' | 'yaml'
+  /** Codeblock content raw text. */
+  source: string
+  /** Codeblock content parsed. */
+  data: unknown
+}
+
+//#endregion
+
+//#region Settings
+
+/**
+ * Representation of the plugin settings on disk.
+ */
+export type RawPluginSettings = PrimitivePluginSettings & {
+  enabled_formats: string[]
+  enabled_components: [string, boolean][]
+}
+
 export type PrimitivePluginSettings = Omit<
   PluginSettings,
   'enabled_formats' | 'enabled_components'
 >
 
-export type RawPluginSettings = Omit<
-  PrimitivePluginSettings,
-  'enable_versioning'
-> & {
-  enabled_formats: string[]
-  enabled_components: [string, boolean][]
-}
-
+/**
+ * Representation of the plugin settings on memory.
+ */
 export interface PluginSettings {
-  /**
-   * Controls when to enable the block file versioning.
-   * > `Warning:` The versioning stores each edition of a file
-   * > to provide a way to load the file changes on runtime
-   * > this behavior will cause an increase on memory usage and
-   * > storage usage, so it should be **disabled always**
-   * > until the user enables it **manually**
-   */
-  enable_versioning: boolean
-
   /**
    * Stores the plugin behavior about components discovery.
    * - `'STRICT'` allow only components enabled by the user.
@@ -102,3 +125,5 @@ export interface ComponentFound {
   /** User defined names */
   names: string
 }
+
+//#endregion

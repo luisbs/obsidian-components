@@ -1,7 +1,7 @@
 import type { ComponentFound, ComponentsPlugin, PluginSettings } from '@/types'
-import { LoggingGroup, isRecord } from '@/utility'
 import { MarkdownRenderer, TFile, Vault } from 'obsidian'
-import { ComponentError } from '../ComponentError'
+import { LoggingGroup, isRecord } from '@/utility'
+import { ComponentError } from './ComponentError'
 
 export abstract class Renderer {
   protected settings: PluginSettings
@@ -12,7 +12,7 @@ export abstract class Renderer {
   static trackedByRenderer: string[] = []
 
   constructor(
-    public element: HTMLElement,
+    protected element: HTMLElement,
     protected plugin: ComponentsPlugin,
     protected component: ComponentFound,
     protected data: unknown,

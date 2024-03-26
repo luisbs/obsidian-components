@@ -1,7 +1,10 @@
 import type { ComponentFormat, PluginSettings } from '@/types'
 
-/** Get a list of the default formats. */
-function SupportedFormats(): ComponentFormat[] {
+/**
+ * Get a list of the default formats.
+ */
+export function getSupportedFormats(): ComponentFormat[] {
+  // as function to prevent any values mixin on the regex
   return [
     // html/markdown
     { id: 'html', ext: /\.html$/i, type: 'html' },
@@ -14,14 +17,10 @@ function SupportedFormats(): ComponentFormat[] {
   ]
 }
 
-export function getSupportedFormats(): Array<ComponentFormat> {
-  return SupportedFormats()
-}
-
-export function getFormatById(
-  formatId: string,
-  settings: PluginSettings,
-): ComponentFormat | undefined {
+/**
+ * Get a format definition from its id.
+ */
+export function getFormatById(formatId: string): ComponentFormat | undefined {
   return getSupportedFormats().find((format) => format.id === formatId)
 }
 
@@ -33,12 +32,9 @@ export function isFormatEnabled(
   settings: PluginSettings,
 ): boolean {
   // if the behavior is to allow all the components by default
-  if (settings.enable_components === 'ALL') {
-    return true
-  }
-
-  const formatId = typeof format === 'string' ? format : format.id
+  if (settings.enable_components === 'ALL') return true
 
   // check if the format has been whitelisted
+  const formatId = typeof format === 'string' ? format : format.id
   return settings.enabled_formats.has(formatId)
 }

@@ -1,8 +1,15 @@
-export default class MapStore<T> {
+export class MapStore<T> {
   protected values = new Map<string, T[]>()
 
   public clear(): void {
     this.values = new Map()
+  }
+
+  /**
+   * Get the stored keys.
+   */
+  public keys(): IterableIterator<string> {
+    return this.values.keys()
   }
 
   /**
@@ -47,5 +54,22 @@ export default class MapStore<T> {
     const values = this.get(key).reverse()
     values.unshift(value)
     this.values.set(key, values.unique().reverse())
+  }
+
+  /**
+   * Creates a MapStore from an object
+   * uses the source values as result keys,
+   * and the source keys as result values.
+   */
+  public static fromReversedObject(
+    values: Record<string, string>,
+  ): MapStore<string> {
+    const result = new MapStore<string>()
+
+    for (const [value, key] of Object.entries(values)) {
+      result.push(key, value)
+    }
+
+    return result
   }
 }

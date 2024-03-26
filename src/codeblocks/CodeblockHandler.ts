@@ -6,15 +6,16 @@ import type {
 } from '@/types'
 import { createHmac } from 'crypto'
 import { parseYaml } from 'obsidian'
-import { getComponentById, isRecord } from '@/utility'
+import { getComponentById, isRecord, MapStore } from '@/utility'
 import { ComponentError } from './ComponentError'
-import { Renderer, getRenderer } from './renders'
+import { Renderer } from './Renderer'
+import { getRenderer } from './Renderers'
 
 export class CodeblockHandler {
   #plugin: ComponentsPlugin
 
   #registered: string[] = []
-  #rendered: Map<string, Renderer[]> = new Map()
+  #rendered: MapStore<Renderer> = new MapStore()
 
   constructor(plugin: ComponentsPlugin) {
     this.#plugin = plugin
@@ -26,29 +27,38 @@ export class CodeblockHandler {
   }
 
   public clear(): void {
-    this.#rendered = new Map()
+    this.#rendered.clear()
     // todo check a way to un-register the processors
   }
 
-  protected storeRenderer(filePath: string, renderer: Renderer): void {
-    const rendered = this.#rendered.get(filePath) || []
-    rendered.push(renderer)
-    this.#rendered.set(filePath, rendered.unique())
+  /**
+   * Force all instances of all components to re-render.
+   */
+  public refreshAll(): void {
+    for (const key of this.#rendered.keys()) {
+      this.refresh(key)
+    }
   }
 
+  /**
+   * Force all the instances of a component to re-render.
+   */
   public refresh(filePath: string): void {
     for (const renderer of this.#rendered.get(filePath) || []) {
       renderer.render()
     }
   }
 
+  /**
+   * Register the handler for default codeblocks.
+   */
   public registerBaseCodeblock(): void {
     this.#plugin.registerMarkdownCodeBlockProcessor(
       'use',
       (source, el, ctx) => {
         console.log('Procesing base codeblock')
 
-        this.#catchErrors(source, el, () => {
+        this.#catchErrors(el, () => {
           const content = this.#parseCodeblock(source)
           const { name, component } = this.#getComponent(content, el, ctx)
           if (!component) throw new ComponentError('unknown-component')
@@ -56,7 +66,7 @@ export class CodeblockHandler {
 
           // prettier-ignore
           const renderer = getRenderer(el, this.#plugin, component, content.data)
-          this.storeRenderer(component.path, renderer)
+          this.#rendered.push(component.path, renderer)
           renderer.render()
         })
       },
@@ -64,6 +74,9 @@ export class CodeblockHandler {
     )
   }
 
+  /**
+   * Register the handler for user-defined codeblocks.
+   */
   public registerCustomCodeblocks(): void {
     const { settings, state } = this.#plugin
 
@@ -78,7 +91,7 @@ export class CodeblockHandler {
           (source, el, ctx) => {
             console.log(`Procesing '${name}' codeblock`)
 
-            return this.#catchErrors(source, el, () => {
+            return this.#catchErrors(el, () => {
               const content = this.#parseCodeblock(source)
               const component = getComponentById(componentId, settings)
               if (!component) throw new ComponentError('unknown-component')
@@ -86,7 +99,7 @@ export class CodeblockHandler {
 
               // prettier-ignore
               const renderer = getRenderer(el, this.#plugin, component, content.data)
-              this.storeRenderer(component.path, renderer)
+              this.#rendered.push(component.path, renderer)
               renderer.render()
             })
           },
@@ -97,7 +110,6 @@ export class CodeblockHandler {
   }
 
   async #catchErrors(
-    source: string,
     element: HTMLElement,
     callback: () => void,
   ): Promise<void> {
@@ -164,7 +176,7 @@ export class CodeblockHandler {
 
     // search the component
     for (const componentId in state.components) {
-      if (state.components[componentId].contains(name)) {
+      if (state.components.has(componentId, name)) {
         return {
           name,
           component: settings.components_found[componentId] || null,

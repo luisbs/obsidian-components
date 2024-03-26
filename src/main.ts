@@ -5,11 +5,10 @@ import type {
   RawPluginSettings,
 } from './types'
 import { App, Plugin, PluginManifest } from 'obsidian'
-import { CodeblockHandler } from './parsers'
+import { LoggingGroup, preparePluginState } from './utility'
+import { FilesystemAdapter, VersionController } from './filesystem'
+import { CodeblockHandler } from './codeblocks'
 import { SettingsTab } from './settings/SettingsTab'
-import { preparePluginState } from './utility'
-import { VersionController } from './filesystem/VersionController'
-import FilesystemAdapter from './filesystem/FilesystemAdapter'
 
 export const DEFAULT_SETTINGS: PrimitivePluginSettings = {
   enable_components: 'STRICT',

@@ -1,50 +1,49 @@
 import type { ComponentsPlugin } from '@/types'
 import { TAbstractFile, TFile } from 'obsidian'
-import { Logger } from '@/utility'
-import MapStore from './MapStore'
-import FilesystemAdapter from './FilesystemAdapter'
+import { Logger, MapStore } from '@/utility'
+import { FilesystemAdapter } from './FilesystemAdapter'
 
 export class VersionController {
-  protected plugin: ComponentsPlugin
+  #plugin: ComponentsPlugin
 
-  protected log = new Logger()
+  #log = new Logger()
   // like { 'music.html.cjs': ['music.html-23f29a.cjs'] }
-  protected versions = new MapStore<string>()
+  #versions = new MapStore<string>()
   // like { 'HtmlRenderer.cjs': ['music.html.cjs', 'content.html.cjs'] }
-  protected dependencies = new MapStore<string>()
+  #dependencies = new MapStore<string>()
 
   constructor(plugin: ComponentsPlugin) {
-    this.plugin = plugin
+    this.#plugin = plugin
     this.clearCache()
 
-    this.plugin.app.vault.on('modify', this.handleFileModification.bind(this))
+    this.#plugin.app.vault.on('modify', this.handleFileModification.bind(this))
   }
 
   public clear(): void {
-    this.plugin.app.vault.off('modify', this.handleFileModification.bind(this))
+    this.#plugin.app.vault.off('modify', this.handleFileModification.bind(this))
 
-    this.dependencies.clear()
-    this.versions.clear()
+    this.#dependencies.clear()
+    this.#versions.clear()
     this.clearCache()
   }
 
   public async clearCache(): Promise<void> {
-    await this.plugin.fs.renewFolder(this.plugin.fs.getCachePath())
-    this.log.info('Cleared cache')
+    await this.#plugin.fs.renewFolder(this.#plugin.fs.getCachePath())
+    this.#log.info('Cleared cache')
   }
 
   /**
    * Update cache registry when a file is modified.
    */
   protected handleFileModification(file: TAbstractFile): void {
-    if (!this.plugin.settings.enable_versioning) return
+    if (!this.#plugin.isDesignModeEnabled) return
 
     // listen only the files on the components folder
     if (
       file instanceof TFile &&
-      file.path.startsWith(this.plugin.settings.components_folder)
+      file.path.startsWith(this.#plugin.settings.components_folder)
     ) {
-      this.log.debug(`Listening changes on "${file.path}"`)
+      this.#log.debug(`Listening changes on "${file.path}"`)
       this.trackFile(file)
     }
   }
@@ -53,29 +52,29 @@ export class VersionController {
    * Resolves a filepath into its latest cached version.
    */
   public resolveFile(fileOrPath: null | string | TFile): string | undefined {
-    if (!this.plugin.settings.enable_versioning) return
+    if (!this.#plugin.isDesignModeEnabled) return
     if (!fileOrPath) return
 
     const filepath = FilesystemAdapter.resolvePath(fileOrPath)
-    return this.versions.getFirst(filepath)
+    return this.#versions.getFirst(filepath)
   }
 
   /**
    * Tracks the modifications on a file.
    */
   public async trackFile(fileOrPath: null | string | TFile): Promise<boolean> {
-    if (!this.plugin.settings.enable_versioning) return false
+    if (!this.#plugin.isDesignModeEnabled) return false
     if (!fileOrPath) return false
 
-    const file = this.plugin.fs.resolveFile(fileOrPath)
+    const file = this.#plugin.fs.resolveFile(fileOrPath)
     if (!file) return false
 
-    const log = this.log.group(`Tracking changes on <${file.path}>`)
-    const hash = await this.plugin.fs.getFileHash(fileOrPath)
+    const log = this.#log.group(`Tracking changes on <${file.path}>`)
+    const hash = await this.#plugin.fs.getFileHash(fileOrPath)
     const versionName = await this.cacheFile(file, hash, log)
     if (!versionName) return false
 
-    this.versions.prepend(file.path, versionName)
+    this.#versions.prepend(file.path, versionName)
 
     // force the components to refresh
     this.refreshRender(file.path, log)
@@ -95,14 +94,14 @@ export class VersionController {
     log: Logger,
   ): Promise<string> {
     const cachedFileName = `${file.basename}.${hash}.${file.extension}`
-    const cachedFilePath = this.plugin.fs.getCachePath(cachedFileName)
+    const cachedFilePath = this.#plugin.fs.getCachePath(cachedFileName)
 
-    if (await this.plugin.fs.exists(cachedFilePath)) {
+    if (await this.#plugin.fs.exists(cachedFilePath)) {
       const timestamp = Date.now().toString()
       const cloneFileName = `${file.basename}.${hash}-${timestamp}.${file.extension}`
-      const cloneFilePath = this.plugin.fs.getCachePath(cloneFileName)
+      const cloneFilePath = this.#plugin.fs.getCachePath(cloneFileName)
 
-      await this.plugin.fs.copy(cachedFilePath, cloneFilePath)
+      await this.#plugin.fs.copy(cachedFilePath, cloneFilePath)
       log.debug(`Cloned <${cachedFileName}> to <${cloneFileName}>`)
 
       return cloneFileName
@@ -110,13 +109,13 @@ export class VersionController {
 
     log.debug(`Caching file <${file.name}> to <${cachedFileName}>`)
     const parentPath = file.parent?.path || ''
-    await this.plugin.fs.copy(file, cachedFilePath, (content) => {
+    await this.#plugin.fs.copy(file, cachedFilePath, (content) => {
       return content.replaceAll(/require *\( *['"](.+)['"] *\)/g, (_, $1) => {
         const path = FilesystemAdapter.join(parentPath, $1)
         log.debug(`Injecting resolver for <${path}>`)
 
         // store which files this file imports
-        this.dependencies.push(path, file.path)
+        this.#dependencies.push(path, file.path)
         return `app.plugins.plugins['obsidian-components'].resolve("${path}")`
       })
     })
@@ -139,13 +138,13 @@ export class VersionController {
     // first refresh direct components of the file
     if (!called.includes(filepath)) {
       log.debug(`Refreshing <${filepath}> components`)
-      this.plugin.parser.refresh(filepath)
+      this.#plugin.parser.refresh(filepath)
       called.push(filepath)
     }
 
     // then refresh components that depend on the file
     // the recursivity allows to refresh all the chain of files
-    for (const dependentPath of this.dependencies.get(filepath)) {
+    for (const dependentPath of this.#dependencies.get(filepath)) {
       if (called.includes(dependentPath)) continue
 
       // clone the file, so when executed re-instances imports like:

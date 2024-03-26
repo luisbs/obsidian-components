@@ -123,7 +123,7 @@ export class ComponentsTable extends SettingsTable<ComponentFound> {
     const row = new TableRow(trEl)
 
     // construct the description of the component
-    const names = this.plugin.state.components[id] || []
+    const names = this.plugin.state.components.get(id)
     const desc = createFragment()
     desc.appendText('Use it as: ')
     desc.createEl('code', { text: names.map((v) => `'${v}'`).join(', ') })
