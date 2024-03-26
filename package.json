@@ -44,6 +44,6 @@
     "typescript": "^4.9.5"
   },
   "dependencies": {
-    "obsidian-fnc": "link:../obsidian-fnc"
+    "obsidian-fnc": "github:luisbs/obsidian-fnc"
   }
 }
