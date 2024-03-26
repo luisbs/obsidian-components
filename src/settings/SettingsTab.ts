@@ -118,12 +118,15 @@ export class SettingsTab extends PluginSettingTab {
       .setName('Design mode')
       .setDesc(modeDesc)
       .addToggle((input) => {
-        input.setValue(this.settings.enable_versioning).onChange((value) => {
-          // allows only enable in it
-          if (this.settings.enable_versioning) return
-          this.update('enable_versioning', true)
-          input.setDisabled(true)
-        })
+        input
+          .setValue(this.settings.enable_versioning)
+          .setDisabled(this.settings.enable_versioning)
+          .onChange((value) => {
+            // allows only enable in it
+            if (this.settings.enable_versioning) return
+            this.update('enable_versioning', true)
+            input.setDisabled(true)
+          })
       })
 
     //
