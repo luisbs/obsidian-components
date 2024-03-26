@@ -1,4 +1,4 @@
-module.exports.Spotify = {
+module.exports.spotify = {
   /**
    * @param {string} id
    * @example
@@ -39,7 +39,7 @@ module.exports.Spotify = {
   },
 };
 
-module.exports.Youtube = {
+module.exports.youtube = {
   /**
    * @param {string} id
    * @example

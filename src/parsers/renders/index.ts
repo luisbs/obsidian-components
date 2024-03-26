@@ -1,6 +1,6 @@
 import type { ComponentFound, ComponentsPlugin } from '@/types'
 import { getFormatById, isComponentEnabled } from '@/utility'
-import { CodeblockError } from '../CodeblockError'
+import { ComponentError } from '../ComponentError'
 
 import type { Renderer } from './Renderer'
 export { Renderer }
@@ -20,11 +20,11 @@ export function getRenderer(
   data: unknown,
 ): Renderer {
   if (!isComponentEnabled(component, plugin.settings)) {
-    throw new CodeblockError('disabled-component')
+    throw new ComponentError('disabled-component')
   }
 
   const format = getFormatById(component.format, plugin.settings)
-  if (!format) throw new CodeblockError('missing-component-renderer')
+  if (!format) throw new ComponentError('missing-component-renderer')
 
   switch (format.id) {
     case 'html':
@@ -40,5 +40,5 @@ export function getRenderer(
       return new JavascriptCodeRenderer(element, plugin, component, data)
   }
 
-  throw new CodeblockError('missing-component-renderer')
+  throw new ComponentError('missing-component-renderer')
 }

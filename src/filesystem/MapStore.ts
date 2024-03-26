@@ -22,12 +22,16 @@ export default class MapStore<T> {
   /**
    * Check if a value is stored in relation to a key.
    */
-  public has(key: string, value: T): boolean {
-    return this.get(key).includes(value)
+  public has(key: string, value?: T): boolean {
+    if (value) {
+      return this.get(key).includes(value)
+    } else {
+      return this.values.has(key)
+    }
   }
 
   /**
-   * Store a value as first value related to a key.
+   * Store a value as the first value related to a key.
    */
   public prepend(key: string, value: T): void {
     const values = this.get(key)
@@ -36,11 +40,12 @@ export default class MapStore<T> {
   }
 
   /**
-   * Store a value as last value related to a key.
+   * Store a value as the last value related to a key.
    */
   public push(key: string, value: T): void {
-    const values = this.get(key)
-    values.push(value)
-    this.values.set(key, values.unique())
+    // reverse the list so the newly inserted value is kept when unique si applied
+    const values = this.get(key).reverse()
+    values.unshift(value)
+    this.values.set(key, values.unique().reverse())
   }
 }

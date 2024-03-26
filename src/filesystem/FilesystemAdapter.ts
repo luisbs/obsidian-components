@@ -13,12 +13,31 @@ export default class FilesystemAdapter {
   }
 
   /**
+   * @note this method can not be used with files inside `.obsidian` folder
+   */
+  public resolveFile(source: TAbstractFile | string | undefined): TFile | null {
+    if (typeof source === 'string') {
+      const file = this.vault.getAbstractFileByPath(source)
+      return file instanceof TFile ? file : null
+    }
+    return source instanceof TFile ? source : null
+  }
+
+  public static resolvePath(source: TAbstractFile | string): string {
+    return typeof source === 'string' ? source : source.path
+  }
+
+  public static join(...paths: string[]): string {
+    return normalizePath(Path.join(...paths))
+  }
+
+  /**
    * Generates a vault-path to the file,
    * if no params are passed the route of the
    * cache folder is returned.
    */
   public getCachePath(...paths: string[]): string {
-    return this.join(
+    return FilesystemAdapter.join(
       this.vault.configDir,
       'plugins/obsidian-components/.temp',
       ...paths,
@@ -46,108 +65,89 @@ export default class FilesystemAdapter {
       .replace(/\?\d+$/i, '') // removes the postfix
   }
 
-  public join(...paths: string[]): string {
-    return normalizePath(Path.join(...paths))
+  /**
+   * Checks if a file exists.
+   */
+  public async missing(fileOrPath: TFile | string): Promise<boolean> {
+    return !this.exists(fileOrPath as string)
   }
 
   /**
    * Checks if a file exists.
    */
-  public async missing(file: TFile): Promise<boolean>
-  public async missing(filePath: string): Promise<boolean>
-  public async missing(source: TFile | string): Promise<boolean> {
-    return !this.exists(source as string)
-  }
-
-  /**
-   * Checks if a file exists.
-   */
-  public async exists(file: TFile): Promise<boolean>
-  public async exists(filePath: string): Promise<boolean>
-  public async exists(source: TFile | string): Promise<boolean> {
-    const filePath = this.resolveFilePath(source)
-    return this.vault.adapter.exists(filePath)
+  public async exists(fileOrPath: TFile | string): Promise<boolean> {
+    const filepath = FilesystemAdapter.resolvePath(fileOrPath)
+    return this.vault.adapter.exists(filepath)
   }
 
   /**
    * Copies the content of a file into another.
+   * @param editor callback used to perform an edition before saving
    */
-  public async copy(file: TFile, newFilePath: string): Promise<void>
-  public async copy(filePath: string, newFilePath: string): Promise<void>
   public async copy(
-    source: TFile | string,
+    fileOrPath: TFile | string,
     newFilePath: string,
+    editor?: ContentEditor,
   ): Promise<void> {
-    const filePath = this.resolveFilePath(source)
-    await this.vault.adapter.copy(filePath, newFilePath)
+    const filepath = FilesystemAdapter.resolvePath(fileOrPath)
+
+    // copy with edit
+    if (typeof editor === 'function') {
+      const content = await this.vault.adapter.read(filepath)
+      await this.vault.adapter.write(newFilePath, editor(content))
+    }
+    // simplier copy
+    else {
+      await this.vault.adapter.copy(filepath, newFilePath)
+    }
   }
 
   /**
    * Edits a file content using a callback.
-   * @param {ContentEditor} editor callback used to perform the edition
+   * @param editor callback used to perform the edition
    */
-  public async edit(file: TFile, editor: ContentEditor): Promise<void>
-  public async edit(filePath: string, editor: ContentEditor): Promise<void>
   public async edit(
-    source: TFile | string,
+    fileOrPath: TFile | string,
     editor: ContentEditor,
   ): Promise<void> {
-    const filePath = this.resolveFilePath(source)
-    const content = await this.vault.adapter.read(filePath)
-    await this.vault.adapter.write(filePath, editor(content))
+    const filepath = FilesystemAdapter.resolvePath(fileOrPath)
+    const content = await this.vault.adapter.read(filepath)
+    await this.vault.adapter.write(filepath, editor(content))
   }
 
   /**
    * Removes a file from the filesystem.
    */
-  public async remove(file: TFile): Promise<void>
-  public async remove(filePath: string): Promise<void>
-  public async remove(source: TFile | string): Promise<void> {
-    const filePath = this.resolveFilePath(source)
-    await this.vault.adapter.remove(filePath)
+  public async remove(fileOrPath: TFile | string): Promise<void> {
+    const filepath = FilesystemAdapter.resolvePath(fileOrPath)
+    await this.vault.adapter.remove(filepath)
   }
 
   /**
    * Removes everything from a folder
-   * and creates a new empty folder.
+   * and creates a new empty folder with the same name.
    */
-  public async renewFolder(file: TFolder): Promise<void>
-  public async renewFolder(filePath: string): Promise<void>
-  public async renewFolder(source: TFolder | string): Promise<void> {
-    const folderPath = this.resolveFilePath(source)
-    if (await this.vault.adapter.exists(folderPath)) {
-      await this.vault.adapter.rmdir(folderPath, true)
+  public async renewFolder(folderOrPath: TFolder | string): Promise<void> {
+    const folderpath = FilesystemAdapter.resolvePath(folderOrPath)
+    if (await this.vault.adapter.exists(folderpath)) {
+      await this.vault.adapter.rmdir(folderpath, true)
     }
-    if (!(await this.vault.adapter.exists(folderPath))) {
-      await this.vault.adapter.mkdir(folderPath)
+    if (!(await this.vault.adapter.exists(folderpath))) {
+      await this.vault.adapter.mkdir(folderpath)
     }
   }
 
   /**
    * Generates a hash of certain length based on the content of a file.
-   * @param {number} length extension of the hash, if is passed a number lower to `1` the complete hash is returned
+   * @param length preferred of the hash, if is passed a number lower to `1` the complete hash is returned
    */
-  public async getFileHash(file: TFile, length?: number): Promise<string>
-  public async getFileHash(filePath: string, length?: number): Promise<string>
   public async getFileHash(
-    source: TFile | string,
-    length = 10,
+    fileOrPath: TFile | string,
+    length = 6,
   ): Promise<string> {
-    const filePath = this.resolveFilePath(source)
-    const content = await this.vault.adapter.read(filePath)
+    const filepath = FilesystemAdapter.resolvePath(fileOrPath)
+    const content = await this.vault.adapter.read(filepath)
     const hash = createHash('sha256').update(content).digest('hex')
-    return length < 1 ? hash : hash.substring(0, 10)
-  }
-
-  public resolveFilePath(source: TAbstractFile | string): string {
-    return typeof source === 'string' ? source : source.path
-  }
-
-  public resolveFile(source: TAbstractFile | string): TFile | null {
-    if (typeof source === 'string') {
-      const file = this.vault.getAbstractFileByPath(source)
-      return file instanceof TFile ? file : null
-    }
-    return source instanceof TFile ? source : null
+    return length < 1 ? hash : hash.substring(0, length)
   }
 }

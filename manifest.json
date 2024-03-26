@@ -1,11 +1,11 @@
 {
-  "id": "obsidian-components",
-  "name": "Components",
-  "version": "0.4.1",
-  "minAppVersion": "0.14.0",
-  "description": "Plugin to use template components on render time",
-  "author": "luisbs",
-  "authorUrl": "https://github.com/luisbs",
-  "fundingUrl": "https://www.buymeacoffee.com/luisbs",
-  "isDesktopOnly": true
+	"id": "obsidian-components",
+	"name": "Components",
+	"version": "0.4.3",
+	"minAppVersion": "1.5.11",
+	"description": "Plugin to use custom visual elements on notes",
+	"author": "luisbs",
+	"authorUrl": "https://github.com/luisbs",
+	"fundingUrl": "https://www.buymeacoffee.com/luisbs",
+	"isDesktopOnly": false
 }

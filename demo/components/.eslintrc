@@ -2,7 +2,10 @@
   "root": true,
   "env": { "node": true },
   "extends": ["eslint:recommended"],
-  "parserOptions": { "sourceType": "module", "ecmaVersion": 2015 },
+  "parserOptions": {
+    "sourceType": "module",
+    "ecmaVersion": 2020
+  },
   "rules": {
     "no-unused-vars": "warn",
     "no-prototype-builtins": "off"

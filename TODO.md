@@ -23,6 +23,8 @@
 - [x] Add support for `'javascript_markdown'` component.
 - [x] Add support for `'javascript_code'` component.
 
+<!-- -->
+
 - [x] Support on Linux
 - [x] Support on Windows
 
@@ -37,11 +39,11 @@
 
 ## Discarted Ideas
 
-> Add syntax highlight on _edit mode_.
+> Add syntax highlight on _edit mode_.<br>
 > R/ It seems the syntax highlight can not easily be activated for custom codeblocks.
 
 > Add the posibility to use a separator inside `yaml`
-> to make easier the use of objects arrays.
+> to make easier the use of objects arrays.<br>
 > R/ Is better to keep a valid syntax
 > Example:
 >

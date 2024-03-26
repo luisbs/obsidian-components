@@ -7,7 +7,7 @@ import type {
 import { createHmac } from 'crypto'
 import { parseYaml } from 'obsidian'
 import { getComponentById, isRecord } from '@/utility'
-import { CodeblockError } from './CodeblockError'
+import { ComponentError } from './ComponentError'
 import { Renderer, getRenderer } from './renders'
 
 export class CodeblockHandler {
@@ -37,7 +37,6 @@ export class CodeblockHandler {
   }
 
   public refresh(filePath: string): void {
-    console.log(`Refreshing '${filePath}' components`)
     for (const renderer of this.#rendered.get(filePath) || []) {
       renderer.render()
     }
@@ -52,7 +51,7 @@ export class CodeblockHandler {
         this.#catchErrors(source, el, () => {
           const content = this.#parseCodeblock(source)
           const { name, component } = this.#getComponent(content, el, ctx)
-          if (!component) throw new CodeblockError('unknown-component')
+          if (!component) throw new ComponentError('unknown-component')
           el.classList.add('component', `${name}-component`)
 
           // prettier-ignore
@@ -82,7 +81,7 @@ export class CodeblockHandler {
             return this.#catchErrors(source, el, () => {
               const content = this.#parseCodeblock(source)
               const component = getComponentById(componentId, settings)
-              if (!component) throw new CodeblockError('unknown-component')
+              if (!component) throw new ComponentError('unknown-component')
               el.classList.add('component', `${name}-component`)
 
               // prettier-ignore
@@ -106,14 +105,8 @@ export class CodeblockHandler {
       callback()
     } catch (error) {
       const pre = element.createEl('pre')
-
-      const isError = error instanceof CodeblockError
-      if (isError) pre.classList.add(error.code)
-      if (isError && error.source) {
-        pre.append(String(error.source))
-      } else {
-        pre.append(source)
-      }
+      if (error instanceof ComponentError) pre.classList.add(error.code)
+      pre.append(String(error))
     }
   }
 
@@ -126,7 +119,7 @@ export class CodeblockHandler {
     try {
       data = isJson ? JSON.parse(source) : parseYaml(source)
     } catch (error) {
-      throw new CodeblockError('invalid-codeblock-syntax', error)
+      throw new ComponentError('invalid-codeblock-syntax', error)
     }
 
     return {
@@ -161,13 +154,13 @@ export class CodeblockHandler {
     // if the name is missing try to get it from inline
     if (!name && settings.naming_method !== 'PARAM') {
       const info = context.getSectionInfo(element)
-      if (!info) throw new CodeblockError('missing-component-name')
+      if (!info) throw new ComponentError('missing-component-name')
 
       const header = info.text.split('\n').at(info.lineStart) ?? ''
       name = header.replace(codeblockPrefix, '').trim()
     }
 
-    if (!name) throw new CodeblockError('missing-component-name')
+    if (!name) throw new ComponentError('missing-component-name')
 
     // search the component
     for (const componentId in state.components) {
