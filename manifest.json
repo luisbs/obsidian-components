@@ -1,8 +1,8 @@
 {
 	"id": "obsidian-components",
 	"name": "Components",
-	"version": "0.4.2",
-	"minAppVersion": "1.4.14",
+	"version": "0.4.3",
+	"minAppVersion": "1.5.11",
 	"description": "Plugin to use custom visual elements on notes",
 	"author": "luisbs",
 	"authorUrl": "https://github.com/luisbs",
