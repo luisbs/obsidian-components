@@ -26,7 +26,9 @@
     "lib": ["DOM", "ES2021"],
     "paths": {
       "@ui/*": ["src/components/*"],
-      "@/*": ["src/*"]
+      "@/*": ["src/*"],
+
+      "obsidian-fnc": ["node_modules/obsidian-fnc/src"]
     }
   },
   "include": ["src/**/*.ts", "src/**/*.tsx"],
