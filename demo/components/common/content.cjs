@@ -107,7 +107,7 @@ module.exports.content = (render, wrapperCls, innerCls, input) => {
 
     render.group('card-summary', PROGRESS_ATTRS, record, (key, value) => {
       const attr = ATTRS[key] || {};
-      render.el(attr.tag, `${value}${stringify(attr.text)}`, 'lb-teal');
+      render.el(attr.tag, `${value}${stringify(attr.text)}`, 'lb-pink');
     });
 
     render.group('card-links', LINKS_ATTRS, record, (key, value) => {

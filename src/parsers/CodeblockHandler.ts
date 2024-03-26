@@ -37,7 +37,6 @@ export class CodeblockHandler {
   }
 
   public refresh(filePath: string): void {
-    console.log(`Refreshing '${filePath}' components`)
     for (const renderer of this.#rendered.get(filePath) || []) {
       renderer.render()
     }

@@ -12,6 +12,10 @@ export interface LogEntry {
 }
 
 export class Logger {
+  static make(): Logger {
+    return new Logger()
+  }
+
   static formatTimestamp(timestamp: Date): string {
     //2021-05-04 13:14:15.012
     return (
@@ -95,5 +99,7 @@ export class LoggingGroup extends Logger {
       this.log(entry.level, entry.data)
     }
     console.groupEnd()
+
+    this.#logs = []
   }
 }

@@ -12,7 +12,10 @@ export default class FilesystemAdapter {
     this.vault = plugin.app.vault
   }
 
-  public resolveFile(source: TAbstractFile | string): TFile | null {
+  /**
+   * @note this method can not be used with files inside `.obsidian` folder
+   */
+  public resolveFile(source: TAbstractFile | string | undefined): TFile | null {
     if (typeof source === 'string') {
       const file = this.vault.getAbstractFileByPath(source)
       return file instanceof TFile ? file : null

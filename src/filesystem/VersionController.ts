@@ -1,6 +1,6 @@
 import type { ComponentsPlugin } from '@/types'
 import { TAbstractFile, TFile } from 'obsidian'
-import { Logger } from '@/utility/logging'
+import { Logger } from '@/utility'
 import MapStore from './MapStore'
 import FilesystemAdapter from './FilesystemAdapter'
 
@@ -76,10 +76,11 @@ export class VersionController {
     if (!versionName) return false
 
     this.versions.prepend(file.path, versionName)
-    log.flush(`Stored version "${versionName}"`)
 
-    // force the refresh of the components
-    this.refreshRender(file.path)
+    // force the components to refresh
+    this.refreshRender(file.path, log)
+    log.flush(`Stored version <${versionName}> and refreshed components`)
+
     return true
   }
 
@@ -97,8 +98,14 @@ export class VersionController {
     const cachedFilePath = this.plugin.fs.getCachePath(cachedFileName)
 
     if (await this.plugin.fs.exists(cachedFilePath)) {
-      log.debug(`File already cached <${cachedFileName}>`)
-      return cachedFileName
+      const timestamp = Date.now().toString()
+      const cloneFileName = `${file.basename}.${hash}-${timestamp}.${file.extension}`
+      const cloneFilePath = this.plugin.fs.getCachePath(cloneFileName)
+
+      await this.plugin.fs.copy(cachedFilePath, cloneFilePath)
+      log.debug(`Cloned <${cachedFileName}> to <${cloneFileName}>`)
+
+      return cloneFileName
     }
 
     log.debug(`Caching file <${file.name}> to <${cachedFileName}>`)
@@ -116,13 +123,6 @@ export class VersionController {
 
     log.debug(`Cached file <${cachedFileName}>`)
     return cachedFileName
-
-    // try {
-    // } catch (ignored) {
-    // multiples calls at start can generate errors on copy
-    // log.debug(`Failed caching file "${cachedFilePath}"`)
-    // return null
-    // }
   }
 
   /**
@@ -131,20 +131,29 @@ export class VersionController {
    */
   protected async refreshRender(
     filepath: string,
+    log: Logger,
     called: string[] = [],
   ): Promise<void> {
     // use `called` to avoid calling a refresh twice
 
     // first refresh direct components of the file
     if (!called.includes(filepath)) {
+      log.debug(`Refreshing <${filepath}> components`)
       this.plugin.parser.refresh(filepath)
       called.push(filepath)
     }
 
-    // then update components that depend on the file
+    // then refresh components that depend on the file
     // the recursivity allows to refresh all the chain of files
     for (const dependentPath of this.dependencies.get(filepath)) {
-      this.refreshRender(dependentPath, called)
+      if (called.includes(dependentPath)) continue
+
+      // clone the file, so when executed re-instances imports like:
+      // `const { a, b } = require('./file')`
+      this.trackFile(dependentPath)
+      called.push(dependentPath)
+
+      this.refreshRender(dependentPath, log, called)
     }
   }
 }
