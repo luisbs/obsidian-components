@@ -20,28 +20,13 @@ export function arrayToObject<T extends object>(
 }
 
 /**
- * Creates an object from other objects
- * uses the source values as result keys,
- * and the source keys as result values.
+ * Generates an `string[]` from a string with separators `|;,\s`
  */
-export function reverseObject(
-  source: Record<string, string>,
-): Record<string, string[]> {
-  const result = {} as Record<string, string[]>
-
-  for (const [value, key] of Object.entries(source)) {
-    // after first occurrence
-    if (key in result) result[key].push(value)
-    // first occurrence
-    else result[key] = [value]
-  }
-
-  return result
-}
-
 export function parseStringList(source: string): string[] {
   return source.split(/[|;,\s]+/gi).reduce((arr, str) => {
+    // keep only basic values [A-Za-z0-9_]
     str = str.replace(/\W*/gi, '')
+    // add values only onces
     if (str.length > 0 && !arr.includes(str)) arr.push(str)
     return arr
   }, [] as string[])

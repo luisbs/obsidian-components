@@ -1,5 +1,5 @@
-import type { ComponentFound, PluginSettings } from '@/types/settings'
-import { Vault } from 'obsidian'
+import type { ComponentFound, PluginSettings } from '@/types'
+import type { Vault } from 'obsidian'
 import { getFilesOnFolder } from 'obsidian-fnc'
 import { getSupportedFormats, isFormatEnabled } from './formatsTools'
 
@@ -11,7 +11,6 @@ export function loadComponentsOnVault(
   settings: PluginSettings,
 ): PluginSettings['components_found'] {
   const supported = getSupportedFormats()
-
   const files = getFilesOnFolder(vault, settings.components_folder)
 
   const components: PluginSettings['components_found'] = {}
@@ -37,11 +36,14 @@ export function loadComponentsOnVault(
   return components
 }
 
+/**
+ * Get a component definition from its id.
+ */
 export function getComponentById(
   componentId: string,
   settings: PluginSettings,
-): ComponentFound | null {
-  return settings.components_found[componentId] || null
+): ComponentFound | undefined {
+  return settings.components_found[componentId]
 }
 
 /**

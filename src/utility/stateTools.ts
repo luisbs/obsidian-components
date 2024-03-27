@@ -1,8 +1,9 @@
 import type { ComponentFound, ComponentFormat, ComponentsPlugin } from '@/types'
-import path from 'path'
-import { arrayToObject, reverseObject, parseStringList } from './common'
+import Path from 'path'
+import { arrayToObject, parseStringList } from './common'
 import { getSupportedFormats } from './formatsTools'
 import { isComponentEnabled } from './componentsTools'
+import { MapStore } from './MapStore'
 
 /**
  * Pre-process the plugin settings to set the plugin state.
@@ -32,13 +33,12 @@ export function preparePluginState(plugin: ComponentsPlugin): void {
       )
     })
 
-  const codeblocks = {} as Record<string, string>
   const components = {} as Record<string, string>
+  const codeblocks = {} as Record<string, string>
 
   const includeLongNames = settings.naming_strategy !== 'SHORT'
   const includeAllNames = settings.naming_strategy === 'ALL'
 
-  // prettier-ignore
   for (const component of source) {
     const componentId = component.path
     const format = formats[component.format]
@@ -90,8 +90,8 @@ export function preparePluginState(plugin: ComponentsPlugin): void {
   // reset state
   plugin.state = {
     params: parseStringList(settings.naming_params),
-    components: reverseObject(components),
-    codeblocks: reverseObject(codeblocks),
+    components: MapStore.fromReversedObject(components),
+    codeblocks: MapStore.fromReversedObject(codeblocks),
   }
 }
 
@@ -138,12 +138,12 @@ function sortComponents(
  * Construct the names used on runtime.
  */
 function constructNames(component: ComponentFound, format: ComponentFormat) {
-  const basename = path.basename(component.path)
-  const dir = path.dirname(component.path) + '/'
+  const basename = Path.basename(component.path)
+  const dir = Path.dirname(component.path) + '/'
   const ext =
-    format.type === 'code' ? path.extname(component.path) : format.type
+    format.type === 'code' ? Path.extname(component.path) : format.type
 
-  const shortest = path.basename(component.path).replace(/\..*$/i, '')
+  const shortest = basename.replace(/\..*$/i, '')
   const shorter = shortest + '_' + ext.replace('.', '')
 
   return {

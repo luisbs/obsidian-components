@@ -5,15 +5,13 @@ import type {
   RawPluginSettings,
 } from './types'
 import { App, Plugin, PluginManifest } from 'obsidian'
-import { CodeblockHandler } from './parsers'
+import { LoggingGroup, preparePluginState } from './utility'
+import { FilesystemAdapter, VersionController } from './filesystem'
+import { CodeblockHandler } from './codeblocks'
 import { SettingsTab } from './settings/SettingsTab'
-import { preparePluginState } from './utility'
-import { VersionController } from './filesystem/VersionController'
-import FilesystemAdapter from './filesystem/FilesystemAdapter'
 
 export const DEFAULT_SETTINGS: PrimitivePluginSettings = {
   enable_components: 'STRICT',
-  enable_versioning: false,
   enable_codeblocks: false,
 
   naming_params: '__name',
@@ -53,65 +51,59 @@ export default class ComponentsPlugin extends Plugin {
   }
 
   async loadSettings(): Promise<void> {
-    const rawData = (await this.loadData()) || {}
+    const log = LoggingGroup.make('Loading Settings')
+    const { enabled_formats, enabled_components, ...primitives } =
+      (await this.loadData()) || {}
 
-    console.debug('Loading Settings')
-    console.debug(rawData)
-
-    const {
-      // prevent loading `enable_versioning`
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      enable_versioning,
-      enabled_formats,
-      enabled_components,
-      ...primitiveData
-    } = rawData
-
-    // load primitives
-    this.settings = Object.assign({}, DEFAULT_SETTINGS, primitiveData)
-
-    // load non-primitives
+    this.settings = Object.assign({}, DEFAULT_SETTINGS, primitives)
     this.settings.enabled_formats = new Set(enabled_formats || [])
     this.settings.enabled_components = new Map(enabled_components || [])
 
-    console.log('Loaded Settings')
-    console.debug(this.settings)
+    log.debug(this.settings)
+    log.flush('Loaded Settings')
 
     // load runtime configuration
     preparePluginState(this)
   }
 
   async saveSettings(): Promise<void> {
-    console.debug('Saving Settings')
-    console.debug(this.settings)
+    const log = LoggingGroup.make('Saving Settings')
+    log.debug(this.settings)
 
-    const {
-      // prevent storing `enable_versioning`
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      enable_versioning,
-      enabled_formats,
-      enabled_components,
-      ...primitiveData
-    } = this.settings
+    const { enabled_formats, enabled_components, ...primitiveData } =
+      this.settings
 
-    // shallow copy primitives
     const rawData = Object.assign({}, primitiveData) as RawPluginSettings
-
-    // convert non-primitives
     rawData.enabled_formats = Array.from(enabled_formats)
     rawData.enabled_components = Array.from(enabled_components)
 
-    // store the data
     await this.saveData(rawData)
+    log.debug(rawData)
+    log.flush('Saved Settings')
 
-    console.log('Saved Settings')
-    console.debug(rawData)
-
-    // load runtime configuration
     preparePluginState(this)
-
-    // register proccessors
     this.parser.registerCustomCodeblocks()
+  }
+
+  // Design Mode
+  #designMode = false
+
+  get isDesignModeEnabled(): boolean {
+    return this.#designMode
+  }
+
+  /**
+   * Controls when to enable the block file versioning.
+   * > `Warning:` The versioning stores each edition of a file
+   * > to provide a way to load the file changes on runtime
+   * > this behavior will cause an increase on memory usage and
+   * > storage usage, so it should be **disabled always**
+   * > until the user enables it **manually**
+   */
+  public enableDesignMode(): void {
+    if (this.#designMode) return
+    this.#designMode = true
+    this.parser.refreshAll()
   }
 
   // external API
