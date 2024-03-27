@@ -35,6 +35,9 @@ export class CodeblockHandler {
    * Force all instances of all components to re-render.
    */
   public refreshAll(): void {
+    // clear the list so when components are re-render
+    // they call `trackFile` an so the HotComponentReload works correctly
+    Renderer.trackedByRenderer = []
     for (const key of this.#rendered.keys()) {
       this.refresh(key)
     }
@@ -80,7 +83,7 @@ export class CodeblockHandler {
   public registerCustomCodeblocks(): void {
     const { settings, state } = this.#plugin
 
-    for (const [componentId, names] of Object.entries(state.codeblocks)) {
+    for (const [componentId, names] of state.codeblocks.entries()) {
       for (const name of names) {
         // avoid re-registering a processor
         if (this.#registered.includes(name)) continue

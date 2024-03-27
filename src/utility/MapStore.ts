@@ -1,22 +1,36 @@
 export class MapStore<T> {
-  protected values = new Map<string, T[]>()
+  protected _values = new Map<string, T[]>()
 
   public clear(): void {
-    this.values = new Map()
+    this._values = new Map()
   }
 
   /**
-   * Get the stored keys.
+   * Returns an iterable of keys in the MapStore.
    */
   public keys(): IterableIterator<string> {
-    return this.values.keys()
+    return this._values.keys()
+  }
+
+  /**
+   * Returns an iterable of values in the MapStore.
+   */
+  public values(): IterableIterator<T[]> {
+    return this._values.values()
+  }
+
+  /**
+   * Returns an iterable of key, value pairs for every entry in the MapStore.
+   */
+  public entries(): IterableIterator<[string, T[]]> {
+    return this._values.entries()
   }
 
   /**
    * Get the stored values related to the key.
    */
   public get(key: string): T[] {
-    return this.values.get(key) || []
+    return this._values.get(key) || []
   }
 
   /**
@@ -33,7 +47,7 @@ export class MapStore<T> {
     if (value) {
       return this.get(key).includes(value)
     } else {
-      return this.values.has(key)
+      return this._values.has(key)
     }
   }
 
@@ -43,7 +57,7 @@ export class MapStore<T> {
   public prepend(key: string, value: T): void {
     const values = this.get(key)
     values.unshift(value)
-    this.values.set(key, values.unique())
+    this._values.set(key, values.unique())
   }
 
   /**
@@ -53,7 +67,7 @@ export class MapStore<T> {
     // reverse the list so the newly inserted value is kept when unique si applied
     const values = this.get(key).reverse()
     values.unshift(value)
-    this.values.set(key, values.unique().reverse())
+    this._values.set(key, values.unique().reverse())
   }
 
   /**
