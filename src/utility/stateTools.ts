@@ -36,8 +36,8 @@ export function preparePluginState(plugin: ComponentsPlugin): void {
   const components = {} as Record<string, string>
   const codeblocks = {} as Record<string, string>
 
-  const includeLongNames = settings.naming_strategy !== 'SHORT'
-  const includeAllNames = settings.naming_strategy === 'ALL'
+  const includeLongNames = settings.components_naming !== 'SHORT'
+  const includeAllNames = settings.components_naming === 'ALL'
 
   for (const component of source) {
     const componentId = component.path
@@ -89,7 +89,7 @@ export function preparePluginState(plugin: ComponentsPlugin): void {
 
   // reset state
   plugin.state = {
-    params: parseStringList(settings.naming_params),
+    params: parseStringList(settings.usage_naming),
     components: MapStore.fromReversedObject(components),
     codeblocks: MapStore.fromReversedObject(codeblocks),
   }

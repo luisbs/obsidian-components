@@ -3,17 +3,19 @@
 // * - to have typehint with @jsdocs
 // * - use other files as library files and import/export with `require`
 
-const {join} = require('./lib.cjs')
+const { join } = require('./lib.cjs');
 
 /**
  * @param {HTMLElement} container
  * @param {Record<string, unknown>} data
  */
 module.exports = function (container, data) {
-  const p  = container.createEl('p')
-  p.appendText(`The author ${data.author}`)
-  p.appendText(` allways has been popular`)
-  p.appendText(` for his/her book named "${data.title}"`)
+  data = Array.isArray(data) ? data : [data];
 
-  container.createEl('p').setText(join(data.author, data.title))
-}
+  const ul = container.createEl('ul');
+  data.forEach((dt) => {
+    ul.createEl('li', undefined, (p) => {
+      p.append(`The author ${dt.author} wrote "${dt.title}"`);
+    });
+  });
+};

@@ -9,6 +9,7 @@
 - [x] Support for **custom codeblocks name**.
 - [x] Error output handling.
 - [x] Reload the component when the **component file** is modified (**design mode** only).
+- [x] Allow usage of **Codeblock Separators**
 
 ## Things to do before v1.0
 
@@ -41,19 +42,3 @@
 
 > Add syntax highlight on _edit mode_.<br>
 > R/ It seems the syntax highlight can not easily be activated for custom codeblocks.
-
-> Add the posibility to use a separator inside `yaml`
-> to make easier the use of objects arrays.<br>
-> R/ Is better to keep a valid syntax
-> Example:
->
-> ```yaml
-> var1: a
-> var2: b
-> ---
-> var1: c
-> var2: d
-> ---
-> var1: e
-> var2: f
-> ```
