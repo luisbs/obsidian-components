@@ -128,11 +128,19 @@ export class CodeblockHandler {
   #parseCodeblock(source: string): CodeblockContent {
     source = source.trim()
 
+    // TODO: define separator on settings
+    const separator = /\n---/gi
     const isJson = source.startsWith('{')
-    let data = {}
 
+    let data = null
     try {
-      data = isJson ? JSON.parse(source) : parseYaml(source)
+      if (!separator.test(source)) {
+        data = isJson ? JSON.parse(source) : parseYaml(source)
+      } else {
+        data = source
+          .split(separator)
+          .map((source) => (isJson ? JSON.parse(source) : parseYaml(source)))
+      }
     } catch (error) {
       throw new ComponentError('invalid-codeblock-syntax', error)
     }
@@ -141,7 +149,7 @@ export class CodeblockHandler {
       hash: createHmac('sha256', '').update(source).digest('base64'),
       syntax: isJson ? 'json' : 'yaml',
       source,
-      data,
+      data: data || {},
     }
   }
 
