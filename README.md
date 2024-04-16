@@ -8,7 +8,7 @@
 
 - Custom render elements created by the user.
 - Granular control over which component are allow to run.
-- Support for [**custom codeblocks name**](./docs/settings.md#about-the-components-custom-names).
+- Support for [**custom codeblocks name**](./docs/usage.md#about-the-components-custom-names).
 - [Design Mode (Hot-Module-Reload)](./docs/settings.md#design-mode-setting)
 - [Full User Styling](./docs/usage.md#styling)
 

@@ -52,7 +52,7 @@ All the **Codeblocks** support the use of `JSON` too. Example:
 
 First-level array items can be written as:
 
-```use book
+```book_cjs
 title: 'The Great Gatsby'
 author: 'F. Scott Fitzgerald'
 ---
@@ -65,7 +65,7 @@ author: 'J. R. Tolkien'
 
 That will give the same result as:
 
-```use book
+```book_cjs
 - title: 'The Great Gatsby'
   author: 'F. Scott Fitzgerald'
 
