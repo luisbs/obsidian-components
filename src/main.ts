@@ -13,11 +13,13 @@ import { SettingsTab } from './settings/SettingsTab'
 export const DEFAULT_SETTINGS: PrimitivePluginSettings = {
   enable_components: 'STRICT',
   enable_codeblocks: false,
+  enable_separators: false,
 
-  naming_params: '__name',
-  naming_method: 'INLINE',
-  naming_strategy: 'LONG',
+  usage_method: 'INLINE',
+  usage_naming: '__name',
+  usage_separator: '---',
 
+  components_naming: 'LONG',
   components_folder: '',
   components_found: {},
 }

@@ -24,7 +24,7 @@ The bad thing about this is that it will generate a higher memory and storage us
 
 ## Custom Codeblocks Setting
 
-By default to identify a Codeblocks that should run a **component**, the `use <component-name>` sentence is used as the header of the Codeblock. Example:
+By default to identify a **Codeblocks** that should run a **component**, the `use <component-name>` sentence is used as the header of the **Codeblock**. Example:
 
 ````yaml
 ```use book
@@ -32,10 +32,54 @@ param1: value1
 ```
 ````
 
-This settings allows the usage of the **components custom names** defined by the user as Codeblocks identifiers, so instead of `use book` you can use `book` in the first line of the Codeblock. Example:
+This settings allows the usage of the **components custom names** defined by the user as **Codeblocks** identifiers, so instead of `use book` you can use `book` in the first line of the **Codeblock**. Example:
 
 ````yaml
 ```book
 param1: value1
+```
+````
+
+## Codeblocks Separators Setting
+
+By default the content inside a **Codeblock** is parsed as detailed at [Supported Codeblocks Syntax](./usage.md#supported-codeblocks-syntax). But in the case of `YAML` that will force arrays to be indented. Example:
+
+````yaml
+```use component
+- param1: value1
+  param2: value2
+
+- param1: value3
+  param2: value4
+
+- param1: value5
+  param2: value6
+```
+````
+
+This setting makes possible to avoid that situation and instead use a _user-defined_ separator. Example:
+
+````yaml
+```use component
+param1: value1
+param2: value2
+---
+param1: value3
+param2: value4
+---
+param1: value5
+param2: value6
+```
+````
+
+This feature can also be used with `JSON`.
+
+````json
+```use component
+{ "param1": "value1", "param2": "value2" }
+---
+{ "param1": "value3", "param2": "value4" }
+---
+{ "param1": "value5", "param2": "value6" }
 ```
 ````

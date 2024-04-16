@@ -127,14 +127,12 @@ export class CodeblockHandler {
 
   #parseCodeblock(source: string): CodeblockContent {
     source = source.trim()
-
-    // TODO: define separator on settings
-    const separator = /\n---/gi
     const isJson = source.startsWith('{')
+    const separator = new RegExp(this.#plugin.settings.usage_separator, 'ig')
 
     let data = null
     try {
-      if (!separator.test(source)) {
+      if (!this.#plugin.settings.enable_separators || !separator.test(source)) {
         data = isJson ? JSON.parse(source) : parseYaml(source)
       } else {
         data = source
@@ -165,7 +163,7 @@ export class CodeblockHandler {
     let name = ''
 
     // first search for the name on the data
-    if (settings.naming_method !== 'INLINE' && isRecord(data)) {
+    if (settings.usage_method !== 'INLINE' && isRecord(data)) {
       for (const paramName of state.params) {
         if (typeof data[paramName] === 'string') {
           name = data[paramName] as string
@@ -175,7 +173,7 @@ export class CodeblockHandler {
     }
 
     // if the name is missing try to get it from inline
-    if (!name && settings.naming_method !== 'PARAM') {
+    if (!name && settings.usage_method !== 'PARAM') {
       const info = context.getSectionInfo(element)
       if (!info) throw new ComponentError('missing-component-name')
 
