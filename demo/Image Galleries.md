@@ -13,13 +13,15 @@ To avoid this situation, styles can be used (the next images have a `max-width: 
 
 This demo includes 2 image-gallery implementations to give an idea of what is possible.
 
-#### Image sources
+### Image sources
 
 The used images are only limited to what the user implements on the **Component**:
+
 - External images can be used directly like `https://cdn.myanimelist.net/images/anime/5/44560l.jpg`
 - Local images are resolved in this examples using the object `app.fileManager.vault.adapter` (Note: this object may change in the future, is not standard) but other implementations can be achieved probably.
 
 ---
+
 ## Examples
 
 ### Slide gallery

@@ -1,12 +1,13 @@
 import type { ComponentsPlugin, PluginSettings } from '@/types'
+import type { TextAreaComponent, TextComponent } from 'obsidian'
 import { PluginSettingTab, Setting } from 'obsidian'
 import { FolderSuggester } from 'obsidian-fnc'
 import { loadComponentsOnVault } from '@/utility'
 import { FormatsTable, ComponentsTable } from './components'
 
 // prettier-ignore
-function getDocumentationUrl(id: string): string {
-  return "https://github.com/luisbs/obsidian-components/blob/main/docs/settings.md#" + id;
+function createDocsLink(id: string, text: string): HTMLAnchorElement {
+  return createEl('a', { text, href: "https://github.com/luisbs/obsidian-components/blob/main/docs/settings.md#" + id })
 }
 
 export class SettingsTab extends PluginSettingTab {
@@ -44,6 +45,9 @@ export class SettingsTab extends PluginSettingTab {
     this.#newSetting().setName('Usage Settings').setHeading()
     this.#displayUsageSettings()
 
+    this.#newSetting().setName('Codeblocks Settings').setHeading()
+    this.#displayCodeblocksSettings()
+
     this.#newSetting().setName('Components Settings').setHeading()
     this.#displayComponentsSettings()
 
@@ -73,45 +77,41 @@ export class SettingsTab extends PluginSettingTab {
   }
 
   #displayGeneralSettings(): void {
-    const behaviorDesc = createFragment()
-    const behaviorDescP = behaviorDesc.createEl('p')
-    behaviorDescP.appendText('Security behavior when runing the components.')
-    behaviorDescP.createEl('br')
-    behaviorDescP.createEl('br')
-    behaviorDescP.appendText('For more details see ')
-    behaviorDescP.createEl('a', {
-      text: 'execution behavior setting',
-      href: getDocumentationUrl('execution-behavior-setting'),
+    const behaviorDesc = createFragment((div) => {
+      div.append(
+        'Security behavior when runing the components.',
+        createEl('br'),
+        'For more details see ',
+        createDocsLink('execution-behavior-setting', 'execution behavior'),
+        '.',
+      )
     })
 
     this.#newSetting()
       .setName('Execution behavior')
       .setDesc(behaviorDesc)
       .addDropdown((input) => {
-        input
-          .addOptions({
-            STRICT: 'Only components enabled by the user. (recomended)',
-            FLEXIBLE: 'Components and formats enabled by the user.',
-            ALL: 'Allow all the components',
-          })
-          .setValue(this.#settings.enable_components)
-          .onChange(this.update.bind(this, 'enable_components'))
+        input.addOptions({
+          STRICT: 'Only components enabled by the user. (recomended)',
+          FLEXIBLE: 'Components and formats enabled by the user.',
+          ALL: 'Allow all the components',
+        })
+        input.setValue(this.#settings.enable_components)
+        input.onChange(this.update.bind(this, 'enable_components'))
       })
 
     //
     // Design mode setting
-    const modeDesc = createFragment()
-    const modeDescP = modeDesc.createEl('p')
-    // prettier-ignore
-    modeDescP.appendText("Enable design mode only if you're editing your components code.")
-    modeDescP.createEl('br')
-    modeDescP.appendText('It will not disabled until you close the app.')
-    modeDescP.createEl('br')
-    modeDescP.createEl('br')
-    modeDescP.appendText('For more details see ')
-    modeDescP.createEl('a', {
-      text: 'design mode',
-      href: getDocumentationUrl('design-mode-setting'),
+    const modeDesc = createFragment((div) => {
+      div.append(
+        "Enable design mode only if you're editing your components code.",
+        createEl('br'),
+        'It will not disabled until you close the app.',
+        createEl('br'),
+        'For more details see ',
+        createDocsLink('design-mode-setting', 'design mode'),
+        '.',
+      )
     })
 
     this.#newSetting()
@@ -119,53 +119,33 @@ export class SettingsTab extends PluginSettingTab {
       .setDesc(modeDesc)
       .addToggle((input) => {
         const enabled = this.#plugin.isDesignModeEnabled
-        input
-          .setValue(enabled)
-          .setDisabled(enabled)
-          .onChange((value) => {
-            // allows only enable
-            if (enabled) return
-            input.setDisabled(true)
-            this.#plugin.enableDesignMode()
-          })
-      })
-
-    //
-    // Custom codeblocks setting
-    const codeblocksDesc = createFragment()
-    const codeblocksDescP = codeblocksDesc.createEl('p')
-    // prettier-ignore
-    codeblocksDescP.appendText('Allows the usage of the components custom names as codeblocks identifiers.')
-    codeblocksDescP.createEl('br')
-    codeblocksDescP.createEl('br')
-    codeblocksDescP.appendText('For more details see ')
-    codeblocksDescP.createEl('a', {
-      text: 'design mode',
-      href: getDocumentationUrl('custom-codeblocks-setting'),
-    })
-
-    this.#newSetting()
-      .setName('Custom Codeblocks')
-      .setDesc(codeblocksDesc)
-      .addToggle((input) => {
-        input
-          .setValue(this.#settings.enable_codeblocks)
-          .onChange(this.update.bind(this, 'enable_codeblocks'))
+        input.setDisabled(enabled)
+        input.setValue(enabled)
+        input.onChange((value) => {
+          // allows only enable
+          if (enabled) return
+          input.setDisabled(true)
+          this.#plugin.enableDesignMode()
+        })
       })
   }
 
   #displayUsageSettings(): void {
-    const methodDesc = createFragment()
-    methodDesc.createEl('ul', undefined, (ul) => {
-      ul.createEl('li').append(
-        'Inline names: like',
-        createEl('code', { text: "'```use book```'" }),
-      )
-      ul.createEl('li').append(
-        'Param names: like',
-        createEl('code', { text: `'__name: "book"'` }),
-        '(inside the codeblock)',
-      )
+    const isDisabled = (value: string): boolean => value === 'INLINE'
+    let namingMethodInput: TextAreaComponent | null = null
+
+    const methodDesc = createFragment((div) => {
+      div.createEl('ul', undefined, (ul) => {
+        ul.createEl('li').append(
+          'Inline names: like',
+          createEl('code', { text: "'```use book```'" }),
+        )
+        ul.createEl('li').append(
+          'Param names: like',
+          createEl('code', { text: `'__name: "book"'` }),
+          '(inside the codeblock)',
+        )
+      })
     })
 
     this.#newSetting()
@@ -177,16 +157,76 @@ export class SettingsTab extends PluginSettingTab {
           PARAM: 'Use param names',
           BOTH: 'Use both methods',
         })
-        input.setValue(this.#settings.naming_method)
-        input.onChange(this.update.bind(this, 'naming_method'))
+        input.setValue(this.#settings.usage_method)
+        input.onChange((value) => {
+          this.update('usage_method', value)
+          namingMethodInput?.setDisabled(isDisabled(value))
+        })
       })
 
     this.#newSetting()
       .setName('Base Codeblock name parameters')
-      .setDesc('Defines the parameters used to identify a component')
+      .setDesc('Defines the parameters used to identify a component.')
       .addTextArea((input) => {
-        input.setValue(this.#settings.naming_params)
-        input.onChange(this.update.bind(this, 'naming_params'))
+        namingMethodInput = input
+        input.setDisabled(isDisabled(this.#settings.usage_method))
+        input.setValue(this.#settings.usage_naming)
+        input.onChange(this.update.bind(this, 'usage_naming'))
+      })
+
+    //
+    // Custom codeblocks setting
+    const codeblocksDesc = createFragment((div) => {
+      div.append(
+        'Allows the usage of the components custom names as codeblocks identifiers.',
+        createEl('br'),
+        'For more details see ',
+        createDocsLink('custom-codeblocks-setting', 'custom codeblocks'),
+        '.',
+      )
+    })
+
+    this.#newSetting()
+      .setName('Custom Codeblocks')
+      .setDesc(codeblocksDesc)
+      .addToggle((input) => {
+        input.setValue(this.#settings.enable_codeblocks)
+        input.onChange(this.update.bind(this, 'enable_codeblocks'))
+      })
+  }
+
+  #displayCodeblocksSettings(): void {
+    let usageSeparatorInput: TextComponent | null = null
+
+    const separatorDesc = createFragment((div) => {
+      div.append(
+        'Allows the usage of separators inside codeblocks.',
+        createEl('br'),
+        'For more details see ',
+        createDocsLink('codeblocks-separators-setting', 'codeblock separators'),
+        '.',
+      )
+    })
+
+    this.#newSetting()
+      .setName('Codeblocks Separators')
+      .setDesc(separatorDesc)
+      .addToggle((input) => {
+        input.setValue(this.#settings.enable_separators)
+        input.onChange((value) => {
+          this.update('enable_separators', value)
+          usageSeparatorInput?.setDisabled(!value)
+        })
+      })
+
+    this.#newSetting()
+      .setName('Codeblocks Separator')
+      .setDesc('Separator to use inside codeblocks.')
+      .addText((input) => {
+        usageSeparatorInput = input
+        input.setDisabled(!this.#settings.enable_separators)
+        input.setValue(this.#settings.usage_separator)
+        input.onChange(this.update.bind(this, 'usage_separator'))
       })
   }
 
@@ -194,26 +234,27 @@ export class SettingsTab extends PluginSettingTab {
     this.#newSetting()
       .setName('Components templates folder.')
       .setDesc('Files in this directory will be taken as components.')
-      .addText((text) => {
-        new FolderSuggester(this.app, text.inputEl, this.containerEl)
-        text
-          .setPlaceholder('Example: folder1/folder2')
-          .setValue(this.#settings.components_folder)
-          .onChange(this.update.bind(this, 'components_folder'))
+      .addText((input) => {
+        new FolderSuggester(this.app, input.inputEl, this.containerEl)
+        input.setPlaceholder('Example: folder1/folder2')
+        input.setValue(this.#settings.components_folder)
+        input.onChange(this.update.bind(this, 'components_folder'))
       })
 
     //
     // Naming strategy setting
-    const strategyDesc = createFragment()
-    strategyDesc.appendText('Strategy used for using the components.')
-    strategyDesc.createEl('br')
-    // prettier-ignore
-    strategyDesc.appendText('In cases of naming collition the names are going to be assigned incrementally in the next order.')
-    // prettier-ignore
-    strategyDesc.createEl('ul', undefined, (ul) => {
-      ul.createEl('li', undefined, (li) => li.append('Short names: like', createEl('code', { text: "'book'" })))
-      ul.createEl('li', undefined, (li) => li.append('Long names: like', createEl('code', { text: "'folder/book'" })))
-      ul.createEl('li', undefined, (li) => li.append('Full names: like', createEl('code', { text: "'full/vault/path/book'" })))
+    const strategyDesc = createFragment((div) => {
+      div.append(
+        'Strategy used for using the components.',
+        createEl('br'),
+        'In cases of naming collition the names are going to be assigned incrementally in the next order.',
+        // prettier-ignore
+        createEl('ul', undefined, (ul) => {
+          ul.createEl('li', undefined, (li) => li.append('Short names: like', createEl('code', { text: "'book'" })))
+          ul.createEl('li', undefined, (li) => li.append('Long names: like', createEl('code', { text: "'folder/book'" })))
+          ul.createEl('li', undefined, (li) => li.append('Full names: like', createEl('code', { text: "'full/vault/path/book'" })))
+        }),
+      )
     })
 
     this.#newSetting()
@@ -225,8 +266,8 @@ export class SettingsTab extends PluginSettingTab {
           LONG: 'Short and long names.',
           ALL: 'Include all names',
         })
-        input.setValue(this.#settings.naming_strategy)
-        input.onChange(this.update.bind(this, 'naming_strategy'))
+        input.setValue(this.#settings.components_naming)
+        input.onChange(this.update.bind(this, 'components_naming'))
       })
   }
 

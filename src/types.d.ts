@@ -52,26 +52,30 @@ export interface PluginSettings {
    * - `'ALL'` allow all the components.
    */
   enable_components: 'STRICT' | 'FLEXIBLE' | 'ALL'
-  /** Stores the user desition to use custom codeblocks. */
+  /** Stores the user desition to allow custom codeblocks. */
   enable_codeblocks: boolean
+  /** Stores the user desition to allow separators on codeblocks. */
+  enable_separators: boolean
 
-  /** Store the user input about which params can be used to retrive a component name. */
-  naming_params: string
   /**
    * Stores the component naming method for the vault.
    * - `'INLINE'` specify the name as an inline string (e.g. `use book`)
    * - `'PARAM'` specify the name as a param (e.g. `__name: 'book'`)
    * - `'BOTH'` use both methods
    */
-  naming_method: 'INLINE' | 'PARAM' | 'BOTH'
+  usage_method: 'INLINE' | 'PARAM' | 'BOTH'
+  /** Store the user input about which params can be used to retrive a component name. */
+  usage_naming: string
+  /** Store the user input about the separator to use inside codeblocks. */
+  usage_separator: string
+
   /**
    * Stores the components naming strategy.
    * - `'SHORT'` includes only the short names
    * - `'LONG'` includes the short and long names
    * - `'ALL'` includes all the possible names
    */
-  naming_strategy: 'SHORT' | 'LONG' | 'ALL'
-
+  components_naming: 'SHORT' | 'LONG' | 'ALL'
   /** Stores the route where the components are. */
   components_folder: string
   /** Stores the components found on the vault. */

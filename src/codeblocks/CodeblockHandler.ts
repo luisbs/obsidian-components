@@ -127,12 +127,18 @@ export class CodeblockHandler {
 
   #parseCodeblock(source: string): CodeblockContent {
     source = source.trim()
-
     const isJson = source.startsWith('{')
-    let data = {}
+    const separator = new RegExp(this.#plugin.settings.usage_separator, 'ig')
 
+    let data = null
     try {
-      data = isJson ? JSON.parse(source) : parseYaml(source)
+      if (!this.#plugin.settings.enable_separators || !separator.test(source)) {
+        data = isJson ? JSON.parse(source) : parseYaml(source)
+      } else {
+        data = source
+          .split(separator)
+          .map((source) => (isJson ? JSON.parse(source) : parseYaml(source)))
+      }
     } catch (error) {
       throw new ComponentError('invalid-codeblock-syntax', error)
     }
@@ -141,7 +147,7 @@ export class CodeblockHandler {
       hash: createHmac('sha256', '').update(source).digest('base64'),
       syntax: isJson ? 'json' : 'yaml',
       source,
-      data,
+      data: data || {},
     }
   }
 
@@ -157,7 +163,7 @@ export class CodeblockHandler {
     let name = ''
 
     // first search for the name on the data
-    if (settings.naming_method !== 'INLINE' && isRecord(data)) {
+    if (settings.usage_method !== 'INLINE' && isRecord(data)) {
       for (const paramName of state.params) {
         if (typeof data[paramName] === 'string') {
           name = data[paramName] as string
@@ -167,7 +173,7 @@ export class CodeblockHandler {
     }
 
     // if the name is missing try to get it from inline
-    if (!name && settings.naming_method !== 'PARAM') {
+    if (!name && settings.usage_method !== 'PARAM') {
       const info = context.getSectionInfo(element)
       if (!info) throw new ComponentError('missing-component-name')
 
