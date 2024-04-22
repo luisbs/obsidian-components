@@ -139,15 +139,20 @@ export class CodeblockHandler {
           .split(separator)
           .map((source) => (isJson ? JSON.parse(source) : parseYaml(source)))
       }
-    } catch (error) {
-      throw new ComponentError('invalid-codeblock-syntax', error)
-    }
 
-    return {
-      hash: createHmac('sha256', '').update(source).digest('base64'),
-      syntax: isJson ? 'json' : 'yaml',
-      source,
-      data: data || {},
+      return {
+        hash: createHmac('sha256', '').update(source).digest('base64'),
+        syntax: isJson ? 'json' : 'yaml',
+        source,
+        data: data || '',
+      }
+    } catch (ignored) {
+      return {
+        hash: createHmac('sha256', '').update(source).digest('base64'),
+        syntax: 'none',
+        source,
+        data: source,
+      }
     }
   }
 

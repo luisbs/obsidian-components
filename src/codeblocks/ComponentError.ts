@@ -1,6 +1,6 @@
 type ErrorCode =
   // throwed on `codeblockProcessors`
-  | 'invalid-codeblock-syntax'
+  //| 'invalid-codeblock-syntax'
   | 'missing-component-name'
   | 'unknown-component'
   // throwed on `getRenderer`
@@ -26,8 +26,8 @@ export class ComponentError extends Error {
 
   static #suggestion(code: ErrorCode): string {
     switch (code) {
-      case 'invalid-codeblock-syntax':
-        return 'check json/yaml syntax on the codeblock'
+      //case 'invalid-codeblock-syntax':
+      //  return 'check json/yaml syntax on the codeblock'
       case 'missing-component-name':
         return 'check component-name is present and follows Plugin settings'
       case 'unknown-component':
