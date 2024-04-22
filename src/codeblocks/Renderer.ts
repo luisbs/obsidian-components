@@ -36,10 +36,10 @@ export abstract class Renderer {
       await this.runRenderer()
     } catch (error) {
       const pre = this.element.createEl('pre')
-
-      const isError = error instanceof ComponentError
-      if (isError) pre.classList.add(error.code)
-      pre.append(String(error))
+      if (error instanceof ComponentError) pre.classList.add(error.code)
+      if (error instanceof Error) pre.append(error.stack || error.message)
+      else pre.append(String(error))
+      this.#log.error(error)
     }
     this.#log.flush(`[${this.#id}] Rendered '${this.component.path}'`)
   }
