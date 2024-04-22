@@ -50,10 +50,22 @@ export abstract class Renderer {
     fallback = '[missing]',
   ): string {
     this.#log.debug('replaceData')
-    if (!isRecord(data)) throw new ComponentError('invalid-component-params')
-    return source.replace(/\{\{ *(\w+) *\}\}/gi, (match, key) => {
-      return key in data ? String(data[key]) : fallback
-    })
+
+    try {
+      if (isRecord(data) || Array.isArray(data)) {
+        return source.replace(/\{\{ *(\w+) *\}\}/gi, (_, key) => {
+          //@ts-expect-error runtime dynamic replacement
+          return data[key] ? String(data[key]) : fallback
+        })
+      }
+
+      return source.replace(
+        /\{\{ *(\w+) *\}\}/gi,
+        data ? String(data) : fallback,
+      )
+    } catch (error) {
+      throw new ComponentError('invalid-component-params', error)
+    }
   }
 
   protected renderHTMLContent(element: HTMLElement, content: string): void {
