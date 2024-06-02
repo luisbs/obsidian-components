@@ -10,10 +10,39 @@
 - [x] Error output handling.
 - [x] Reload the component when the **component file** is modified (**design mode** only).
 - [x] Allow usage of **Codeblock Separators**
+- [ ] Listen changes on imported files, although they aren't inside components folder. Example:
+
+Right now a config like the next one works:
+
+```yaml
+# config
+components-folder: code/components/
+
+# vault
+paths:
+  - code/components/
+  - code/components/example.js (imports commons.js)
+  - code/components/commons.js
+```
+
+But the next example will not work since `commons.js` is outside of `code/components/` and the plugin only listens to changes inside the `components-folder` path.
+
+```yaml
+# config
+components-folder: code/components/
+
+# vault
+paths:
+  - code/components/
+  - code/components/example.js (imports commons.js)
+  - code/commons.js
+```
+
+The change is to keep a list of referenced files, inside the **components** files and listen to changes on those files too.
 
 ## Things to do before v1.0
 
-- [ ] Add a showcase video.
+- [x] Add a showcase video.
 - [ ] Add the plugin to the obsidian plugins repository.
 
 ### Support
@@ -33,6 +62,7 @@
 
 - [ ] Add **API** to allow integration with other plugins.
   - For example use **Dataview** to collect data and **Components** to render the output.
+  - For example allow a **Component** to run a render-method on an external plugin, the external plugin should notify **Components** is able to handle integration.
 - [ ] Add cache of `'html' | 'md'` component types.
 - [ ] Add support for other codeblock content syntax (e.g. **JS objects**)
 - [ ] Add support for other codeblock content syntax (e.g. **TOML**)
