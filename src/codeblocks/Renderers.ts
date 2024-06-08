@@ -33,8 +33,9 @@ export function getRenderer(
   throw new ComponentError('missing-component-renderer')
 }
 
-type TextRenderer = (data: unknown) => string
-type CodeRenderer = (container: HTMLElement, data: unknown) => void
+type MayPromise<T> = T | Promise<T>
+type TextRenderer = (data: unknown) => MayPromise<string>
+type CodeRenderer = (container: HTMLElement, data: unknown) => MayPromise<void>
 
 export class HTMLRenderer extends Renderer {
   async runRenderer(): Promise<void> {
@@ -55,7 +56,7 @@ export class MarkdownRenderer extends Renderer {
 export class JavascriptHTMLRenderer extends Renderer {
   async runRenderer(): Promise<void> {
     const render = (await this.requireRenderFn()) as TextRenderer
-    const html = render(this.data)
+    const html = await render(this.data)
     this.renderHTMLContent(this.element, html)
   }
 }
@@ -63,7 +64,7 @@ export class JavascriptHTMLRenderer extends Renderer {
 export class JavascriptMarkdownRenderer extends Renderer {
   async runRenderer(): Promise<void> {
     const render = (await this.requireRenderFn()) as TextRenderer
-    const markdown = render(this.data)
+    const markdown = await render(this.data)
     this.renderMarkdownContent(this.element, markdown)
   }
 }
@@ -71,6 +72,6 @@ export class JavascriptMarkdownRenderer extends Renderer {
 export class JavascriptCodeRenderer extends Renderer {
   async runRenderer(): Promise<void> {
     const render = (await this.requireRenderFn()) as CodeRenderer
-    render(this.element, this.data)
+    await render(this.element, this.data)
   }
 }
