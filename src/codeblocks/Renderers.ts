@@ -13,21 +13,24 @@ export function getRenderer(
     throw new ComponentError('disabled-component')
   }
 
-  const format = getFormatById(component.format)
-  if (!format) throw new ComponentError('missing-component-renderer')
+  const f = getFormatById(component.format)
+  if (!f) throw new ComponentError('missing-component-renderer')
 
-  switch (format.id) {
+  switch (f.id) {
     case 'html':
-      return new HTMLRenderer(element, plugin, component, data)
+      return new HTMLRenderer(element, plugin, f, component, data)
     case 'markdown':
-      return new MarkdownRenderer(element, plugin, component, data)
+      return new MarkdownRenderer(element, plugin, f, component, data)
 
-    case 'javascript_html':
-      return new JavascriptHTMLRenderer(element, plugin, component, data)
-    case 'javascript_markdown':
-      return new JavascriptMarkdownRenderer(element, plugin, component, data)
-    case 'javascript_code':
-      return new JavascriptCodeRenderer(element, plugin, component, data)
+    case 'commonjs_html':
+    case 'esmodules_html':
+      return new JavascriptHTMLRenderer(element, plugin, f, component, data)
+    case 'commonjs_markdown':
+    case 'esmodules_markdown':
+      return new JavascriptMarkdownRenderer(element, plugin, f, component, data)
+    case 'commonjs_code':
+    case 'esmodules_code':
+      return new JavascriptCodeRenderer(element, plugin, f, component, data)
   }
 
   throw new ComponentError('missing-component-renderer')

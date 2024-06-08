@@ -100,15 +100,14 @@ export interface PluginSettings {
  * Defines a component format.
  */
 export interface ComponentFormat {
-  /**
-   * Unique Identifier for the format.
-   */
+  /** Unique Identifier for the format. */
   id: string
-  /**
-   * Defines the extension of the files
-   * with this format.
-   */
+  /** Defines the extension of the files with this format. */
   ext: RegExp
+  /** Defines tags to group formats. */
+  tags: string[]
+
+  // TODO: remove type property
   /**
    * Defines the type of behavior of the components
    * - `code` corresponds with formats that can handle the DOM a.k.a. **javascript**

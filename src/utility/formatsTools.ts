@@ -5,15 +5,21 @@ import type { ComponentFormat, PluginSettings } from '@/types'
  */
 export function getSupportedFormats(): ComponentFormat[] {
   // as function to prevent any values mixin on the regex
+  // prettier-ignore
   return [
     // html/markdown
-    { id: 'html', ext: /\.html$/i, type: 'html' },
-    { id: 'markdown', ext: /\.md$/i, type: 'md' },
+    { id: 'html', ext: /\.html$/i, type: 'html', tags: ['html'] },
+    { id: 'markdown', ext: /\.md$/i, type: 'md', tags: ['md'] },
 
-    // javascript
-    { id: 'javascript_html', ext: /\.html\.c?js$/i, type: 'html' },
-    { id: 'javascript_markdown', ext: /\.md\.c?js$/i, type: 'md' },
-    { id: 'javascript_code', ext: /\.c?js$/i, type: 'code' },
+    // CommonJS
+    { id: 'commonjs_html', ext: /\.html\.cjs$/i, type: 'html', tags: ['commonjs', 'html'] },
+    { id: 'commonjs_markdown', ext: /\.md\.cjs$/i, type: 'md', tags: ['commonjs', 'md'] },
+    { id: 'commonjs_code', ext: /\.cjs$/i, type: 'code', tags: ['commonjs', 'code'] },
+
+    // ESModules
+    { id: 'esmodules_html', ext: /\.html\.js$/i, type: 'html', tags: ['esmodules', 'html',] },
+    { id: 'esmodules_markdown', ext: /\.md\.js$/i, type: 'md', tags: ['esmodules', 'md',] },
+    { id: 'esmodules_code', ext: /\.js$/i, type: 'code', tags: ['esmodules', 'code',] },
   ]
 }
 

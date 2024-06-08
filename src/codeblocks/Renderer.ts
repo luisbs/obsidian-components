@@ -1,4 +1,9 @@
-import type { ComponentFound, ComponentsPlugin, PluginSettings } from '@/types'
+import type {
+  ComponentFormat,
+  ComponentFound,
+  ComponentsPlugin,
+  PluginSettings,
+} from '@/types'
 import { MarkdownRenderer, TFile, Vault } from 'obsidian'
 import { LoggingGroup, isRecord } from '@/utility'
 import { ComponentError } from './ComponentError'
@@ -14,6 +19,7 @@ export abstract class Renderer {
   constructor(
     protected element: HTMLElement,
     protected plugin: ComponentsPlugin,
+    protected format: ComponentFormat,
     protected component: ComponentFound,
     protected data: unknown,
   ) {
@@ -120,25 +126,35 @@ export abstract class Renderer {
       }
 
       const versionName = this.plugin.versions.resolveFile(baseFile)
-      const versionPath = versionName
+      const modulePath = versionName
         ? this.plugin.fs.getCachePath(versionName)
-        : undefined
-      const modulePath = this.getModulePath(versionPath)
+        : this.component.path
 
-      this.#log.info(`Executing <${versionName || this.component.path}>`)
-      return require(modulePath)
+      if (this.format.tags.contains('commonjs')) {
+        return await this.requireModule(modulePath)
+      } else if (this.format.tags.contains('esmodules')) {
+        return await this.importModule(modulePath)
+      }
+
+      throw new Error('unsupported javascript module format')
     } catch (error) {
       this.#log.error(error)
       throw new ComponentError('invalid-component-syntax', error)
     }
   }
 
-  /**
-   * @returns the real path of the file on the os.
-   */
-  protected getModulePath(filePath?: string | null): string {
-    this.#log.debug('getModulePath')
-    filePath = filePath || this.component.path
-    return this.plugin.fs.getRealPath(filePath)
+  protected async requireModule(modulePath: string): Promise<unknown> {
+    const resolved = this.plugin.fs.getRealPath(modulePath)
+    this.#log.info(`require('${resolved}')`)
+    return await require(resolved)
+  }
+
+  protected async importModule(modulePath: string): Promise<unknown> {
+    const file = this.vault.getFileByPath(modulePath)
+    if (!file) throw new ComponentError('missing-component-file', modulePath)
+
+    const resolved = this.vault.getResourcePath(file)
+    this.#log.info(`import('${resolved}')`)
+    return await import(resolved)
   }
 }
