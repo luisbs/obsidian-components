@@ -1,3 +1,5 @@
+/* prettier-ignore */
+
 .content-component code {
   display: inline-block;
 }
@@ -40,6 +42,11 @@
   display: inline;
 }
 
+.card-catalogue img {
+  width: 100%;
+  object-fit: contain;
+}
+
 /* mobile-first */
 
 .cards-collection {
@@ -72,7 +79,8 @@
   margin: var(--size-4-4) auto;
   border: 1px solid var(--lb-border);
   border-radius: var(--size-2-2);
-  background-color: var(--lb-base);
+  /* background-color: var(--lb-base); */
+  background-color: #00000010;
 }
 
 .vault-card > * {
@@ -85,7 +93,8 @@
   border: 1px solid var(--lb-border);
 }
 .vault-card > *:hover {
-  background-color: var(--lb-base-hover);
+  /* background-color: var(--lb-base-hover); */
+  background-color: #00000005;
 }
 
 .card-header {
@@ -96,6 +105,9 @@
 }
 .card-details {
   grid-area: details;
+}
+.card-chapters {
+  grid-area: chapters;
 }
 .card-summary {
   grid-area: summary;
@@ -186,26 +198,28 @@
   .content-card {
     grid-template-columns: 1fr 1fr;
     grid-template-areas:
-      'header  header'
-      'tags    tags'
-      'details details'
-      'summary links'
-      'gallery gallery';
+      'header   header'
+      'tags     tags'
+      'details  details'
+      'chapters links'
+      'summary  summary'
+      'gallery  gallery';
   }
   .content-card.with-cover {
     grid-template-areas:
       'header  header'
       'cover   tags'
       'cover   details'
-      'cover   summary'
+      'cover   chapters'
       'cover   links'
+      'summary summary'
       'gallery gallery';
   }
 
   .content-card .card-details {
     align-content: flex-start;
   }
-  .content-card .card-summary {
+  .content-card .card-chapters {
     align-content: center;
   }
   .content-card .card-links {
@@ -218,19 +232,21 @@
   .content-card {
     grid-template-columns: minmax(fit-content, 5fr) 2fr 2fr;
     grid-template-areas:
-      'header  header  header'
-      'tags    tags    tags'
-      'details summary links'
-      'gallery gallery gallery';
+      'header  header   header'
+      'tags    tags     tags'
+      'details chapters links'
+      'summary summary  summary'
+      'gallery gallery  gallery';
   }
   .content-card.with-cover {
     grid-template-columns: min(40%, 200px) 3fr 5fr;
     grid-template-areas:
-      'cover   header  header'
-      'cover   tags    tags'
-      'cover   details details'
-      'cover   summary links'
-      'gallery gallery gallery';
+      'cover   header   header'
+      'cover   tags     tags'
+      'cover   details  details'
+      'cover   chapters links'
+      'summary summary  summary'
+      'gallery gallery  gallery';
   }
 }
 
@@ -278,7 +294,46 @@
   grid-column-end: span 2;
 }
 .gallery-card .card-gallery .w3 {
-  grid-column-end: span 2;
+  grid-column-end: span 3;
+}
+
+/* sliders */
+.catalogue-card,
+.gallery-card {
+  word-break: break-all;
+}
+.catalogue-card {
+  --item-basis: 25%;
+}
+.catalogue-card.c3 {
+  --item-basis: 33%;
+}
+.catalogue-card.c2 {
+  --item-basis: 50%;
+}
+
+.catalogue-card img {
+  max-height: 400px;
+}
+.catalogue-card input {
+  display: none;
+}
+/* .catalogue-card label { } */
+.catalogue-card .card-catalogue-main {
+  grid-area: main;
+  justify-content: center;
+  align-items: center;
+}
+.catalogue-card .card-catalogue-options {
+  grid-area: options;
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+  align-content: flex-start;
+}
+.catalogue-card .card-catalogue-options > * {
+  flex: 0 0 var(--item-basis);
+  padding: var(--size-2-2);
 }
 
 @media (min-width: 520px) {
@@ -289,5 +344,48 @@
   .gallery-card.with-header {
     grid-template-areas: 'header' 'gallery';
   }
+
+  .catalogue-card {
+    grid-template-columns: 8fr 4fr;
+    grid-template-areas: 'main options';
+  }
+  .catalogue-card.with-header {
+    grid-template-columns: 8fr 4fr;
+    grid-template-areas: 'header header' 'main options';
+  }
 }
+
 /* @media (min-width: 720px) {} */
+
+.cards-grid {
+  display: grid;
+}
+.cards-grid .vault-card {
+  margin: 0;
+}
+
+/* Characters components */
+.characters-grid {
+  grid-template-columns: repeat(auto-fit, minmax(200px, auto));
+}
+.characters-card {
+  flex: 0 0 max(240px, 260px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+
+  height: 100%;
+  padding: var(--size-4-2) var(--size-4-4);
+  border: 1px solid var(--lb-border);
+  border-radius: initial;
+}
+.characters-card > * {
+  border: none;
+  padding: 0;
+}
+.characters-card > *:hover {
+  background-color: var(--table-row-odd-background);
+}
+.characters-grid :is(h1, h2, h3, h4, h5, h6) {
+  margin: 0;
+}

@@ -24,7 +24,7 @@ const genre = [
   'gore',
 ];
 
-module.exports.match = (...tags) => {
+export function match(...tags) {
   const valid = [];
 
   // cleanup
@@ -54,4 +54,4 @@ module.exports.match = (...tags) => {
     if (genre.contains(tag)) return '#genre/' + tag;
     return '#theme/' + tag;
   });
-};
+}

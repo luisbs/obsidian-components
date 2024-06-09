@@ -60,7 +60,7 @@ module.exports.width = (url) => {
 
 /**
  * @param {unknown} item
- * @returns {GalleryRow|undefined}
+ * @returns {ImgData|undefined}
  */
 module.exports.serializeItem = (item) => {
   if (isNil(item)) return;
@@ -78,7 +78,7 @@ module.exports.serializeItem = (item) => {
 
 /**
  * @param {unknown} group
- * @returns {{ label: string?, images: GalleryRow[] }}
+ * @returns {{ label: string?, images: ImgData[] }}
  */
 module.exports.serializeGroup = (group) => {
   const prepare = (images) => images.map(this.serializeItem).filter((v) => !!v);
@@ -96,7 +96,7 @@ module.exports.serializeGroup = (group) => {
  * Serialize the data into an standard object.
  *
  * @param {unknown} data
- * @returns {Array<{ label: string?, images: GalleryRow[] }>}
+ * @returns {Array<{ label: string?, images: ImgData[] }>}
  */
 module.exports.serialize = (data) => {
   if (Array.isArray(data) && data.some((item) => !isNil(item) && typeof item === 'object')) {

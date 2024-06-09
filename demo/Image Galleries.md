@@ -41,9 +41,27 @@ gallery:
 - https://cdn.myanimelist.net/images/anime/1159/95649l.jpg
 ```
 
+### Catalogue
+
+The example **Catalogue** `catalogue.js` renders the images as thumbnail giving priority to a selected image.
+
+```catalogue
+- https://static.wikia.nocookie.net/komisan-wa-komyushou-desu/images/e/e2/Komi_San_Volume_1.png?v1cover
+- https://static.wikia.nocookie.net/komisan-wa-komyushou-desu/images/d/d3/Volume_1_Special_Edition.png?v1scover
+- https://static.wikia.nocookie.net/komisan-wa-komyushou-desu/images/2/2f/Volume_2.png?v2cover
+- https://static.wikia.nocookie.net/komisan-wa-komyushou-desu/images/c/c3/Volume_2_Special_Edition.png?v2scover
+- https://static.wikia.nocookie.net/komisan-wa-komyushou-desu/images/c/c3/Komi_San_Volume_3.png?v3cover
+- https://static.wikia.nocookie.net/komisan-wa-komyushou-desu/images/3/3d/M_Volume_4.jpg?v4cover
+- https://static.wikia.nocookie.net/komisan-wa-komyushou-desu/images/f/f4/M_Volume_5.jpg?v5cover
+- https://static.wikia.nocookie.net/komisan-wa-komyushou-desu/images/a/a1/M_Volume_6.jpg?v6cover
+- https://static.wikia.nocookie.net/komisan-wa-komyushou-desu/images/b/bd/M_Volume_7.jpeg?v7cover
+- https://static.wikia.nocookie.net/komisan-wa-komyushou-desu/images/f/fe/Komi_San_Volume_8.jpg?v8cover
+- https://static.wikia.nocookie.net/komisan-wa-komyushou-desu/images/1/17/Komi_San_Volume_9.png?v9cover
+```
+
 ### Masonry-ish gallery
 
-The example **Component** `gallery.html.cjs` renders the images on a grid adding rows when necessary.
+The example **Component** `gallery.html.js` renders the images on a grid adding rows when necessary.
 
 ```gallery
 - https://static.wikia.nocookie.net/komisan-wa-komyushou-desu/images/e/e2/Komi_San_Volume_1.png?v1cover
@@ -55,7 +73,7 @@ The example **Component** `gallery.html.cjs` renders the images on a grid adding
 
 #### Grouped images
 
-The example **Component** `gallery.html.cjs` can group the images and add group titles.
+The example **Component** `gallery.html.js` can group the images and add group titles.
 
 ```gallery
 - label: Covers of volumes 01 - 09
@@ -99,7 +117,7 @@ The example **Component** `gallery.html.cjs` can group the images and add group 
 
 ## Joined gallery
 
-The example **Component** `gallery.html.cjs` can also spawn an extended list of images.
+The example **Component** `gallery.html.js` can also spawn an extended list of images.
 
 ```gallery
 - https://static.wikia.nocookie.net/komisan-wa-komyushou-desu/images/e/e2/Komi_San_Volume_1.png?v1cover
