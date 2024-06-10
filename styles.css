@@ -21,12 +21,12 @@
   width: 270px;
 }
 
-.invalid-codeblock-syntax,
+/* .invalid-codeblock-syntax, */
 .missing-component-name,
 .unknown-component,
 .disabled-component,
 .missing-component-renderer,
-.invalid-component-params,
+/* .invalid-component-params, */
 .missing-component-file,
 .invalid-component-syntax,
 .missing-component-render-function {

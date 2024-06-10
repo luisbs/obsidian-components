@@ -7,8 +7,8 @@ type ErrorCode =
   | 'disabled-component'
   | 'missing-component-renderer'
   // throwed on `render` method
+  // | 'invalid-component-params'
   | 'missing-component-file'
-  | 'invalid-component-params'
   | 'invalid-component-syntax'
   | 'missing-component-render-function'
 
@@ -26,8 +26,8 @@ export class ComponentError extends Error {
 
   static #suggestion(code: ErrorCode): string {
     switch (code) {
-      //case 'invalid-codeblock-syntax':
-      //  return 'check json/yaml syntax on the codeblock'
+      // case 'invalid-codeblock-syntax':
+      //   return 'check json/yaml syntax on the codeblock'
       case 'missing-component-name':
         return 'check component-name is present and follows Plugin settings'
       case 'unknown-component':
@@ -38,10 +38,10 @@ export class ComponentError extends Error {
       case 'missing-component-renderer':
         return "refresh 'Components filter' on Plugin settings"
 
+      // case 'invalid-component-params':
+      //   return 'codeblock json/yaml should be object-ish'
       case 'missing-component-file':
         return "refresh 'Components filter' on Plugin settings"
-      case 'invalid-component-params':
-        return 'codeblock json/yaml should be object-ish'
       case 'invalid-component-syntax':
         return 'check the code on the component file'
       case 'missing-component-render-function':

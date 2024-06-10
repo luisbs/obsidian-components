@@ -8,8 +8,7 @@ import { createHmac } from 'crypto'
 import { parseYaml } from 'obsidian'
 import { getComponentById, isRecord, MapStore } from '@/utility'
 import { ComponentError } from './ComponentError'
-import { Renderer } from './Renderer'
-import { getRenderer } from './Renderers'
+import { Renderer, getRenderer } from './Renderers'
 
 export class CodeblockHandler {
   #plugin: ComponentsPlugin
@@ -37,7 +36,7 @@ export class CodeblockHandler {
   public refreshAll(): void {
     // clear the list so when components are re-render
     // they call `trackFile` an so the HotComponentReload works correctly
-    Renderer.trackedByRenderer = []
+    Renderer.clearTracked()
     for (const key of this.#rendered.keys()) {
       this.refresh(key)
     }
