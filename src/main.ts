@@ -9,6 +9,7 @@ import { LoggingGroup, preparePluginState } from './utility'
 import { FilesystemAdapter, VersionController } from './filesystem'
 import { CodeblockHandler } from './codeblocks'
 import { SettingsTab } from './settings/SettingsTab'
+import ComponentAPI from './ComponentsAPI'
 
 export const DEFAULT_SETTINGS: PrimitivePluginSettings = {
   enable_components: 'STRICT',
@@ -28,6 +29,7 @@ export default class ComponentsPlugin extends Plugin {
   public settings = {} as PluginSettings
   public state = {} as PluginState
 
+  public api: ComponentAPI
   public fs: FilesystemAdapter
   public parser: CodeblockHandler
   public versions: VersionController
@@ -35,9 +37,14 @@ export default class ComponentsPlugin extends Plugin {
   constructor(app: App, manifest: PluginManifest) {
     super(app, manifest)
 
+    this.api = new ComponentAPI(this)
     this.fs = new FilesystemAdapter(this)
     this.parser = new CodeblockHandler(this)
     this.versions = new VersionController(this)
+
+    // thrid-party API
+    // @ts-ignore non-standard API
+    globalThis.Components = this.api
   }
 
   async onload(): Promise<void> {
@@ -109,10 +116,7 @@ export default class ComponentsPlugin extends Plugin {
   }
 
   // external API
-  public resolve(path: string): unknown {
-    const versionName = this.versions.resolveFile(path)
-    const versionPath = versionName ? this.fs.getCachePath(versionName) : path
-    console.debug(`Resolved as "${versionPath}"`)
-    return require(this.fs.getRealPath(versionPath))
+  public resolve(filePath: string): Promise<unknown> {
+    return this.api.latest(filePath)
   }
 }

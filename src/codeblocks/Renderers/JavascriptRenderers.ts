@@ -7,7 +7,7 @@ export abstract class CodeRenderer extends Renderer {
   protected async getRenderFunction(componentFile: TFile): Promise<Function> {
     this.log.debug('getRenderFunction')
 
-    const module = await this.getFileModule(componentFile)
+    const module = await this.plugin.api.source(componentFile)
     this.log.debug({ module })
 
     // default export on cjs
@@ -22,35 +22,6 @@ export abstract class CodeRenderer extends Renderer {
     if (typeof module.render === 'function') return module.render
 
     throw new ComponentError('missing-component-render-function')
-  }
-
-  protected async getFileModule(componentFile: TFile): Promise<unknown> {
-    this.log.debug('getFileModule')
-
-    try {
-      if (this.format.tags.contains('commonjs')) {
-        return this.requireModule(componentFile)
-      } else if (this.format.tags.contains('esmodules')) {
-        return this.importModule(componentFile)
-      }
-
-      throw new Error('unsupported javascript syntax, use CJS or ESM instead')
-    } catch (error) {
-      this.log.error(error)
-      throw new ComponentError('invalid-component-syntax', error)
-    }
-  }
-
-  protected requireModule(componentFile: TFile): Promise<unknown> {
-    const resolved = this.plugin.fs.getRealPath(componentFile.path)
-    this.log.info(`require('${resolved}')`)
-    return require(resolved)
-  }
-
-  protected importModule(componentFile: TFile): Promise<unknown> {
-    const resolved = this.vault.getResourcePath(componentFile)
-    this.log.info(`import('${resolved}')`)
-    return import(resolved)
   }
 }
 

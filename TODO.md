@@ -60,9 +60,9 @@ The change is to keep a list of referenced files, inside the **components** file
 
 ## Ideas for the future
 
-- [ ] Add **API** to allow integration with other plugins.
-  - For example use **Dataview** to collect data and **Components** to render the output.
-  - For example allow a **Component** to run a render-method on an external plugin, the external plugin should notify **Components** is able to handle integration.
+- [x] Add **API** to allow integration with other plugins.
+  - [ ] For example use **Dataview** to collect data and **Components** to render the output.
+  - [ ] For example allow a **Component** to run a render-method on an external plugin, the external plugin should notify **Components** is able to handle integration.
 - [ ] Add cache of `'html' | 'md'` component types.
 - [ ] Add support for other codeblock content syntax (e.g. **JS objects**)
 - [ ] Add support for other codeblock content syntax (e.g. **TOML**)

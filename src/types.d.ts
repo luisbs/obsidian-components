@@ -1,8 +1,16 @@
+import { TFile } from 'obsidian'
 import { MapStore } from './utility'
 
 export { default as ComponentsPlugin } from './main'
 
 //#region Runtime
+
+export interface PluginAPI {
+  /** Tries to import/request a file. */
+  source(file: TFile): Promise<unknown>
+  /** Tries to import/request the last version of a file. */
+  latest(filePath: string): Promise<unknown>
+}
 
 export interface PluginState {
   /** Stores the currently parameters that can be used to define a component name. */
@@ -56,6 +64,9 @@ export interface PluginSettings {
   enable_codeblocks: boolean
   /** Stores the user desition to allow separators on codeblocks. */
   enable_separators: boolean
+
+  /** Stores the route where the components versions should be stored on _Design Mode_. */
+  cache_folder: string
 
   /**
    * Stores the component naming method for the vault.

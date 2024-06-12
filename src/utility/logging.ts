@@ -12,7 +12,8 @@ export interface LogEntry {
 }
 
 export class Logger {
-  static make(): Logger {
+  // TODO: make use of namespace
+  static make(namespace?: string): Logger {
     return new Logger()
   }
 
