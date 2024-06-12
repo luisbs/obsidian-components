@@ -16,6 +16,8 @@ export const DEFAULT_SETTINGS: PrimitivePluginSettings = {
   enable_codeblocks: false,
   enable_separators: false,
 
+  cache_folder: 'temp/',
+
   usage_method: 'INLINE',
   usage_naming: '__name',
   usage_separator: '---',
@@ -91,6 +93,7 @@ export default class ComponentsPlugin extends Plugin {
     log.flush('Saved Settings')
 
     preparePluginState(this)
+    this.versions.clearCache()
     this.parser.registerCustomCodeblocks()
   }
 
@@ -109,14 +112,11 @@ export default class ComponentsPlugin extends Plugin {
    * > storage usage, so it should be **disabled always**
    * > until the user enables it **manually**
    */
-  public enableDesignMode(): void {
+  public async enableDesignMode(): Promise<void> {
     if (this.#designMode) return
     this.#designMode = true
-    this.parser.refreshAll()
-  }
 
-  // external API
-  public resolve(filePath: string): Promise<unknown> {
-    return this.api.latest(filePath)
+    await this.versions.clearCache()
+    this.parser.refreshAll()
   }
 }

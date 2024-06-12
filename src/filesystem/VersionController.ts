@@ -14,8 +14,6 @@ export class VersionController {
 
   constructor(plugin: ComponentsPlugin) {
     this.#plugin = plugin
-    this.clearCache()
-
     this.#plugin.app.vault.on('modify', this.handleFileModification.bind(this))
   }
 
@@ -110,18 +108,34 @@ export class VersionController {
     log.debug(`Caching file <${file.name}> to <${cachedFileName}>`)
     const parentPath = file.parent?.path || ''
     await this.#plugin.fs.copy(file, cachedFilePath, (content) => {
-      return content.replaceAll(/require *\( *['"](.+)['"] *\)/g, (_, $1) => {
-        const path = FilesystemAdapter.join(parentPath, $1)
-        log.debug(`Injecting resolver for <${path}>`)
-
-        // store which files this file imports
-        this.#dependencies.push(path, file.path)
-        return `app.plugins.plugins['obsidian-components'].resolve("${path}")`
-      })
+      return this.replaceImports(file, log, parentPath, content)
     })
 
     log.debug(`Cached file <${cachedFileName}>`)
     return cachedFileName
+  }
+
+  protected replaceImports(
+    file: TFile,
+    log: Logger,
+    parentPath: string,
+    content: string,
+  ): string {
+    // import Obj from './esm/index.js';
+    // const Obj = Components.latest('components/esm/index.js');
+    return content
+      .replaceAll(/^ *import */gi, 'const ')
+      .replaceAll(
+        / *from *['"](.+)['"]|= *require *\( *['"](.+)['"] *\)/gi,
+        (_, $1) => {
+          const path = FilesystemAdapter.join(parentPath, $1)
+          log.debug(`Injecting resolver for <${path}>`)
+
+          // store which files this file imports
+          this.#dependencies.push(path, file.path)
+          return ` = await Components.latest('${path}')`
+        },
+      )
   }
 
   /**

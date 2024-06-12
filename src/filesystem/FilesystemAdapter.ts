@@ -8,7 +8,7 @@ type ContentEditor = (content: string) => string
 export class FilesystemAdapter {
   #vault: Vault
 
-  constructor(plugin: ComponentsPlugin) {
+  constructor(private plugin: ComponentsPlugin) {
     this.#vault = plugin.app.vault
   }
 
@@ -37,11 +37,7 @@ export class FilesystemAdapter {
    * cache folder is returned.
    */
   public getCachePath(...paths: string[]): string {
-    return FilesystemAdapter.join(
-      this.#vault.configDir,
-      'plugins/obsidian-components/.temp',
-      ...paths,
-    )
+    return FilesystemAdapter.join(this.plugin.settings.cache_folder, ...paths)
   }
 
   /**

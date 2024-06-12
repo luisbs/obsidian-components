@@ -1,4 +1,6 @@
-*
+temp/
+.obsidian/
+
 !.gitignore
 !community-plugins.json
 
