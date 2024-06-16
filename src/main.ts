@@ -5,7 +5,8 @@ import type {
   RawPluginSettings,
 } from './types'
 import { App, Plugin, PluginManifest } from 'obsidian'
-import { LoggingGroup, preparePluginState } from './utility'
+import { Logger } from 'obsidian-fnc'
+import { preparePluginState } from '@/utility'
 import { FilesystemAdapter, VersionController } from './filesystem'
 import { CodeblockHandler } from './codeblocks'
 import { SettingsTab } from './settings/SettingsTab'
@@ -28,6 +29,8 @@ export const DEFAULT_SETTINGS: PrimitivePluginSettings = {
 }
 
 export default class ComponentsPlugin extends Plugin {
+  #log = new Logger('ComponentsPlugin')
+
   public settings = {} as PluginSettings
   public state = {} as PluginState
 
@@ -62,7 +65,7 @@ export default class ComponentsPlugin extends Plugin {
   }
 
   async loadSettings(): Promise<void> {
-    const log = LoggingGroup.make('Loading Settings')
+    const log = this.#log.group('Loading Settings')
     const { enabled_formats, enabled_components, ...primitives } =
       (await this.loadData()) || {}
 
@@ -78,7 +81,7 @@ export default class ComponentsPlugin extends Plugin {
   }
 
   async saveSettings(): Promise<void> {
-    const log = LoggingGroup.make('Saving Settings')
+    const log = this.#log.group('Saving Settings')
     log.debug(this.settings)
 
     const { enabled_formats, enabled_components, ...primitiveData } =

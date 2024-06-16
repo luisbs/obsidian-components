@@ -1,12 +1,13 @@
 import type { ComponentsPlugin } from '@/types'
 import { TAbstractFile, TFile } from 'obsidian'
-import { Logger, MapStore } from '@/utility'
+import { Logger } from 'obsidian-fnc'
+import { MapStore } from '@/utility'
 import { FilesystemAdapter } from './FilesystemAdapter'
 
 export class VersionController {
   #plugin: ComponentsPlugin
 
-  #log = new Logger()
+  #log = new Logger('VersionController')
   // like { 'music.html.cjs': ['music.html-23f29a.cjs'] }
   #versions = new MapStore<string>()
   // like { 'HtmlRenderer.cjs': ['music.html.cjs', 'content.html.cjs'] }

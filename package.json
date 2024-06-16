@@ -30,9 +30,9 @@
     "lint:ts": "tsc -noEmit -skipLibCheck"
   },
   "devDependencies": {
-    "@types/node": "^20.11.30",
-    "@typescript-eslint/eslint-plugin": "^7.3.1",
-    "@typescript-eslint/parser": "^7.3.1",
+    "@types/node": "^20.14.2",
+    "@typescript-eslint/eslint-plugin": "^7.13.0",
+    "@typescript-eslint/parser": "^7.13.0",
     "builtin-modules": "^3.3.0",
     "esbuild": "^0.14.54",
     "esbuild-plugin-copy": "^1.6.0",
@@ -40,7 +40,7 @@
     "npm-run-all": "^4.1.5",
     "obsidian": "^1.5.7",
     "rimraf": "^4.4.1",
-    "tslib": "^2.6.2",
+    "tslib": "^2.6.3",
     "typescript": "^4.9.5"
   },
   "dependencies": {

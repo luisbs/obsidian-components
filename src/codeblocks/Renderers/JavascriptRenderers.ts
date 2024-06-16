@@ -1,14 +1,15 @@
 import { TFile } from 'obsidian'
+import { Logger } from 'obsidian-fnc'
 import { isRecord } from '@/utility'
 import { Renderer } from './Renderer'
 import { ComponentError } from '../ComponentError'
 
 export abstract class CodeRenderer extends Renderer {
-  protected async getRenderFunction(componentFile: TFile): Promise<Function> {
-    this.log.debug('getRenderFunction')
+  #log = new Logger('CodeRenderer')
 
-    const module = await this.plugin.api.source(componentFile)
-    this.log.debug({ module })
+  protected async getRenderFunction(componentFile: TFile): Promise<Function> {
+    const module = await this.plugin.api.source(componentFile, this.logger)
+    this.#log.on(this.logger).debug('getRenderFunction', module)
 
     // default export on cjs
     if (typeof module === 'function') return module

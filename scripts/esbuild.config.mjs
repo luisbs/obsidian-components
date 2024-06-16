@@ -80,7 +80,7 @@ const PROD_CONFIG = {
   drop: ['debugger', 'console'],
   watch: false,
   outdir: 'dist',
-  logLevel: 'error',
+  logLevel: 'warning',
   sourcemap: false,
   plugins: [
     copy({

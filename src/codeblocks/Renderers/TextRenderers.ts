@@ -1,10 +1,13 @@
 import { TFile } from 'obsidian'
+import { Logger } from 'obsidian-fnc'
 import { isRecord } from '@/utility'
 import { Renderer } from './Renderer'
 
 export abstract class TextRenderer extends Renderer {
+  #log = new Logger('TextRenderer')
+
   protected async getFileContent(componentFile: TFile): Promise<string> {
-    this.log.debug('getFileContent')
+    this.#log.on(this.logger).debug('getFileContent')
     return this.vault.read(componentFile)
   }
 
@@ -13,7 +16,7 @@ export abstract class TextRenderer extends Renderer {
     data: unknown,
     fallback = '[missing]',
   ): string {
-    this.log.debug('replaceData')
+    this.#log.on(this.logger).debug('replaceData')
 
     if (!isRecord(data) && !Array.isArray(data)) {
       const value = data ? String(data) : fallback

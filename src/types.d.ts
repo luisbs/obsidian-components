@@ -1,5 +1,5 @@
 import { TFile } from 'obsidian'
-import { MapStore } from './utility'
+import { Logger, MapStore } from './utility'
 
 export { default as ComponentsPlugin } from './main'
 
@@ -7,9 +7,9 @@ export { default as ComponentsPlugin } from './main'
 
 export interface PluginAPI {
   /** Tries to import/request a file. */
-  source(file: TFile): Promise<unknown>
+  source(file: TFile, logger?: Logger): Promise<unknown>
   /** Tries to import/request the last version of a file. */
-  latest(filePath: string): Promise<unknown>
+  latest(filePath: string, logger?: Logger): Promise<unknown>
 }
 
 export interface PluginState {
