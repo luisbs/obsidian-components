@@ -1,5 +1,6 @@
 import { TFile } from 'obsidian'
-import { Logger, MapStore } from './utility'
+import { Logger } from 'obsidian-fnc'
+import { MapStore } from './utility'
 
 export { default as ComponentsPlugin } from './main'
 
@@ -65,7 +66,7 @@ export interface PluginSettings {
   /** Stores the user desition to allow separators on codeblocks. */
   enable_separators: boolean
 
-  /** Stores the route where the components versions should be stored on _Design Mode_. */
+  /** Stores the route where the components versions should be cached. */
   cache_folder: string
 
   /**
@@ -82,11 +83,12 @@ export interface PluginSettings {
 
   /**
    * Stores the components naming strategy.
+   * - `'CUSTOM'` includes only the user-defined names
    * - `'SHORT'` includes only the short names
    * - `'LONG'` includes the short and long names
    * - `'ALL'` includes all the possible names
    */
-  components_naming: 'SHORT' | 'LONG' | 'ALL'
+  components_naming: 'CUSTOM' | 'SHORT' | 'LONG' | 'ALL'
   /** Stores the route where the components are. */
   components_folder: string
   /** Stores the components found on the vault. */

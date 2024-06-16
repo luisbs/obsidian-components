@@ -36,8 +36,10 @@ export function preparePluginState(plugin: ComponentsPlugin): void {
   const components = {} as Record<string, string>
   const codeblocks = {} as Record<string, string>
 
-  const includeLongNames = settings.components_naming !== 'SHORT'
   const includeAllNames = settings.components_naming === 'ALL'
+  const includeShortNames = settings.components_naming !== 'CUSTOM'
+  const includeLongNames =
+    includeAllNames || settings.components_naming === 'LONG'
 
   for (const component of source) {
     const componentId = component.path
@@ -53,6 +55,9 @@ export function preparePluginState(plugin: ComponentsPlugin): void {
         codeblocks[name] = componentId
       })
     }
+
+    // early ending when only user-names are used
+    if (!includeShortNames) continue
 
     const names = constructNames(component, format)
 

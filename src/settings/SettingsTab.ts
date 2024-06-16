@@ -209,7 +209,7 @@ export class SettingsTab extends PluginSettingTab {
     })
 
     this.#newSetting()
-      .setName('Codeblocks Separators')
+      .setName('Enable Codeblocks Separators')
       .setDesc(separatorDesc)
       .addToggle((input) => {
         input.setValue(this.#settings.enable_separators)
@@ -262,6 +262,7 @@ export class SettingsTab extends PluginSettingTab {
       .setDesc(strategyDesc)
       .addDropdown((input) => {
         input.addOptions({
+          CUSTOM: 'Only use custom names.',
           SHORT: 'Only the shortest names.',
           LONG: 'Short and long names.',
           ALL: 'Include all names',
