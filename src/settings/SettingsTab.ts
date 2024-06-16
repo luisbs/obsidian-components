@@ -42,9 +42,6 @@ export class SettingsTab extends PluginSettingTab {
     this.#newSetting().setName('Plugin Settings').setHeading()
     this.#displayGeneralSettings()
 
-    this.#newSetting().setName('Usage Settings').setHeading()
-    this.#displayUsageSettings()
-
     this.#newSetting().setName('Codeblocks Settings').setHeading()
     this.#displayCodeblocksSettings()
 
@@ -130,7 +127,27 @@ export class SettingsTab extends PluginSettingTab {
       })
   }
 
-  #displayUsageSettings(): void {
+  #displayCodeblocksSettings(): void {
+    // Custom codeblocks setting
+    const codeblocksDesc = createFragment((div) => {
+      div.append(
+        'Allows the usage of the components custom names as codeblocks identifiers.',
+        createEl('br'),
+        'For more details see ',
+        createDocsLink('custom-codeblocks-setting', 'custom codeblocks'),
+        '.',
+      )
+    })
+
+    this.#newSetting()
+      .setName('Custom Codeblocks')
+      .setDesc(codeblocksDesc)
+      .addToggle((input) => {
+        input.setValue(this.#settings.enable_codeblocks)
+        input.onChange(this.update.bind(this, 'enable_codeblocks'))
+      })
+
+    //
     const isDisabled = (value: string): boolean => value === 'INLINE'
     let namingMethodInput: TextAreaComponent | null = null
 
@@ -175,27 +192,8 @@ export class SettingsTab extends PluginSettingTab {
       })
 
     //
-    // Custom codeblocks setting
-    const codeblocksDesc = createFragment((div) => {
-      div.append(
-        'Allows the usage of the components custom names as codeblocks identifiers.',
-        createEl('br'),
-        'For more details see ',
-        createDocsLink('custom-codeblocks-setting', 'custom codeblocks'),
-        '.',
-      )
-    })
-
-    this.#newSetting()
-      .setName('Custom Codeblocks')
-      .setDesc(codeblocksDesc)
-      .addToggle((input) => {
-        input.setValue(this.#settings.enable_codeblocks)
-        input.onChange(this.update.bind(this, 'enable_codeblocks'))
-      })
-  }
-
-  #displayCodeblocksSettings(): void {
+    //
+    //
     let usageSeparatorInput: TextComponent | null = null
 
     const separatorDesc = createFragment((div) => {
@@ -231,14 +229,55 @@ export class SettingsTab extends PluginSettingTab {
   }
 
   #displayComponentsSettings(): void {
+    const attachPathHandler = (
+      key: keyof PluginSettings,
+      input: TextComponent,
+      logs: HTMLElement,
+    ) => {
+      input.onChange(async (path: string) => {
+        logs.empty()
+
+        if (!path || path === '/' || (await this.#plugin.fs.missing(path))) {
+          input.inputEl.classList.add('invalid-value')
+          logs.appendText('Invalid path.')
+          return
+        }
+
+        input.inputEl.classList.remove('invalid-value')
+        this.update(key, path)
+      })
+    }
+
+    //
+    // Components folder setting
+    const sourceDesc = createFragment()
+    sourceDesc.append('Files in this directory will be taken as components.')
+    const sourceLog = sourceDesc.createEl('p', 'invalid-value')
+
     this.#newSetting()
-      .setName('Components templates folder.')
-      .setDesc('Files in this directory will be taken as components.')
+      .setName('Components templates folder')
+      .setDesc(sourceDesc)
       .addText((input) => {
         new FolderSuggester(this.app, input.inputEl, this.containerEl)
         input.setPlaceholder('Example: folder1/folder2')
         input.setValue(this.#settings.components_folder)
-        input.onChange(this.update.bind(this, 'components_folder'))
+        attachPathHandler('components_folder', input, sourceLog)
+      })
+
+    //
+    // Cache folder setting
+    const cacheDesc = createFragment()
+    cacheDesc.append('Folder used to cache pre-processed components.')
+    const cacheLog = cacheDesc.createEl('p', 'invalid-value')
+
+    this.#newSetting()
+      .setName('Components cache folder')
+      .setDesc(cacheDesc)
+      .addText((input) => {
+        new FolderSuggester(this.app, input.inputEl, this.containerEl)
+        input.setPlaceholder('Example: folder1/folder2')
+        input.setValue(this.#settings.cache_folder)
+        attachPathHandler('cache_folder', input, cacheLog)
       })
 
     //
@@ -258,7 +297,7 @@ export class SettingsTab extends PluginSettingTab {
     })
 
     this.#newSetting()
-      .setName('Components naming strategy.')
+      .setName('Components naming strategy')
       .setDesc(strategyDesc)
       .addDropdown((input) => {
         input.addOptions({

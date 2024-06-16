@@ -17,7 +17,7 @@ export const DEFAULT_SETTINGS: PrimitivePluginSettings = {
   enable_codeblocks: false,
   enable_separators: false,
 
-  cache_folder: 'temp/',
+  cache_folder: '__temp/',
 
   usage_method: 'INLINE',
   usage_naming: '__name',

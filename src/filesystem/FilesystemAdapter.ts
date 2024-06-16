@@ -61,19 +61,26 @@ export class FilesystemAdapter {
       .replace(/\?\d+$/i, '') // removes the postfix
   }
 
+  async #missing(filepath: string): Promise<boolean> {
+    return !(await this.#vault.adapter.exists(filepath))
+  }
+
+  async #exists(filepath: string): Promise<boolean> {
+    return await this.#vault.adapter.exists(filepath)
+  }
+
   /**
    * Checks if a file exists.
    */
   public async missing(fileOrPath: TFile | string): Promise<boolean> {
-    return !this.exists(fileOrPath as string)
+    return this.#missing(FilesystemAdapter.resolvePath(fileOrPath))
   }
 
   /**
    * Checks if a file exists.
    */
   public async exists(fileOrPath: TFile | string): Promise<boolean> {
-    const filepath = FilesystemAdapter.resolvePath(fileOrPath)
-    return this.#vault.adapter.exists(filepath)
+    return this.#exists(FilesystemAdapter.resolvePath(fileOrPath))
   }
 
   /**
@@ -125,10 +132,10 @@ export class FilesystemAdapter {
    */
   public async renewFolder(folderOrPath: TFolder | string): Promise<void> {
     const folderpath = FilesystemAdapter.resolvePath(folderOrPath)
-    if (await this.#vault.adapter.exists(folderpath)) {
+    if (await this.#exists(folderpath)) {
       await this.#vault.adapter.rmdir(folderpath, true)
     }
-    if (!(await this.#vault.adapter.exists(folderpath))) {
+    if (await this.#missing(folderpath)) {
       await this.#vault.adapter.mkdir(folderpath)
     }
   }

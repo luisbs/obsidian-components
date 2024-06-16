@@ -1,3 +1,11 @@
+.components-settings .setting-item-description .invalid-value {
+  color: orangered;
+  margin: 0;
+}
+.components-settings .setting-item-control .invalid-value {
+  border: 1px solid orangered;
+}
+
 .suggestions-tooltip {
   position: absolute;
   border: var(--input-border-width) solid var(--background-modifier-border);
