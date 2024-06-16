@@ -1,18 +1,8 @@
-temp/
-.obsidian/
+__temp/
 
-!.gitignore
+.obsidian/*.json
 !community-plugins.json
 
-# files of templates
-!snippets/components.css
-
-# plugins suit
-!plugins
-!plugins/hot-reload-master
-!plugins/obsidian-components/
-!plugins/obsidian-components/.hotreload
-
-# styles for examples
-!snippets
-!snippets/components.css
+# plugins
+.obsidian/plugins/obsidian-components/*
+!.obsidian/plugins/obsidian-components/.hotreload

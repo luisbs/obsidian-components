@@ -1,0 +1,102 @@
+:root {
+  /* see: https://tailwindcss.com/docs/customizing-colors */
+  --tl-neutral-50: #fafafa;
+  --tl-neutral-100: #f5f5f5;
+  --tl-neutral-200: #e5e5e5;
+  --tl-neutral-600: #525252;
+  --tl-neutral-700: #404040;
+  --tl-neutral-800: #262626;
+
+  --tl-slate-400: #cbd5e1;
+  --tl-red-400: #f87171;
+  --tl-orange-400: #fb923c;
+  --tl-teal-400: #2dd4bf;
+  --tl-sky-400: #38bdf8;
+  --tl-violet-400: #a78bfa;
+  --tl-pink-400: #f472b6;
+}
+
+/* Themes */
+
+.theme-light {
+  --lb-border: var(--tl-neutral-200);
+  --lb-base: var(--tl-neutral-50);
+  --lb-base-hover: var(--tl-neutral-100);
+
+  --lb-text-color: black;
+  --lb-text-inverse: var(--tl-neutral-50);
+
+  --lb-slate-base: var(--tl-slate-400);
+  --lb-red-base: var(--tl-red-400);
+  --lb-orange-base: var(--tl-orange-400);
+  --lb-teal-base: var(--tl-teal-400);
+  --lb-sky-base: var(--tl-sky-400);
+  --lb-violet-base: var(--tl-violet-400);
+  --lb-pink-base: var(--tl-pink-400);
+}
+
+.theme-dark {
+  --lb-border: var(--tl-neutral-700);
+  --lb-base: var(--tl-neutral-800);
+  --lb-base-hover: var(--tl-neutral-600);
+
+  --lb-text-color: var(--tl-neutral-100);
+  --lb-text-inverse: var(--tl-neutral-700);
+
+  --lb-slate-color: var(--tl-slate-400);
+  --lb-red-color: var(--tl-red-400);
+  --lb-orange-color: var(--tl-orange-400);
+  --lb-teal-color: var(--tl-teal-400);
+  --lb-sky-color: var(--tl-sky-400);
+  --lb-violet-color: var(--tl-violet-400);
+  --lb-pink-color: var(--tl-pink-400);
+}
+
+/* Styles */
+
+.lb-slate.lb-slate {
+  color: var(--lb-slate-color, var(--lb-text-inverse)) !important;
+  background-color: var(--lb-slate-base, var(--lb-text-inverse)) !important;
+}
+.lb-red.lb-red {
+  color: var(--lb-red-color, var(--lb-text-inverse)) !important;
+  background-color: var(--lb-red-base, var(--lb-text-inverse)) !important;
+}
+.lb-orange.lb-orange {
+  color: var(--lb-orange-color, var(--lb-text-inverse)) !important;
+  background-color: var(--lb-orange-base, var(--lb-text-inverse)) !important;
+}
+.lb-teal.lb-teal {
+  color: var(--lb-teal-color, var(--lb-text-inverse)) !important;
+  background-color: var(--lb-teal-base, var(--lb-text-inverse)) !important;
+}
+.lb-sky.lb-sky {
+  color: var(--lb-sky-color, var(--lb-text-inverse)) !important;
+  background-color: var(--lb-sky-base, var(--lb-text-inverse)) !important;
+}
+.lb-violet.lb-violet {
+  color: var(--lb-violet-color, var(--lb-text-inverse)) !important;
+  background-color: var(--lb-violet-base, var(--lb-text-inverse)) !important;
+}
+.lb-pink.lb-pink {
+  color: var(--lb-pink-color, var(--lb-text-inverse)) !important;
+  background-color: var(--lb-pink-base, var(--lb-text-inverse)) !important;
+}
+
+/*  */
+
+img[alt*='w220'] {
+  width: 220px;
+  height: auto;
+}
+
+img[alt*='w50'],
+img[alt*='half'] {
+  width: 49% !important;
+  margin-right: 1%;
+}
+
+img[alt*='w100'],
+img[src*='full'] {
+  width: 100% !important;
+}
