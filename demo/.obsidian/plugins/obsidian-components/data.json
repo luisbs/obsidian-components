@@ -1,0 +1,34 @@
+{
+  "enable_components": "STRICT",
+  "enable_codeblocks": true,
+  "enable_separators": true,
+  "cache_folder": "__temp",
+  "usage_method": "INLINE",
+  "usage_naming": "__name",
+  "usage_separator": "---",
+  "components_naming": "CUSTOM",
+  "components_folder": "components/entries",
+  "components_found": {
+    "components/entries/catalogue.js": {
+      "path": "components/entries/catalogue.js",
+      "format": "esmodules_code",
+      "names": "catalogue"
+    },
+    "components/entries/gallery.html.js": {
+      "path": "components/entries/gallery.html.js",
+      "format": "esmodules_html",
+      "names": "gallery"
+    }
+  },
+  "enabled_formats": [],
+  "enabled_components": [
+    [
+      "components/entries/catalogue.js",
+      true
+    ],
+    [
+      "components/entries/gallery.html.js",
+      true
+    ]
+  ]
+}

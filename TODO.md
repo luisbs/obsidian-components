@@ -10,35 +10,7 @@
 - [x] Error output handling.
 - [x] Reload the component when the **component file** is modified (**design mode** only).
 - [x] Allow usage of **Codeblock Separators**
-- [ ] Listen changes on imported files, although they aren't inside components folder. Example:
-
-Right now a config like the next one works:
-
-```yaml
-# config
-components-folder: code/components/
-
-# vault
-paths:
-  - code/components/
-  - code/components/example.js (imports commons.js)
-  - code/components/commons.js
-```
-
-But the next example will not work since `commons.js` is outside of `code/components/` and the plugin only listens to changes inside the `components-folder` path.
-
-```yaml
-# config
-components-folder: code/components/
-
-# vault
-paths:
-  - code/components/
-  - code/components/example.js (imports commons.js)
-  - code/commons.js
-```
-
-The change is to keep a list of referenced files, inside the **components** files and listen to changes on those files too.
+- [x] Listen changes on imported files, although they aren't inside components folder. Dependants are now pre-explored.
 
 ## Things to do before v1.0
 

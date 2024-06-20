@@ -1,4 +1,6 @@
-import { Obj, CodeRenderer, serializeImages } from './esm/index.js';
+import { Obj, CodeRenderer, serializeImages } from '../esm/index.js';
+
+// change
 
 /** @typedef {SerializedGroup<ImgData, 'images'>} Row */
 
@@ -55,3 +57,5 @@ export default function render(root, input) {
     }
   }
 }
+
+// cambio

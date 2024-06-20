@@ -1,4 +1,4 @@
-import { Obj, HtmlRenderer, serializeImages } from './esm/index.js';
+import { Obj, HtmlRenderer, serializeImages } from '../esm/index.js';
 
 /** @typedef {SerializedGroup<ImgData, 'images'>} Row */
 
