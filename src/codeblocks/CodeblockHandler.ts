@@ -34,9 +34,6 @@ export class CodeblockHandler {
    * Force all instances of all components to re-render.
    */
   public refreshAll(): void {
-    // clear the list so when components are re-render
-    // they call `trackFile` an so the HotComponentReload works correctly
-    Renderer.clearTracked()
     for (const key of this.#rendered.keys()) {
       this.refresh(key)
     }
@@ -72,7 +69,6 @@ export class CodeblockHandler {
           renderer.render()
         })
       },
-      -1,
     )
   }
 
@@ -105,7 +101,6 @@ export class CodeblockHandler {
               renderer.render()
             })
           },
-          -1,
         )
       }
     }
@@ -189,7 +184,7 @@ export class CodeblockHandler {
 
     // search the component
     for (const componentId in state.components) {
-      if (state.components.has(componentId, name)) {
+      if (state.components.hasKeyValue(componentId, name)) {
         return {
           name,
           component: settings.components_found[componentId] || null,

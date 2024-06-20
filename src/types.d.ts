@@ -7,10 +7,15 @@ export { default as ComponentsPlugin } from './main'
 //#region Runtime
 
 export interface PluginAPI {
+  /** Tries to refresh the components rendered instances. */
+  refresh(filepath: string, logger?: Logger): void
+
+  /** Maps a file to its more recent version. */
+  latest(filePath: string, logger?: Logger): TFile
+  /** Tries to import/request the latest version of a file. */
+  resolve(filePath: string, logger?: Logger): Promise<unknown>
   /** Tries to import/request a file. */
   source(file: TFile, logger?: Logger): Promise<unknown>
-  /** Tries to import/request the last version of a file. */
-  latest(filePath: string, logger?: Logger): Promise<unknown>
 }
 
 export interface PluginState {

@@ -20,11 +20,6 @@ export abstract class Renderer {
     this.vault = plugin.app.vault
   }
 
-  static #tracked: string[] = []
-  public static clearTracked(): void {
-    this.#tracked = []
-  }
-
   /** Each renderer should define the sequence. */
   protected abstract renderingSequence(componentFile: TFile): Promise<void>
 
@@ -32,26 +27,24 @@ export abstract class Renderer {
   public async render(): Promise<void> {
     // clear the element
     this.element.empty()
-
-    // catch problems during execution
     this.logger = this.#log.group('renderSequence')
 
     try {
-      const componentFile = await this.#getComponentFile()
-      this.logger.debug(`componentFile <${componentFile.path}>`)
-
+      // prettier-ignore
+      const componentFile = this.plugin.api.latest(this.component.path, this.logger)
       await this.renderingSequence(componentFile)
+      this.logger.flush(`[${this.id}] Rendered <${this.component.path}>`)
+
       //
     } catch (error) {
       this.logger.error(error)
+      this.logger.flush(`[${this.id}] Failed <${this.component.path}>`)
 
       const pre = this.element.createEl('pre')
       if (error instanceof ComponentError) pre.classList.add(error.code)
       if (error instanceof Error) pre.append(error.stack || error.message)
       else pre.append(String(error))
     }
-
-    this.logger.flush(`[${this.id}] Rendered '${this.component.path}'`)
   }
 
   protected renderHTML(content: string): void {
@@ -69,33 +62,5 @@ export abstract class Renderer {
       this.component.path,
       this.plugin,
     )
-  }
-
-  /** Middlewares file tracking. */
-  async #getComponentFile(): Promise<TFile> {
-    this.logger.debug('getComponentFile')
-
-    const baseFile = this.vault.getFileByPath(this.component.path)
-    if (!baseFile) throw new ComponentError('missing-component-file')
-
-    if (!Renderer.#tracked.includes(this.component.path)) {
-      // opening a note with multiple references to a single component
-      // will execute this tracking each time, soooo...
-      // it should be tracked only once, at the end of `trackFile()`
-      // a refresh is executed on the renderer of all instances
-      Renderer.#tracked.push(this.component.path)
-      await this.plugin.versions.trackFile(baseFile)
-    }
-
-    // versioning-hotload
-    const versionPath = this.plugin.versions.resolveFile(baseFile)
-    const modulePath = versionPath
-      ? this.plugin.fs.getCachePath(versionPath)
-      : this.component.path
-
-    const versionFile = this.vault.getFileByPath(modulePath)
-    if (!versionFile) throw new ComponentError('missing-component-file')
-
-    return versionFile
   }
 }

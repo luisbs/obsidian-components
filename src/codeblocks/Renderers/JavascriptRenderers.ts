@@ -9,7 +9,7 @@ export abstract class CodeRenderer extends Renderer {
 
   protected async getRenderFunction(componentFile: TFile): Promise<Function> {
     const module = await this.plugin.api.source(componentFile, this.logger)
-    this.#log.on(this.logger).debug('getRenderFunction', module)
+    this.#log.on(this.logger).debug('getRenderFunction')
 
     // default export on cjs
     if (typeof module === 'function') return module
@@ -48,6 +48,9 @@ export class JavascriptMarkdownRenderer extends CodeRenderer {
 export class JavascriptCodeRenderer extends CodeRenderer {
   async renderingSequence(componentFile: TFile): Promise<void> {
     const render = await this.getRenderFunction(componentFile)
+
+    // prevent the component is attached multiple times
+    this.element.empty()
     await (render as ICodeRenderer)(this.element, this.data)
   }
 }

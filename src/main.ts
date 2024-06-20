@@ -119,7 +119,10 @@ export default class ComponentsPlugin extends Plugin {
     if (this.#designMode) return
     this.#designMode = true
 
+    // clear so when components are re-render they start tracking
+    // and the HotComponentReload works correctly
     await this.versions.clearCache()
+    await this.versions.exploreComponentsFolder()
     this.parser.refreshAll()
   }
 }

@@ -13,6 +13,30 @@ export class MapStore<T> {
   }
 
   /**
+   * Returns an iterable of keys in the MapStore that is related to a value.
+   */
+  public keysWithValue(value: T): Iterable<string>
+  public keysWithValue(matcher: (value: T) => boolean): Iterable<string>
+  public *keysWithValue(
+    valueOrMatcher: T | ((value: T) => boolean),
+  ): Iterable<string> {
+    if (typeof valueOrMatcher !== 'function') {
+      for (const [key, values] of this._values.entries()) {
+        if (values.includes(valueOrMatcher)) {
+          yield key
+        }
+      }
+      return
+    }
+
+    for (const [key, values] of this._values.entries()) {
+      if (values.some(valueOrMatcher as (value: T) => boolean)) {
+        yield key
+      }
+    }
+  }
+
+  /**
    * Returns an iterable of values in the MapStore.
    */
   public values(): IterableIterator<T[]> {
@@ -27,6 +51,30 @@ export class MapStore<T> {
   }
 
   /**
+   * Check if a key is stored.
+   */
+  public has(key: string): boolean {
+    return this._values.has(key)
+  }
+
+  /**
+   * Check if a value is stored in relation to a key.
+   */
+  public hasValue(value: T): boolean {
+    for (const values of this._values.values()) {
+      if (values.includes(value)) return true
+    }
+    return false
+  }
+
+  /**
+   * Check if a value is stored in relation to a key.
+   */
+  public hasKeyValue(key: string, value: T): boolean {
+    return this.get(key).includes(value)
+  }
+
+  /**
    * Get the stored values related to the key.
    */
   public get(key: string): T[] {
@@ -38,17 +86,6 @@ export class MapStore<T> {
    */
   public getFirst(key: string): T | undefined {
     return this.get(key).first()
-  }
-
-  /**
-   * Check if a value is stored in relation to a key.
-   */
-  public has(key: string, value?: T): boolean {
-    if (value) {
-      return this.get(key).includes(value)
-    } else {
-      return this._values.has(key)
-    }
   }
 
   /**

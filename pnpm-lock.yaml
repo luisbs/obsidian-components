@@ -16,7 +16,7 @@ specifiers:
   typescript: ^4.9.5
 
 dependencies:
-  obsidian-fnc: github.com/luisbs/obsidian-fnc/a2131a28fddf8531af0b9a04c1ea0dc09e441693
+  obsidian-fnc: github.com/luisbs/obsidian-fnc/2733e58c8096e60f759aec87510de03bb80dc993
 
 devDependencies:
   '@types/node': 20.14.2
@@ -2125,8 +2125,8 @@ packages:
     engines: {node: '>=10'}
     dev: true
 
-  github.com/luisbs/obsidian-fnc/a2131a28fddf8531af0b9a04c1ea0dc09e441693:
-    resolution: {tarball: https://codeload.github.com/luisbs/obsidian-fnc/tar.gz/a2131a28fddf8531af0b9a04c1ea0dc09e441693}
+  github.com/luisbs/obsidian-fnc/2733e58c8096e60f759aec87510de03bb80dc993:
+    resolution: {tarball: https://codeload.github.com/luisbs/obsidian-fnc/tar.gz/2733e58c8096e60f759aec87510de03bb80dc993}
     name: obsidian-fnc
     version: 0.1.1
     prepare: true

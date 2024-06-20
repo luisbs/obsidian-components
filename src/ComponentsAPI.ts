@@ -13,16 +13,42 @@ export default class ComponentAPI implements PluginAPI {
     this.#vault = plugin.app.vault
   }
 
+  public refresh(filepath: string, logger?: Logger): void {
+    this.#plugin.parser.refresh(filepath)
+  }
+
+  public latest(filepath: string, logger?: Logger): TFile {
+    const latestPath = this.#plugin.versions.resolveLatest(filepath)
+    this.#log.on(logger).debug(`Latest <${latestPath}>`)
+
+    const latestFile = this.#vault.getFileByPath(latestPath)
+    if (!latestFile) throw new ComponentError('missing-component-file')
+
+    return latestFile
+  }
+
+  public async resolve(filepath: string, logger?: Logger): Promise<unknown> {
+    const log = logger || this.#log.group(`Resolving <${filepath}>`)
+
+    const latestFile = this.latest(filepath, log)
+    this.#log.on(log).debug(`Sourcing <${latestFile.path}>`)
+
+    const module = await this.source(latestFile, log)
+    this.#log.on(log).debug(`Resolved`, module)
+
+    return module
+  }
+
   public source(file: TFile, logger?: Logger): Promise<unknown> {
     try {
       if (/\.js$/i.test(file.name)) {
         const resolved = this.#vault.getResourcePath(file)
-        this.#log.on(logger).debug(`source: import('${resolved}')`)
+        this.#log.on(logger).debug(`import('${resolved}')`)
         return import(resolved)
       }
       if (/\.cjs$/i.test(file.name)) {
         const resolved = this.#plugin.fs.getRealPath(file.path)
-        this.#log.on(logger).debug(`source: require('${resolved}')`)
+        this.#log.on(logger).debug(`require('${resolved}')`)
         return require(resolved)
       }
 
@@ -31,18 +57,5 @@ export default class ComponentAPI implements PluginAPI {
       this.#log.on(logger).error(error)
       throw new ComponentError('invalid-component-syntax', error)
     }
-  }
-
-  public latest(filePath: string, logger?: Logger): Promise<unknown> {
-    const versionName = this.#plugin.versions.resolveFile(filePath)
-    const versionPath = versionName
-      ? this.#plugin.fs.getCachePath(versionName)
-      : filePath
-
-    this.#log.on(logger).debug(`resolved: <${filePath}> to <${versionPath}>`)
-    const versionFile = this.#vault.getFileByPath(versionPath)
-    if (!versionFile) throw new ComponentError('missing-component-file')
-
-    return this.source(versionFile)
   }
 }

@@ -13,14 +13,12 @@ export class FilesystemAdapter {
   }
 
   /**
-   * @note this method can not be used with files inside `.obsidian` folder
+   * @note this method can not be used with files inside hidden folders like `.obsidian`
    */
-  public resolveFile(source: TAbstractFile | string | undefined): TFile | null {
-    if (typeof source === 'string') {
-      const file = this.#vault.getAbstractFileByPath(source)
-      return file instanceof TFile ? file : null
-    }
-    return source instanceof TFile ? source : null
+  public resolveFile(source: TFile | string): TFile | null {
+    if (typeof source === 'string') return this.#vault.getFileByPath(source)
+    if (source instanceof TFile) return source
+    return null
   }
 
   public static resolvePath(source: TAbstractFile | string): string {
@@ -84,6 +82,35 @@ export class FilesystemAdapter {
   }
 
   /**
+   * Removes a file from the filesystem.
+   */
+  public async remove(fileOrPath: TFile | string): Promise<void> {
+    const filepath = FilesystemAdapter.resolvePath(fileOrPath)
+    await this.#vault.adapter.remove(filepath)
+  }
+
+  /**
+   * Recovers the content of a file.
+   */
+  public async read(fileOrPath: TFile | string): Promise<string> {
+    const filepath = FilesystemAdapter.resolvePath(fileOrPath)
+    return await this.#vault.adapter.read(filepath)
+  }
+
+  /**
+   * Edits a file content using a callback.
+   * @param editor callback used to perform the edition
+   */
+  public async edit(
+    fileOrPath: TFile | string,
+    editor: ContentEditor,
+  ): Promise<void> {
+    const filepath = FilesystemAdapter.resolvePath(fileOrPath)
+    const content = await this.#vault.adapter.read(filepath)
+    await this.#vault.adapter.write(filepath, editor(content))
+  }
+
+  /**
    * Copies the content of a file into another.
    * @param editor callback used to perform an edition before saving
    */
@@ -103,27 +130,6 @@ export class FilesystemAdapter {
     else {
       await this.#vault.adapter.copy(filepath, newFilePath)
     }
-  }
-
-  /**
-   * Edits a file content using a callback.
-   * @param editor callback used to perform the edition
-   */
-  public async edit(
-    fileOrPath: TFile | string,
-    editor: ContentEditor,
-  ): Promise<void> {
-    const filepath = FilesystemAdapter.resolvePath(fileOrPath)
-    const content = await this.#vault.adapter.read(filepath)
-    await this.#vault.adapter.write(filepath, editor(content))
-  }
-
-  /**
-   * Removes a file from the filesystem.
-   */
-  public async remove(fileOrPath: TFile | string): Promise<void> {
-    const filepath = FilesystemAdapter.resolvePath(fileOrPath)
-    await this.#vault.adapter.remove(filepath)
   }
 
   /**
