@@ -35,7 +35,11 @@ export class FilesystemAdapter {
    * cache folder is returned.
    */
   public getCachePath(...paths: string[]): string {
-    return FilesystemAdapter.join(this.plugin.settings.cache_folder, ...paths)
+    return FilesystemAdapter.join(
+      this.plugin.settings.cache_folder,
+      '__components__',
+      ...paths,
+    )
   }
 
   /**

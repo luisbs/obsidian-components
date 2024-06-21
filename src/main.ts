@@ -7,10 +7,11 @@ import type {
 import { App, Plugin, PluginManifest } from 'obsidian'
 import { Logger } from 'obsidian-fnc'
 import { preparePluginState } from '@/utility'
-import { FilesystemAdapter, VersionController } from './filesystem'
-import { CodeblockHandler } from './codeblocks'
-import { SettingsTab } from './settings/SettingsTab'
 import ComponentAPI from './ComponentsAPI'
+import { CodeblockHandler } from './codeblocks'
+import { FilesystemAdapter, VersionController } from './filesystem'
+import { SettingsTab } from './settings/SettingsTab'
+
 
 export const DEFAULT_SETTINGS: PrimitivePluginSettings = {
   enable_components: 'STRICT',
@@ -96,7 +97,6 @@ export default class ComponentsPlugin extends Plugin {
     log.flush('Saved Settings')
 
     preparePluginState(this)
-    this.versions.clearCache()
     this.parser.registerCustomCodeblocks()
   }
 

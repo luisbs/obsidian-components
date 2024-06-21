@@ -35,6 +35,8 @@ export class VersionController {
   }
 
   public async clearCache(): Promise<void> {
+    // prevent cleaning on non designMode state
+    if (!this.#plugin.isDesignModeEnabled) return
     await this.#plugin.fs.renewFolder(this.#plugin.fs.getCachePath())
     this.#log.info('Cleared cache')
   }
