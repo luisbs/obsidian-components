@@ -64,7 +64,7 @@ export class CodeblockHandler {
           el.classList.add('component', `${name}-component`)
 
           // prettier-ignore
-          const renderer = getRenderer(el, this.#plugin, component, content.data)
+          const renderer = getRenderer(el, this.#plugin, component, ctx.sourcePath, content.data)
           this.#rendered.push(component.path, renderer)
           renderer.render()
         })
@@ -96,7 +96,7 @@ export class CodeblockHandler {
               el.classList.add('component', `${name}-component`)
 
               // prettier-ignore
-              const renderer = getRenderer(el, this.#plugin, component, content.data)
+              const renderer = getRenderer(el, this.#plugin, component, ctx.sourcePath, content.data)
               this.#rendered.push(component.path, renderer)
               renderer.render()
             })

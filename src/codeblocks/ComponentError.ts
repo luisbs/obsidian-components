@@ -46,8 +46,9 @@ export class ComponentError extends Error {
         return 'check the code on the component file'
       case 'missing-component-render-function':
         return "check the component file exports a function or a 'render' method"
-    }
 
-    return 'try-reloading Obsidian'
+      default:
+        return 'try-reloading Obsidian'
+    }
   }
 }

@@ -15,6 +15,7 @@ export function getRenderer(
   element: HTMLElement,
   plugin: ComponentsPlugin,
   component: ComponentFound,
+  notepath: string,
   data: unknown,
 ): Renderer {
   if (!isComponentEnabled(component, plugin.settings)) {
@@ -24,21 +25,22 @@ export function getRenderer(
   const f = getFormatById(component.format)
   if (!f) throw new ComponentError('missing-component-renderer')
 
+  // prettier-ignore
   switch (f.id) {
     case 'html':
-      return new HTMLRenderer(element, plugin, f, component, data)
+      return new HTMLRenderer(element, plugin, notepath, f, component, data)
     case 'markdown':
-      return new MarkdownRenderer(element, plugin, f, component, data)
+      return new MarkdownRenderer(element, plugin, notepath, f, component, data)
 
     case 'commonjs_html':
     case 'esmodules_html':
-      return new JavascriptHTMLRenderer(element, plugin, f, component, data)
+      return new JavascriptHTMLRenderer(element, plugin, notepath, f, component, data)
     case 'commonjs_markdown':
     case 'esmodules_markdown':
-      return new JavascriptMarkdownRenderer(element, plugin, f, component, data)
+      return new JavascriptMarkdownRenderer(element, plugin, notepath, f, component, data)
     case 'commonjs_code':
     case 'esmodules_code':
-      return new JavascriptCodeRenderer(element, plugin, f, component, data)
+      return new JavascriptCodeRenderer(element, plugin, notepath, f, component, data)
   }
 
   throw new ComponentError('missing-component-renderer')

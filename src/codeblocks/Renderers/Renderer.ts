@@ -13,6 +13,7 @@ export abstract class Renderer {
   constructor(
     protected element: HTMLElement,
     protected plugin: ComponentsPlugin,
+    protected notepath: string,
     protected format: ComponentFormat,
     protected component: ComponentFound,
     protected data: unknown,
