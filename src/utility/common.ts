@@ -31,3 +31,19 @@ export function parseStringList(source: string): string[] {
     return arr
   }, [] as string[])
 }
+
+/**
+ * Obtains a `SHA-1` hash from the data.
+ */
+export async function getHash(data: string, logger?: Logger): Promise<string> {
+  const encoder = new TextEncoder()
+  const encodedData = encoder.encode(data)
+  const hashBytes = await crypto.subtle.digest('SHA-1', encodedData)
+  const hashArray = new Uint8Array(hashBytes)
+  const hashString = Array.from(hashArray)
+    .map((byte) => byte.toString(16).padStart(2, '0')) // hex
+    .join('')
+
+  logger?.trace('hash', { encodedData, hashBytes, hashArray, hashString })
+  return hashString
+}

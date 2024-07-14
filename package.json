@@ -14,14 +14,13 @@
     "name": "Luis Brayan",
     "url": "https://github.com/luisbs"
   },
-  "main": "dist/main.js",
+  "type": "module",
+  "module": "./dist/main.js",
   "scripts": {
-    "build": "run-s build:prepare build:package",
-    "build:prepare": "rimraf dist",
-    "build:package": "node ./scripts/esbuild.config.mjs --environment production",
+    "watch": "vite build --watch --mode development",
+    "build": "vite build",
     "build:version": "node ./scripts/version-bump.mjs && git add manifest.json versions.json",
-    "watch": "node ./scripts/esbuild.config.mjs",
-    "lint": "lint:prettier lint:ts",
+    "lint": "run-s lint:eslint lint:prettier",
     "lint:fix": "run-s lint:eslint:fix lint:prettier:fix lint:ts",
     "lint:eslint": "eslint src",
     "lint:eslint:fix": "eslint --fix src",
@@ -29,21 +28,20 @@
     "lint:prettier:fix": "prettier --write src",
     "lint:ts": "tsc -noEmit -skipLibCheck"
   },
+  "dependencies": {
+    "obsidian-fnc": "github:luisbs/obsidian-fnc#v1.0.1"
+  },
   "devDependencies": {
     "@types/node": "^20.14.2",
-    "@typescript-eslint/eslint-plugin": "^7.13.0",
-    "@typescript-eslint/parser": "^7.13.0",
+    "@typescript-eslint/eslint-plugin": "^7.16.0",
+    "@typescript-eslint/parser": "^7.16.0",
     "builtin-modules": "^3.3.0",
-    "esbuild": "^0.14.54",
-    "esbuild-plugin-copy": "^1.6.0",
     "eslint": "^8.57.0",
     "npm-run-all": "^4.1.5",
     "obsidian": "^1.5.7",
-    "rimraf": "^4.4.1",
     "tslib": "^2.6.3",
-    "typescript": "^4.9.5"
-  },
-  "dependencies": {
-    "obsidian-fnc": "github:luisbs/obsidian-fnc"
+    "typescript": "^5.5.3",
+    "vite": "^5.3.3",
+    "vite-plugin-static-copy": "^1.0.6"
   }
 }

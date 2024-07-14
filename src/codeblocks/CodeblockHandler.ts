@@ -4,17 +4,18 @@ import type {
   ComponentFound,
   ComponentsPlugin,
 } from '@/types'
-import { createHmac } from 'crypto'
 import { parseYaml } from 'obsidian'
-import { getComponentById, isRecord, MapStore } from '@/utility'
+import { Logger } from 'obsidian-fnc'
+import { getComponentById, getHash, isRecord, MapStore } from '@/utility'
 import { ComponentError } from './ComponentError'
 import { Renderer, getRenderer } from './Renderers'
 
 export class CodeblockHandler {
   #plugin: ComponentsPlugin
 
-  #registered: string[] = []
+  #log = new Logger('CodeblockHandler')
   #rendered: MapStore<Renderer> = new MapStore()
+  #registered: string[] = []
 
   constructor(plugin: ComponentsPlugin) {
     this.#plugin = plugin
@@ -57,8 +58,8 @@ export class CodeblockHandler {
       (source, el, ctx) => {
         console.log('Procesing base codeblock')
 
-        this.#catchErrors(el, () => {
-          const content = this.#parseCodeblock(source)
+        this.#catchErrors(el, async () => {
+          const content = await this.#parseCodeblock(source)
           const { name, component } = this.#getComponent(content, el, ctx)
           if (!component) throw new ComponentError('unknown-component')
           el.classList.add('component', `${name}-component`)
@@ -89,8 +90,8 @@ export class CodeblockHandler {
           (source, el, ctx) => {
             console.log(`Procesing '${name}' codeblock`)
 
-            return this.#catchErrors(el, () => {
-              const content = this.#parseCodeblock(source)
+            return this.#catchErrors(el, async () => {
+              const content = await this.#parseCodeblock(source)
               const component = getComponentById(componentId, settings)
               if (!component) throw new ComponentError('unknown-component')
               el.classList.add('component', `${name}-component`)
@@ -119,8 +120,9 @@ export class CodeblockHandler {
     }
   }
 
-  #parseCodeblock(source: string): CodeblockContent {
+  async #parseCodeblock(source: string): Promise<CodeblockContent> {
     source = source.trim()
+    const hash = await getHash(source, this.#log)
     const isJson = source.startsWith('{')
     const separator = new RegExp(this.#plugin.settings.usage_separator, 'ig')
 
@@ -135,14 +137,14 @@ export class CodeblockHandler {
       }
 
       return {
-        hash: createHmac('sha256', '').update(source).digest('base64'),
+        hash,
         syntax: isJson ? 'json' : 'yaml',
         source,
         data: data || '',
       }
     } catch (ignored) {
       return {
-        hash: createHmac('sha256', '').update(source).digest('base64'),
+        hash,
         syntax: 'none',
         source,
         data: source,
