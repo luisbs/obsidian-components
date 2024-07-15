@@ -3,7 +3,7 @@ import { TFile, Vault } from 'obsidian'
 import { Logger } from 'obsidian-fnc'
 import { ComponentError } from '@/codeblocks'
 
-export default class ComponentAPI implements PluginAPI {
+export class ComponentAPI implements PluginAPI {
   #log = new Logger('ComponentAPI')
   #plugin: ComponentsPlugin
   #vault: Vault

@@ -1,3 +1,4 @@
+import type { CodeblockContext } from '@/types'
 import { TFile } from 'obsidian'
 import { Logger } from 'obsidian-fnc'
 import { isRecord } from '@/utility'
@@ -26,17 +27,20 @@ export abstract class CodeRenderer extends Renderer {
   }
 }
 
-export type ITextRenderer = (data: unknown, notepath: string) => Promise<string>
+export type ITextRenderer = (
+  data: unknown,
+  context: CodeblockContext,
+) => Promise<string>
 export type ICodeRenderer = (
   root: HTMLElement,
   data: unknown,
-  notepath: string,
+  context: CodeblockContext,
 ) => Promise<void>
 
 export class JavascriptHTMLRenderer extends CodeRenderer {
   async renderingSequence(componentFile: TFile): Promise<void> {
     const render = await this.getRenderFunction(componentFile)
-    const html = await (render as ITextRenderer)(this.data, this.notepath)
+    const html = await (render as ITextRenderer)(this.data, this.context)
     this.renderHTML(html)
   }
 }
@@ -44,7 +48,7 @@ export class JavascriptHTMLRenderer extends CodeRenderer {
 export class JavascriptMarkdownRenderer extends CodeRenderer {
   async renderingSequence(componentFile: TFile): Promise<void> {
     const render = await this.getRenderFunction(componentFile)
-    const markdown = await (render as ITextRenderer)(this.data, this.notepath)
+    const markdown = await (render as ITextRenderer)(this.data, this.context)
     this.renderMarkdown(markdown)
   }
 }
@@ -55,6 +59,6 @@ export class JavascriptCodeRenderer extends CodeRenderer {
 
     // prevent the component is attached multiple times
     this.element.empty()
-    await (render as ICodeRenderer)(this.element, this.data, this.notepath)
+    await (render as ICodeRenderer)(this.element, this.data, this.context)
   }
 }

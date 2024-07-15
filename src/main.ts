@@ -1,20 +1,19 @@
-import type {
-  PluginSettings,
-  PluginState,
-  PrimitivePluginSettings,
-  RawPluginSettings,
-} from './types'
+import type { PluginSettings, PluginState } from './types'
 import { App, Plugin, PluginManifest } from 'obsidian'
 import { Logger } from 'obsidian-fnc'
-import { preparePluginState } from '@/utility'
-import ComponentAPI from './ComponentsAPI'
-import { CodeblockHandler } from './codeblocks'
-import { FilesystemAdapter, VersionController } from './filesystem'
+import {
+  parseStringList,
+  prepareCodeblockNames,
+  prepareComponentMatchers,
+  prepareComponentNames,
+} from '@/utility'
 import { SettingsTab } from './settings/SettingsTab'
+import { FilesystemAdapter, VersionController } from './filesystem'
+import { CodeblockHandler } from './codeblocks'
+import { ComponentAPI } from './ComponentsAPI'
 
 
-export const DEFAULT_SETTINGS: PrimitivePluginSettings = {
-  enable_components: 'STRICT',
+export const DEFAULT_SETTINGS: PluginSettings = {
   enable_codeblocks: false,
   enable_separators: false,
 
@@ -26,7 +25,7 @@ export const DEFAULT_SETTINGS: PrimitivePluginSettings = {
 
   components_naming: 'LONG',
   components_folder: '',
-  components_found: {},
+  components_config: [],
 }
 
 export default class ComponentsPlugin extends Plugin {
@@ -55,9 +54,8 @@ export default class ComponentsPlugin extends Plugin {
 
   async onload(): Promise<void> {
     await this.loadSettings()
+    this.parser.registerBaseCodeblock()
     this.addSettingTab(new SettingsTab(this))
-
-    this.parser.registerCodeblocks()
   }
 
   async onunload(): Promise<void> {
@@ -67,36 +65,38 @@ export default class ComponentsPlugin extends Plugin {
 
   async loadSettings(): Promise<void> {
     const log = this.#log.group('Loading Settings')
-    const { enabled_formats, enabled_components, ...primitives } =
-      (await this.loadData()) || {}
+    const primitives = (await this.loadData()) || {}
 
+    // ensure a fallback value is present
     this.settings = Object.assign({}, DEFAULT_SETTINGS, primitives)
-    this.settings.enabled_formats = new Set(enabled_formats || [])
-    this.settings.enabled_components = new Map(enabled_components || [])
-
-    log.debug(this.settings)
+    log.debug('Loaded: ', this.settings)
     log.flush('Loaded Settings')
 
-    // load runtime configuration
-    preparePluginState(this)
+    this.#prepareState()
   }
 
   async saveSettings(): Promise<void> {
     const log = this.#log.group('Saving Settings')
-    log.debug(this.settings)
+    const primitives = Object.assign({}, this.settings)
+    // serialize special data types (Map, Set, etc)
 
-    const { enabled_formats, enabled_components, ...primitiveData } =
-      this.settings
-
-    const rawData = Object.assign({}, primitiveData) as RawPluginSettings
-    rawData.enabled_formats = Array.from(enabled_formats)
-    rawData.enabled_components = Array.from(enabled_components)
-
-    await this.saveData(rawData)
-    log.debug(rawData)
+    await this.saveData(primitives)
+    log.debug('Saved: ', primitives)
     log.flush('Saved Settings')
 
-    preparePluginState(this)
+    this.#prepareState()
+  }
+
+  #prepareState(): void {
+    this.#log.info('Prepare state')
+    this.state = {
+      name_params: parseStringList(this.settings.usage_naming),
+      codeblocks_enabled: prepareCodeblockNames(this.settings),
+      components_enabled: prepareComponentNames(this.settings),
+      components_matchers: prepareComponentMatchers(this.settings),
+    }
+
+    //
     this.parser.registerCustomCodeblocks()
   }
 

@@ -4,7 +4,6 @@ type ErrorCode =
   | 'missing-component-name'
   | 'unknown-component'
   // throwed on `getRenderer`
-  | 'disabled-component'
   | 'missing-component-renderer'
   // throwed on `render` method
   // | 'invalid-component-params'
@@ -29,12 +28,10 @@ export class ComponentError extends Error {
       // case 'invalid-codeblock-syntax':
       //   return 'check json/yaml syntax on the codeblock'
       case 'missing-component-name':
-        return 'check component-name is present and follows Plugin settings'
+        return 'check if Component-name is present and follows Plugin settings'
       case 'unknown-component':
-        return 'check component in Plugin settings'
+        return "component-name doesn't match an active Component"
 
-      case 'disabled-component':
-        return 'check component in Plugin settings'
       case 'missing-component-renderer':
         return "refresh 'Components filter' on Plugin settings"
 
@@ -43,9 +40,9 @@ export class ComponentError extends Error {
       case 'missing-component-file':
         return "refresh 'Components filter' on Plugin settings"
       case 'invalid-component-syntax':
-        return 'check the code on the component file'
+        return 'check the code on the Component file'
       case 'missing-component-render-function':
-        return "check the component file exports a function or a 'render' method"
+        return "check the Component file exports a function or a 'render' method"
 
       default:
         return 'try-reloading Obsidian'

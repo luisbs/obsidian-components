@@ -1,10 +1,11 @@
 import { TFile } from 'obsidian'
 import { Logger } from 'obsidian-fnc'
 import { MapStore } from './utility'
+import ComponentsPlugin from './main'
 
-export { default as ComponentsPlugin } from './main'
+export { ComponentsPlugin }
 
-//#region Runtime
+//#region Plugin Runtime
 
 export interface PluginAPI {
   /** Tries to refresh the components rendered instances. */
@@ -18,54 +19,73 @@ export interface PluginAPI {
   source(file: TFile, logger?: Logger): Promise<unknown>
 }
 
-export interface PluginState {
-  /** Stores the currently parameters that can be used to define a component name. */
-  params: string[]
-  /** Stores the currently enabled component references. */
-  components: MapStore<string>
-  /** Stores the currently enabled codeblock references. */
-  codeblocks: MapStore<string>
+export interface RendererParams {
+  /** Identified **Codeblock**. */
+  matcher: ComponentMatcher
+  /** Context data to be shared to the renderer. */
+  context: CodeblockContext
+  /** `HTMLElement` of the **Codeblock**. */
+  element: HTMLElement
+  /** Parsed data from the **Component**. */
+  data: unknown
 }
 
-export interface CodeblockContent {
-  /** Hash result of the codeblock content. (used for cache) */
+export interface CodeblockContext {
+  /** Vault-path of the note containing the **Codeblock**. */
+  notepath: string
+  /** Component name used on the **Codeblock**. */
+  used_name: string
+  /** Syntax of the **Codeblock**. */
+  syntax: 'json' | 'yaml' | 'unknown'
+  /** Hash result of the **Codeblock** content. */
   hash: string
-  /** Syntax of the codeblock. */
-  syntax: 'json' | 'yaml' | 'none'
-  /** Codeblock content raw text. */
-  source: string
-  /** Codeblock content parsed. */
-  data: unknown
 }
 
 //#endregion
 
-//#region Settings
+//#region Plugin State
 
-/**
- * Representation of the plugin settings on disk.
- */
-export type RawPluginSettings = PrimitivePluginSettings & {
-  enabled_formats: string[]
-  enabled_components: [string, boolean][]
+export interface PluginState {
+  /** Stores the currently parameters that can be used to define a **Component** name. */
+  name_params: string[]
+  /** Stores the currently enabled **Codeblock** references. */
+  codeblocks_enabled: MapStore<string>
+  /** Stores the currently enabled **Component** references. */
+  components_enabled: MapStore<string>
+  /** Stores the currently active **Component**. */
+  components_matchers: ComponentMatcher[]
 }
 
-export type PrimitivePluginSettings = Omit<
-  PluginSettings,
-  'enabled_formats' | 'enabled_components'
->
+export interface ComponentMatcher {
+  /** Identifier for the **Component**. */
+  id: string
+  /** Vault-path of the **Component**. */
+  path: string
+  /** Checks if the `customName` matches the user-defined names. */
+  test(customName: string): boolean
+  /** Obtains the related format tags. */
+  getTags(): FormatMatcher['tags']
+}
 
-/**
- * Representation of the plugin settings on memory.
- */
-export interface PluginSettings {
+export interface FormatMatcher {
   /**
-   * Stores the plugin behavior about components discovery.
-   * - `'STRICT'` allow only components enabled by the user.
-   * - `'FLEXIBLE'` allow components by user input and format.
-   * - `'ALL'` allow all the components.
+   * Defines the behavior of the **Component**:
+   * - `md` the **Component** returns **Markdown**
+   * - `html` the **Component** returns **HTML**
+   * - `code` the **Component** handles the **DOM** (**javascript**)
+   * - `esm` the **Component** uses **ESModules** syntax
+   * - `cjs` the **Component** uses **CommonJS** syntax
    */
-  enable_components: 'STRICT' | 'FLEXIBLE' | 'ALL'
+  tags: Array<'md' | 'html' | 'code' | 'esm' | 'cjs'>
+  /** Checks if the `componentPath` matches the expected extension. */
+  test(componentPath: string): boolean
+}
+
+//#endregion
+
+//#region Plugin Settings
+
+export interface PluginSettings {
   /** Stores the user desition to allow custom codeblocks. */
   enable_codeblocks: boolean
   /** Stores the user desition to allow separators on codeblocks. */
@@ -75,76 +95,40 @@ export interface PluginSettings {
   cache_folder: string
 
   /**
-   * Stores the component naming method for the vault.
+   * The **Component** naming method.
    * - `'INLINE'` specify the name as an inline string (e.g. `use book`)
    * - `'PARAM'` specify the name as a param (e.g. `__name: 'book'`)
    * - `'BOTH'` use both methods
    */
   usage_method: 'INLINE' | 'PARAM' | 'BOTH'
-  /** Store the user input about which params can be used to retrive a component name. */
+  /** Which params can be used to retrive a **Component** name. */
   usage_naming: string
-  /** Store the user input about the separator to use inside codeblocks. */
+  /** Separator to use inside codeblocks. */
   usage_separator: string
 
   /**
-   * Stores the components naming strategy.
+   * The Components naming strategy.
    * - `'CUSTOM'` includes only the user-defined names
    * - `'SHORT'` includes only the short names
    * - `'LONG'` includes the short and long names
    * - `'ALL'` includes all the possible names
    */
   components_naming: 'CUSTOM' | 'SHORT' | 'LONG' | 'ALL'
-  /** Stores the route where the components are. */
+  /** Vault-path where the components are located. */
   components_folder: string
-  /** Stores the components found on the vault. */
-  components_found: Record<string, ComponentFound>
-
-  /**
-   * Stores the component formats enabled by the user.
-   * - **present** means the format is enabled.
-   * - **missing** means the format is disabled.
-   */
-  enabled_formats: Set<string>
-  /**
-   * Stores the components enabled by the user.
-   * - **missing** means the component has default behavior.
-   * - `false` means the component is disabled.
-   * - `true` means the component is enabled.
-   */
-  enabled_components: Map<string, boolean>
+  /** The Components found on the vault. */
+  components_config: ComponentConfig[]
 }
 
-/**
- * Defines a component format.
- */
-export interface ComponentFormat {
-  /** Unique Identifier for the format. */
+export interface ComponentConfig {
+  /** Identifier of the **Component**. */
   id: string
-  /** Defines the extension of the files with this format. */
-  ext: RegExp
-  /** Defines tags to group formats. */
-  tags: string[]
-
-  // TODO: remove type property
-  /**
-   * Defines the type of behavior of the components
-   * - `code` corresponds with formats that can handle the DOM a.k.a. **javascript**
-   * - `html` the component return **HTML**
-   * - `md` the component return **Markdown**
-   */
-  type: 'code' | 'html' | 'md'
-}
-
-/**
- * Defines a component found on the vault.
- */
-export interface ComponentFound {
-  /** Absolute path of the file on the vault. */
+  /** Vault-path of the file. */
   path: string
-  /** Component format identifier. */
-  format: string
-  /** User defined names */
+  /** User custom names. */
   names: string
+  /** Whether the **Component** should run. */
+  enabled: boolean
 }
 
 //#endregion

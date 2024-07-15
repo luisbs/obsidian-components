@@ -29,7 +29,7 @@
     "lint:ts": "tsc -noEmit -skipLibCheck"
   },
   "dependencies": {
-    "obsidian-fnc": "github:luisbs/obsidian-fnc#v1.0.1"
+    "obsidian-fnc": "github:luisbs/obsidian-fnc#v1.1.0"
   },
   "devDependencies": {
     "@types/node": "^20.14.2",

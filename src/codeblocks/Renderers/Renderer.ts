@@ -1,4 +1,9 @@
-import type { ComponentFormat, ComponentFound, ComponentsPlugin } from '@/types'
+import type {
+  CodeblockContext,
+  ComponentMatcher,
+  ComponentsPlugin,
+  RendererParams,
+} from '@/types'
 import { MarkdownRenderer, TFile, Vault } from 'obsidian'
 import { Logger } from 'obsidian-fnc'
 import { ComponentError } from '../ComponentError'
@@ -9,16 +14,17 @@ export abstract class Renderer {
   protected id = String(Math.floor(Math.random() * 1e6)).padStart(6, '-')
 
   protected vault: Vault
+  protected matcher: ComponentMatcher
+  protected context: CodeblockContext
+  protected element: HTMLElement
+  protected data: unknown
 
-  constructor(
-    protected element: HTMLElement,
-    protected plugin: ComponentsPlugin,
-    protected notepath: string,
-    protected format: ComponentFormat,
-    protected component: ComponentFound,
-    protected data: unknown,
-  ) {
+  constructor(protected plugin: ComponentsPlugin, params: RendererParams) {
     this.vault = plugin.app.vault
+    this.matcher = params.matcher
+    this.context = params.context
+    this.element = params.element
+    this.data = params.data
   }
 
   /** Each renderer should define the sequence. */
@@ -32,14 +38,14 @@ export abstract class Renderer {
 
     try {
       // prettier-ignore
-      const componentFile = this.plugin.api.latest(this.component.path, this.logger)
+      const componentFile = this.plugin.api.latest(this.matcher.path, this.logger)
       await this.renderingSequence(componentFile)
-      this.logger.flush(`[${this.id}] Rendered <${this.component.path}>`)
+      this.logger.flush(`[${this.id}] Rendered <${this.matcher.path}>`)
 
       //
     } catch (error) {
       this.logger.error(error)
-      this.logger.flush(`[${this.id}] Failed <${this.component.path}>`)
+      this.logger.flush(`[${this.id}] Failed <${this.matcher.path}>`)
 
       const pre = this.element.createEl('pre')
       if (error instanceof ComponentError) pre.classList.add(error.code)
@@ -55,12 +61,12 @@ export abstract class Renderer {
 
   protected renderMarkdown(content: string): void {
     this.logger.debug('renderMarkdownContent')
-    // TODO: change the path, to avoid bad link generation of relative links
+    // NOTE: relative links is resolve from `this.context.notepath`
     MarkdownRenderer.render(
       this.plugin.app,
       content,
       this.element,
-      this.component.path,
+      this.context.notepath,
       this.plugin,
     )
   }

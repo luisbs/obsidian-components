@@ -6,8 +6,8 @@ settings:
 
 dependencies:
   obsidian-fnc:
-    specifier: github:luisbs/obsidian-fnc#v1.0.1
-    version: github.com/luisbs/obsidian-fnc/248fefed06c1a9fd79e855ac956d94136eae66eb
+    specifier: github:luisbs/obsidian-fnc#v1.1.0
+    version: github.com/luisbs/obsidian-fnc/96e0509244342d6a3ac3a73068ccc6f075d18140
 
 devDependencies:
   '@types/node':
@@ -2406,10 +2406,11 @@ packages:
     engines: {node: '>=10'}
     dev: true
 
-  github.com/luisbs/obsidian-fnc/248fefed06c1a9fd79e855ac956d94136eae66eb:
-    resolution: {tarball: https://codeload.github.com/luisbs/obsidian-fnc/tar.gz/248fefed06c1a9fd79e855ac956d94136eae66eb}
+  github.com/luisbs/obsidian-fnc/96e0509244342d6a3ac3a73068ccc6f075d18140:
+    resolution: {tarball: https://codeload.github.com/luisbs/obsidian-fnc/tar.gz/96e0509244342d6a3ac3a73068ccc6f075d18140}
     name: obsidian-fnc
-    version: 1.0.1
+    version: 1.1.0
+    prepare: true
     requiresBuild: true
     dependencies:
       '@floating-ui/dom': 1.6.7

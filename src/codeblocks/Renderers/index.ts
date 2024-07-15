@@ -1,5 +1,4 @@
-import type { ComponentFound, ComponentsPlugin } from '@/types'
-import { getFormatById, isComponentEnabled } from '@/utility'
+import type { ComponentsPlugin, RendererParams } from '@/types'
 import { ComponentError } from '../ComponentError'
 import { Renderer } from './Renderer'
 import { HTMLRenderer, MarkdownRenderer } from './TextRenderers'
@@ -12,35 +11,20 @@ import {
 export { Renderer } from './Renderer'
 
 export function getRenderer(
-  element: HTMLElement,
   plugin: ComponentsPlugin,
-  component: ComponentFound,
-  notepath: string,
-  data: unknown,
+  params: RendererParams,
 ): Renderer {
-  if (!isComponentEnabled(component, plugin.settings)) {
-    throw new ComponentError('disabled-component')
+  const tags = params.matcher.getTags()
+  if (tags.length === 1) {
+    if (tags.includes('html')) return new HTMLRenderer(plugin, params)
+    return new MarkdownRenderer(plugin, params)
   }
 
-  const f = getFormatById(component.format)
-  if (!f) throw new ComponentError('missing-component-renderer')
-
   // prettier-ignore
-  switch (f.id) {
-    case 'html':
-      return new HTMLRenderer(element, plugin, notepath, f, component, data)
-    case 'markdown':
-      return new MarkdownRenderer(element, plugin, notepath, f, component, data)
-
-    case 'commonjs_html':
-    case 'esmodules_html':
-      return new JavascriptHTMLRenderer(element, plugin, notepath, f, component, data)
-    case 'commonjs_markdown':
-    case 'esmodules_markdown':
-      return new JavascriptMarkdownRenderer(element, plugin, notepath, f, component, data)
-    case 'commonjs_code':
-    case 'esmodules_code':
-      return new JavascriptCodeRenderer(element, plugin, notepath, f, component, data)
+  if (tags.includes('cjs') || tags.includes('esm')) {
+    if (tags.includes('code')) return new JavascriptCodeRenderer(plugin, params)
+    if (tags.includes('html')) return new JavascriptHTMLRenderer(plugin, params)
+    return new JavascriptMarkdownRenderer(plugin, params)
   }
 
   throw new ComponentError('missing-component-renderer')
