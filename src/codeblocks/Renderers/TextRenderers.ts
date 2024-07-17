@@ -1,22 +1,27 @@
-import { TFile } from 'obsidian'
+import type { CodeblockContext } from '@/types'
+import type { TFile } from 'obsidian'
 import { Logger } from 'obsidian-fnc'
 import { isRecord } from '@/utility'
-import { Renderer } from './Renderer'
+import { ComponentRenderer } from './ComponentRenderer'
 
-export abstract class TextRenderer extends Renderer {
+export abstract class TextRenderer extends ComponentRenderer {
   #log = new Logger('TextRenderer')
 
-  protected async getFileContent(componentFile: TFile): Promise<string> {
-    this.#log.on(this.logger).debug('getFileContent')
-    return this.vault.read(componentFile)
+  protected async getComponentContent(
+    logger: Logger,
+    component: TFile,
+  ): Promise<string> {
+    this.#log.on(logger).debug('getComponentContent')
+    return this.plugin.app.vault.read(component)
   }
 
   protected replaceData(
+    logger: Logger,
     source: string,
     data: unknown,
     fallback = '[missing]',
   ): string {
-    this.#log.on(this.logger).debug('replaceData')
+    this.#log.on(logger).debug('replaceData')
 
     if (!isRecord(data) && !Array.isArray(data)) {
       const value = data ? String(data) : fallback
@@ -32,17 +37,37 @@ export abstract class TextRenderer extends Renderer {
 }
 
 export class HTMLRenderer extends TextRenderer {
-  async renderingSequence(componentFile: TFile): Promise<void> {
-    const content = await this.getFileContent(componentFile)
-    const html = this.replaceData(content, this.data)
-    this.renderHTML(html)
+  #log = new Logger('HTMLRenderer')
+
+  async render(
+    logger: Logger,
+    component: TFile,
+    element: HTMLElement,
+    context: CodeblockContext,
+    data: unknown,
+  ): Promise<void> {
+    this.#log.on(logger).debug('render')
+
+    const content = await this.getComponentContent(logger, component)
+    const html = this.replaceData(logger, content, data)
+    this.renderHTML(logger, element, html)
   }
 }
 
 export class MarkdownRenderer extends TextRenderer {
-  async renderingSequence(componentFile: TFile): Promise<void> {
-    const content = await this.getFileContent(componentFile)
-    const markdown = this.replaceData(content, this.data)
-    this.renderMarkdown(markdown)
+  #log = new Logger('MarkdownRenderer')
+
+  async render(
+    logger: Logger,
+    component: TFile,
+    element: HTMLElement,
+    context: CodeblockContext,
+    data: unknown,
+  ): Promise<void> {
+    this.#log.on(logger).debug('render')
+
+    const content = await this.getComponentContent(logger, component)
+    const markdown = this.replaceData(logger, content, data)
+    this.renderMarkdown(logger, element, markdown, context.notepath)
   }
 }

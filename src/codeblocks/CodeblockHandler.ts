@@ -7,9 +7,9 @@ import type {
 } from '@/types'
 import { parseYaml } from 'obsidian'
 import { Logger } from 'obsidian-fnc'
-import { getHash, isRecord, isString, MapStore } from '@/utility'
+import { MapStore, getHash, isRecord, isString } from '@/utility'
 import { ComponentError } from './ComponentError'
-import { Renderer, getRenderer } from './Renderers'
+import RenderManager from './RenderManager'
 
 interface CodeblockContent {
   /** Syntax of the **Codeblock**. */
@@ -22,13 +22,15 @@ interface CodeblockContent {
 
 export class CodeblockHandler {
   #plugin: ComponentsPlugin
+  #relay: RenderManager
 
   #log = new Logger('CodeblockHandler')
-  #rendered: MapStore<Renderer> = new MapStore()
+  #rendered = new MapStore<RendererParams>()
   #registered: string[] = []
 
   constructor(plugin: ComponentsPlugin) {
     this.#plugin = plugin
+    this.#relay = new RenderManager(plugin)
   }
 
   public clear(): void {
@@ -49,9 +51,13 @@ export class CodeblockHandler {
    * Force all the instances of a component to re-render.
    */
   public refresh(filePath: string): void {
-    for (const renderer of this.#rendered.get(filePath) || []) {
-      renderer.render()
+    const logger = this.#log.group(`Refreshing Components「${filePath}」`)
+    for (const params of this.#rendered.get(filePath) || []) {
+      logger.debug('Refreshing Context', params.context)
+      this.#relay.render(params, logger)
+      logger.info(`Refreshed Component with Hash「${params.context.hash}」`)
     }
+    logger.flush('Refreshed Components')
   }
 
   /**
@@ -87,7 +93,8 @@ export class CodeblockHandler {
     componentId?: string,
     name?: string,
   ): Promise<void> {
-    const log = this.#log.group(`Handling Codeblock`)
+    const id = String(Math.floor(Math.random() * 1e6)).padStart(6, '-')
+    const logger = this.#log.group(`Codeblock Execution ${id}`)
 
     try {
       const { hash, syntax, data } = await this.#parseCodeblock(source)
@@ -99,21 +106,21 @@ export class CodeblockHandler {
       const notepath = elContext.sourcePath
       const context: CodeblockContext = { notepath, used_name, syntax, hash }
       const params: RendererParams = { matcher, context, element, data }
-      log.debug('Codeblock Context', context)
+      logger.debug('Codeblock Context', context)
 
       // run renderer
-      const renderer = getRenderer(this.#plugin, params)
-      this.#rendered.push(matcher.path, renderer)
-      renderer.render()
-      log.flush(`Rendered Component ${matcher.id}`)
+      this.#rendered.push(matcher.path, params)
+      this.#relay.render(params, logger)
+      logger.flush(`[${id}] Rendered Component ${matcher.id}`)
       //
     } catch (error) {
-      log.error(error)
-      log.flush(`Failed rendering Component ${componentId}`)
+      logger.error(error)
+      logger.flush(`[${id}] Failed rendering Component ${componentId}`)
 
       const pre = element.createEl('pre')
       if (error instanceof ComponentError) pre.classList.add(error.code)
-      pre.append(String(error))
+      if (error instanceof Error) pre.append(error.stack || error.message)
+      else pre.append(String(error))
     }
   }
 
