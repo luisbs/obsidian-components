@@ -53,3 +53,29 @@ export async function getHash(data: string, logger?: Logger): Promise<string> {
   logger?.trace('hash', { encodedData, hashBytes, hashArray, hashString })
   return hashString
 }
+
+
+export function compareBySpecificity(a: string, b: string): number {
+  //[
+  //  'example.com',
+  //  'example.com/images',
+  //  'example.com/blog',
+  //  'images.org',
+  //  'example.com/blog/asd',
+  //]
+  // becomes ⬇️
+  //[
+  //  'example.com/blog/asd',
+  //  'example.com/blog',
+  //  'example.com/images',
+  //  'example.com',
+  //  'images.org',
+  //]
+
+  // prioritize specificity
+  if (a.startsWith(b)) return -1
+  else if (b.startsWith(a)) return 1
+
+  // order alfabetically
+  return a.localeCompare(b, 'en')
+}

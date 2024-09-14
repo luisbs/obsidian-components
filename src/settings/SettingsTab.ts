@@ -2,37 +2,21 @@ import type { ComponentsPlugin, PluginSettings } from '@/types'
 import type { TextAreaComponent, TextComponent } from 'obsidian'
 import { PluginSettingTab, Setting } from 'obsidian'
 import { FolderSuggester } from 'obsidian-fnc'
-import { loadComponentsOnVault } from '@/utility'
-import { FormatsTable, ComponentsTable } from './components'
-
-// prettier-ignore
-function createDocsLink(id: string, text: string): HTMLAnchorElement {
-  return createEl('a', { text, href: "https://github.com/luisbs/obsidian-components/blob/main/docs/settings.md#" + id })
-}
+import { SettingsTabComponents } from './SettingsTabComponents'
+import * as Tools from './SettingsTabTools'
 
 export class SettingsTab extends PluginSettingTab {
   #plugin: ComponentsPlugin
-  #settings: PluginSettings
-
-  #componentsTable?: ComponentsTable
-  #formatsTable?: FormatsTable
 
   constructor(plugin: ComponentsPlugin) {
     super(plugin.app, plugin)
     this.#plugin = plugin
-    this.#settings = plugin.settings
   }
 
-  async saveChanges(): Promise<void> {
-    await this.#plugin.saveSettings()
-    this.#componentsTable?.refresh()
-    this.#formatsTable?.refresh()
-  }
-
-  update(key: keyof PluginSettings, value: unknown) {
+  async #update(key: keyof PluginSettings, value: unknown): Promise<void> {
     // @ts-expect-error dynamic assignation
-    this.#settings[key] = value
-    this.saveChanges()
+    this.#plugin.settings[key] = value
+    await this.#plugin.saveSettings()
   }
 
   display(): void {
@@ -48,57 +32,18 @@ export class SettingsTab extends PluginSettingTab {
     this.#newSetting().setName('Components Settings').setHeading()
     this.#displayComponentsSettings()
 
-    this.#componentsTable = new ComponentsTable(
-      this.containerEl,
-      this.#plugin,
-      this.saveChanges.bind(this),
-      () => {
-        // is expected that this callback refreshes the ComponentsTable
-        const components = loadComponentsOnVault(
-          this.#plugin.app.vault,
-          this.#settings,
-        )
-        this.update('components_found', components)
-      },
-    )
+    new SettingsTabComponents(this.#plugin, this.containerEl)
+  }
 
-    this.#newSetting().setName('Formats Settings').setHeading()
-    this.#formatsTable = new FormatsTable(
-      this.containerEl, //
-      this.#settings,
-      this.saveChanges.bind(this),
-    )
+  #newSetting() {
+    return this.#newSettingAt(this.containerEl)
+  }
 
-    this.#componentsTable.render()
-    this.#formatsTable.render()
+  #newSettingAt(container: HTMLElement) {
+    return new Setting(container)
   }
 
   #displayGeneralSettings(): void {
-    const behaviorDesc = createFragment((div) => {
-      div.append(
-        'Security behavior when runing the components.',
-        createEl('br'),
-        'For more details see ',
-        createDocsLink('execution-behavior-setting', 'execution behavior'),
-        '.',
-      )
-    })
-
-    this.#newSetting()
-      .setName('Execution behavior')
-      .setDesc(behaviorDesc)
-      .addDropdown((input) => {
-        input.addOptions({
-          STRICT: 'Only components enabled by the user. (recomended)',
-          FLEXIBLE: 'Components and formats enabled by the user.',
-          ALL: 'Allow all the components',
-        })
-        input.setValue(this.#settings.enable_components)
-        input.onChange(this.update.bind(this, 'enable_components'))
-      })
-
-    //
-    // Design mode setting
     const modeDesc = createFragment((div) => {
       div.append(
         "Enable design mode only if you're editing your components code.",
@@ -106,7 +51,7 @@ export class SettingsTab extends PluginSettingTab {
         'It will not disabled until you close the app.',
         createEl('br'),
         'For more details see ',
-        createDocsLink('design-mode-setting', 'design mode'),
+        Tools.docsLink('design-mode-setting', 'design mode'),
         '.',
       )
     })
@@ -118,7 +63,7 @@ export class SettingsTab extends PluginSettingTab {
         const enabled = this.#plugin.isDesignModeEnabled
         input.setDisabled(enabled)
         input.setValue(enabled)
-        input.onChange((value) => {
+        input.onChange(() => {
           // allows only enable
           if (enabled) return
           input.setDisabled(true)
@@ -129,22 +74,21 @@ export class SettingsTab extends PluginSettingTab {
 
   #displayCodeblocksSettings(): void {
     // Custom codeblocks setting
-    const codeblocksDesc = createFragment((div) => {
-      div.append(
-        'Allows the usage of the components custom names as codeblocks identifiers.',
-        createEl('br'),
-        'For more details see ',
-        createDocsLink('custom-codeblocks-setting', 'custom codeblocks'),
-        '.',
-      )
-    })
+    const codeblocksDesc = createFragment()
+    codeblocksDesc.append(
+      'Allows the usage of the components custom names as codeblocks identifiers.',
+      createEl('br'),
+      'For more details see ',
+      Tools.docsLink('custom-codeblocks-setting', 'custom codeblocks'),
+      '.',
+    )
 
     this.#newSetting()
       .setName('Custom Codeblocks')
       .setDesc(codeblocksDesc)
       .addToggle((input) => {
-        input.setValue(this.#settings.enable_codeblocks)
-        input.onChange(this.update.bind(this, 'enable_codeblocks'))
+        input.setValue(this.#plugin.settings.enable_codeblocks)
+        input.onChange(this.#update.bind(this, 'enable_codeblocks'))
       })
 
     //
@@ -174,9 +118,9 @@ export class SettingsTab extends PluginSettingTab {
           PARAM: 'Use param names',
           BOTH: 'Use both methods',
         })
-        input.setValue(this.#settings.usage_method)
+        input.setValue(this.#plugin.settings.usage_method)
         input.onChange((value) => {
-          this.update('usage_method', value)
+          this.#update('usage_method', value)
           namingMethodInput?.setDisabled(isDisabled(value))
         })
       })
@@ -186,9 +130,9 @@ export class SettingsTab extends PluginSettingTab {
       .setDesc('Defines the parameters used to identify a component.')
       .addTextArea((input) => {
         namingMethodInput = input
-        input.setDisabled(isDisabled(this.#settings.usage_method))
-        input.setValue(this.#settings.usage_naming)
-        input.onChange(this.update.bind(this, 'usage_naming'))
+        input.setDisabled(isDisabled(this.#plugin.settings.usage_method))
+        input.setValue(this.#plugin.settings.usage_naming)
+        input.onChange(this.#update.bind(this, 'usage_naming'))
       })
 
     //
@@ -201,7 +145,7 @@ export class SettingsTab extends PluginSettingTab {
         'Allows the usage of separators inside codeblocks.',
         createEl('br'),
         'For more details see ',
-        createDocsLink('codeblocks-separators-setting', 'codeblock separators'),
+        Tools.docsLink('codeblocks-separators-setting', 'codeblock separators'),
         '.',
       )
     })
@@ -210,9 +154,9 @@ export class SettingsTab extends PluginSettingTab {
       .setName('Enable Codeblocks Separators')
       .setDesc(separatorDesc)
       .addToggle((input) => {
-        input.setValue(this.#settings.enable_separators)
+        input.setValue(this.#plugin.settings.enable_separators)
         input.onChange((value) => {
-          this.update('enable_separators', value)
+          this.#update('enable_separators', value)
           usageSeparatorInput?.setDisabled(!value)
         })
       })
@@ -222,9 +166,9 @@ export class SettingsTab extends PluginSettingTab {
       .setDesc('Separator to use inside codeblocks.')
       .addText((input) => {
         usageSeparatorInput = input
-        input.setDisabled(!this.#settings.enable_separators)
-        input.setValue(this.#settings.usage_separator)
-        input.onChange(this.update.bind(this, 'usage_separator'))
+        input.setDisabled(!this.#plugin.settings.enable_separators)
+        input.setValue(this.#plugin.settings.usage_separator)
+        input.onChange(this.#update.bind(this, 'usage_separator'))
       })
   }
 
@@ -244,7 +188,7 @@ export class SettingsTab extends PluginSettingTab {
         }
 
         input.inputEl.classList.remove('invalid-value')
-        this.update(key, path)
+        this.#update(key, path)
       })
     }
 
@@ -260,7 +204,7 @@ export class SettingsTab extends PluginSettingTab {
       .addText((input) => {
         new FolderSuggester(this.app, input.inputEl, this.containerEl)
         input.setPlaceholder('Example: folder1/folder2')
-        input.setValue(this.#settings.components_folder)
+        input.setValue(this.#plugin.settings.components_folder)
         attachPathHandler('components_folder', input, sourceLog)
       })
 
@@ -276,42 +220,8 @@ export class SettingsTab extends PluginSettingTab {
       .addText((input) => {
         new FolderSuggester(this.app, input.inputEl, this.containerEl)
         input.setPlaceholder('Example: folder1/folder2')
-        input.setValue(this.#settings.cache_folder)
+        input.setValue(this.#plugin.settings.cache_folder)
         attachPathHandler('cache_folder', input, cacheLog)
       })
-
-    //
-    // Naming strategy setting
-    const strategyDesc = createFragment((div) => {
-      div.append(
-        'Strategy used for using the components.',
-        createEl('br'),
-        'In cases of naming collition the names are going to be assigned incrementally in the next order.',
-        // prettier-ignore
-        createEl('ul', undefined, (ul) => {
-          ul.createEl('li', undefined, (li) => li.append('Short names: like', createEl('code', { text: "'book'" })))
-          ul.createEl('li', undefined, (li) => li.append('Long names: like', createEl('code', { text: "'folder/book'" })))
-          ul.createEl('li', undefined, (li) => li.append('Full names: like', createEl('code', { text: "'full/vault/path/book'" })))
-        }),
-      )
-    })
-
-    this.#newSetting()
-      .setName('Components naming strategy')
-      .setDesc(strategyDesc)
-      .addDropdown((input) => {
-        input.addOptions({
-          CUSTOM: 'Only use custom names.',
-          SHORT: 'Only the shortest names.',
-          LONG: 'Short and long names.',
-          ALL: 'Include all names',
-        })
-        input.setValue(this.#settings.components_naming)
-        input.onChange(this.update.bind(this, 'components_naming'))
-      })
-  }
-
-  #newSetting() {
-    return new Setting(this.containerEl)
   }
 }

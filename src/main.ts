@@ -3,7 +3,6 @@ import { App, Plugin, PluginManifest } from 'obsidian'
 import { Logger } from 'obsidian-fnc'
 import {
   parseStringList,
-  prepareCodeblockNames,
   prepareComponentMatchers,
   prepareComponentNames,
 } from '@/utility'
@@ -23,7 +22,6 @@ export const DEFAULT_SETTINGS: PluginSettings = {
   usage_naming: '__name',
   usage_separator: '---',
 
-  components_naming: 'LONG',
   components_folder: '',
   components_config: [],
 }
@@ -89,11 +87,11 @@ export default class ComponentsPlugin extends Plugin {
 
   #prepareState(): void {
     this.#log.info('Prepare state')
+    const names = prepareComponentNames(this.settings)
     this.state = {
       name_params: parseStringList(this.settings.usage_naming),
-      codeblocks_enabled: prepareCodeblockNames(this.settings),
-      components_enabled: prepareComponentNames(this.settings),
-      components_matchers: prepareComponentMatchers(this.settings),
+      components_enabled: names,
+      components_matchers: prepareComponentMatchers(this.settings, names),
     }
 
     //

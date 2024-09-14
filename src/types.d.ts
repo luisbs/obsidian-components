@@ -48,9 +48,7 @@ export interface CodeblockContext {
 export interface PluginState {
   /** Stores the currently parameters that can be used to define a **Component** name. */
   name_params: string[]
-  /** Stores the currently enabled **Codeblock** references. */
-  codeblocks_enabled: MapStore<string>
-  /** Stores the currently enabled **Component** references. */
+  /** Stores the currently enabled **Component** name references. */
   components_enabled: MapStore<string>
   /** Stores the currently active **Component**. */
   components_matchers: ComponentMatcher[]
@@ -106,14 +104,6 @@ export interface PluginSettings {
   /** Separator to use inside codeblocks. */
   usage_separator: string
 
-  /**
-   * The Components naming strategy.
-   * - `'CUSTOM'` includes only the user-defined names
-   * - `'SHORT'` includes only the short names
-   * - `'LONG'` includes the short and long names
-   * - `'ALL'` includes all the possible names
-   */
-  components_naming: 'CUSTOM' | 'SHORT' | 'LONG' | 'ALL'
   /** Vault-path where the components are located. */
   components_folder: string
   /** The Components found on the vault. */

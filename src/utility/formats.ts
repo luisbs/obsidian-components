@@ -2,18 +2,18 @@ import type { FormatMatcher } from '@/types'
 
 /** List of the supported component formats. */
 export const SUPPORTED_FORMATS: FormatMatcher[] = [
-  { tags: ['md'], test: /\.md$/i.test },
-  { tags: ['html'], test: /\.html$/i.test },
+  { tags: ['md'], test: (path) => /\.md$/i.test(path) },
+  { tags: ['html'], test: (path) => /\.html$/i.test(path) },
 
   // CommonJS
-  { tags: ['md', 'cjs'], test: /\.md\.cjs$/i.test },
-  { tags: ['html', 'cjs'], test: /\.html\.cjs$/i.test },
-  { tags: ['code', 'cjs'], test: /\.cjs$/i.test },
+  { tags: ['md', 'cjs'], test: (path) => /\.md\.cjs$/i.test(path) },
+  { tags: ['html', 'cjs'], test: (path) => /\.html\.cjs$/i.test(path) },
+  { tags: ['code', 'cjs'], test: (path) => /\.cjs$/i.test(path) },
 
   // ESModules
-  { tags: ['md', 'esm'], test: /\.md\.m?js$/i.test },
-  { tags: ['html', 'esm'], test: /\.html\.m?js$/i.test },
-  { tags: ['code', 'esm'], test: /\.m?js$/i.test },
+  { tags: ['md', 'esm'], test: (path) => /\.md\.mjs$/i.test(path) },
+  { tags: ['html', 'esm'], test: (path) => /\.html\.mjs$/i.test(path) },
+  { tags: ['code', 'esm'], test: (path) => /\.mjs$/i.test(path) },
 ]
 
 // prettier-ignore

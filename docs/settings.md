@@ -2,23 +2,19 @@
 
 The next entries are settings that can be configured on the _SettingsTab_ of the plugin.
 
-## Execution Behavior Setting
-
-The **components** are run directly, they are not isolated in any way, this allows them to use _network connections_, _import/export modules_, but at the same time **any malicious code will run without limitations**.
-
-To prevent dangerious situations this setting can be used to only allow the execution of **components** you enable, or **components** enabled by the **component-formats** you enable.
-
 ## Design Mode Setting
 
-> **TL;DR** activate the _design mode_ when you're designing/editing the code of your **components** and want to see the result of those changes on the app on runtime.
+> Will be removed on some future update.
 
-The **components** are run directly from the file you write, using the native `require( ... )` method, this allows them to run as normal code, and not like scripts.
+> **TL;DR** activate the _design mode_ when you're designing/editing the code of your **components** and want to see the result of those changes on Obsidian instantly.
 
-But, this situation loads your file in memory, and the next time `require( ... )` is run it will return the already loaded output, and will ignore any modifications you make to the code.
+The **components** are run directly from the file you write, not as sandboxed scripts, using `require( ... )` for `*.cjs` files and `import( ... )` for `*.mjs` files.
 
-This behavior is perfect for reduced resources usage, but when you're editing/designing your **components** is not ideal since you would need to re-open the app each time you change something.
+But, this situation loads your file in memory, and the next time the component is required it will return the already loaded module, and will ignore any modifications you make to the code.
 
-To bypass these behavior the _Design Mode Setting_ actives a modifications tracker, that listen to changes on the **components files**, stores a copy of each iteration, and when changes are made refreshes the rendered element inside the app.
+This behavior is ideal on normal execution since it reduces resources usage, but when you're editing/designing your **components** is not ideal since you would need to fully reload Obsidian each time you change some **component file**.
+
+To bypass these behavior the _Design Mode Setting_ actives a modifications tracker, that listen to changes on the **components files**, stores a copy of each iteration, and when changes are made refreshes the rendered element inside Obsidian.
 
 The bad thing about this is that it will generate a higher memory and storage usage meanwhile the app is open; thats why it is disabled by default.
 
@@ -32,7 +28,7 @@ param1: value1
 ```
 ````
 
-This settings allows the usage of the **components custom names** defined by the user as **Codeblocks** identifiers, so instead of `use book` you can use `book` in the first line of the **Codeblock**. Example:
+This settings instead allows the usage of the **components custom names** defined by the user as **Codeblocks** identifiers, so instead of `use book` you can use `book` in the first line of the **Codeblock**. Example:
 
 ````yaml
 ```book

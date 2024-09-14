@@ -73,7 +73,7 @@ export class CodeblockHandler {
    * Register the handler for user-defined codeblocks.
    */
   public registerCustomCodeblocks(): void {
-    for (const [id, names] of this.#plugin.state.codeblocks_enabled.entries()) {
+    for (const [id, names] of this.#plugin.state.components_enabled.entries()) {
       for (const name of names) {
         // avoid re-registering a processor
         if (this.#registered.includes(name)) continue
