@@ -19,10 +19,10 @@ module.exports.serialize = function (data, itemsLabel, callback, headersCallback
   };
 
   if (Array.isArray(data) && data.some(shouldGroup)) {
-    return data.map((group) => serializeGroup(group, itemsLabel, callback, headersCallback));
+    return data.map((group) => this.serializeGroup(group, itemsLabel, callback, headersCallback));
   }
 
-  return [serializeGroup(data, itemsLabel, callback, headersCallback)];
+  return [this.serializeGroup(data, itemsLabel, callback, headersCallback)];
 };
 
 /**

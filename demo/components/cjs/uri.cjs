@@ -93,7 +93,7 @@ module.exports.getURIMetadata = function (uri) {
   if (INTERNAL_START_REGEX().test(uri)) {
     mode = 'internal';
     [path, ...params] = uri.replace(INTERNAL_BOTH_REGEX(), '').split('|');
-    label = params.length < 1 ? path.replace('#', ' > ') : getParamsLabel(params);
+    label = params.length < 1 ? path.replace('#', ' > ') : this.getParamsLabel(params);
   }
 
   // external URI
@@ -113,7 +113,7 @@ module.exports.getURIMetadata = function (uri) {
 
     mode = 'external';
     params = [...params1, ...params2];
-    label = label || getParamsLabel(params);
+    label = label || this.getParamsLabel(params);
   }
 
   // URL
@@ -121,11 +121,11 @@ module.exports.getURIMetadata = function (uri) {
   else if (uri.startsWith('http')) {
     mode = 'url';
     [path, ...params] = uri.split(URL_PARAMS_REGEX());
-    label = path.contains('#') ? path.split('#')[1] : getParamsLabel(params);
+    label = path.contains('#') ? path.split('#')[1] : this.getParamsLabel(params);
     path = uri;
   }
 
-  const ext = getURIExtension(path);
+  const ext = this.getURIExtension(path);
   return {
     mode,
     path,
@@ -134,10 +134,10 @@ module.exports.getURIMetadata = function (uri) {
     params,
 
     isVideo: () => VIDEO_REGEX().test(ext),
-    getSize: () => getParamsSize(params),
+    getSize: () => this.getParamsSize(params),
     hasLabel: () => !!label,
     getLabel: () => label || path.split(PATH_REGEX()).pop(),
-    getSrc: (notepath) => normalizeURI(path, notepath),
+    getSrc: (notepath) => this.normalizeURI(path, notepath),
   };
 };
 

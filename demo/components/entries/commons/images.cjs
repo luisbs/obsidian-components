@@ -15,7 +15,7 @@ module.exports.serializeImage = function (image) {
  * @returns {SerializedGroup<URIMetadata, 'images'>[]}
  */
 module.exports.serializeGallery = function (input) {
-  return serialize(input, 'images', serializeImage, ({ title: label, artist }, images) => {
+  return serialize(input, 'images', this.serializeImage, ({ title: label, artist }, images) => {
     if (artist) return { label, link: URI.getURIMetadata(artist), images };
     return { label, images };
   });

@@ -24,7 +24,7 @@ module.exports.isNil = function (value) {
  * @returns {boolean}
  */
 module.exports.includes = function (obj, ...fields) {
-  if (typeof obj !== 'object' || isNil(obj)) return false;
+  if (typeof obj !== 'object' || this.isNil(obj)) return false;
 
   for (const field of fields) {
     if (Array.isArray(field) && field.some((f) => !!obj[f])) return true;
@@ -42,7 +42,7 @@ module.exports.includes = function (obj, ...fields) {
  * @returns {Iterable<[string, unknown]>}
  */
 module.exports.flattenEntries = function* (obj, ...fields) {
-  if (typeof obj !== 'object' || isNil(obj)) return;
+  if (typeof obj !== 'object' || this.isNil(obj)) return;
 
   /** @type {string[]} */
   const filtered = fields

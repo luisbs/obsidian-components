@@ -3,8 +3,8 @@
  * @returns {undefined | Record<'getShareUrl'|'getEmbedUrl'|'trim', (id: string) => string>}
  */
 module.exports.getService = function (key) {
-  if (key === 'spotify') return spotify;
-  if (key === 'youtube') return youtube;
+  if (key === 'spotify') return this.spotify;
+  if (key === 'youtube') return this.youtube;
 };
 
 module.exports.spotify = {
