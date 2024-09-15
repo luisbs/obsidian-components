@@ -1,3 +1,12 @@
+/**
+ * @param {string} key
+ * @returns {undefined | Record<'getShareUrl'|'getEmbedUrl'|'trim', (id: string) => string>}
+ */
+export function getService(key) {
+  if (key === 'spotify') return spotify;
+  if (key === 'youtube') return youtube;
+}
+
 export const spotify = {
   /**
    * @param {string} id

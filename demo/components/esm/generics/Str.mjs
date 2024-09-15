@@ -1,4 +1,4 @@
-import { isNil } from './Obj.js';
+import { isNil } from './Obj.mjs';
 
 /**
  * Splits strings with `|;,\s`

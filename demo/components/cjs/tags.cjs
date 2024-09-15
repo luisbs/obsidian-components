@@ -22,9 +22,12 @@ const genre = [
   'mystery',
   'horror',
   'gore',
+
+  'fantasy',
+  'sci_fy',
 ];
 
-module.exports.match = function (...tags) {
+module.exports.tagsCleaner = function (...tags) {
   const valid = [];
 
   // cleanup

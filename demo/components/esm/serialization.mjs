@@ -1,4 +1,4 @@
-const Obj = require('./generics/Obj.cjs');
+import { Obj } from './generics/index.js';
 
 /**
  * Serialize the data into an standard object.
@@ -11,7 +11,7 @@ const Obj = require('./generics/Obj.cjs');
  * @param {(item: unknown, items: T) => SerializedGroup<T, L>} headersCallback
  * @returns {SerializedGroup<T, L>[]>[]}
  */
-module.exports.serialize = function (data, itemsLabel, callback, headersCallback) {
+export function serialize(data, itemsLabel, callback, headersCallback) {
   const shouldGroup = (item) => {
     if (Obj.isNil(item)) return false;
     if (Array.isArray(item)) return true;
@@ -23,7 +23,7 @@ module.exports.serialize = function (data, itemsLabel, callback, headersCallback
   }
 
   return [serializeGroup(data, itemsLabel, callback, headersCallback)];
-};
+}
 
 /**
  * @template T
@@ -34,7 +34,7 @@ module.exports.serialize = function (data, itemsLabel, callback, headersCallback
  * @param {(item: unknown, items: T) => SerializedGroup<T, L>} headersCallback
  * @returns {SerializedGroup<T, L>}
  */
-module.exports.serializeGroup = function (group, itemsLabel, callback, headersCallback = null) {
+export function serializeGroup(group, itemsLabel, callback, headersCallback = null) {
   const prepare = (items) => items.map(callback).filter((v) => !!v);
 
   if (Array.isArray(group)) {
@@ -50,4 +50,4 @@ module.exports.serializeGroup = function (group, itemsLabel, callback, headersCa
   }
 
   return { label: '', [itemsLabel]: prepare([group]) };
-};
+}

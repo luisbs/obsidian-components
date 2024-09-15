@@ -1,4 +1,4 @@
-const { isNil } = require('./Obj.cjs');
+import { isNil } from './Obj.mjs';
 
 /**
  * Ensure a variable is an array.
@@ -7,7 +7,7 @@ const { isNil } = require('./Obj.cjs');
  * @param   {T} value
  * @returns {T extends Array ? T : T[]}
  */
-module.exports.wrap = function (value) {
+export function wrap(value) {
   if (Array.isArray(value)) return value;
   return isNil(value) ? [] : [value];
-};
+}

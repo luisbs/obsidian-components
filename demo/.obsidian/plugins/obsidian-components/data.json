@@ -1,34 +1,31 @@
 {
-  "enable_components": "STRICT",
   "enable_codeblocks": true,
   "enable_separators": true,
   "cache_folder": "__temp",
   "usage_method": "INLINE",
   "usage_naming": "__name",
   "usage_separator": "---",
-  "components_naming": "CUSTOM",
   "components_folder": "components/entries",
-  "components_found": {
-    "components/entries/catalogue.js": {
-      "path": "components/entries/catalogue.js",
-      "format": "esmodules_code",
-      "names": "catalogue"
+  "components_config": [
+    {
+      "id": "soundtrack.html.cjs",
+      "path": "components/entries/soundtrack.html.cjs",
+      "names": "soundtrack_html\nsoundtrack",
+      "enabled": true
     },
-    "components/entries/gallery.html.js": {
-      "path": "components/entries/gallery.html.js",
-      "format": "esmodules_html",
-      "names": "gallery"
+    {
+      "id": "gallery.html.mjs",
+      "path": "components/entries/gallery.html.mjs",
+      "names": "gallery_html",
+      "enabled": false
+    },
+    {
+      "id": "catalogue.mjs",
+      "path": "components/entries/catalogue.mjs",
+      "names": "catalogue",
+      "enabled": false
     }
-  },
-  "enabled_formats": [],
-  "enabled_components": [
-    [
-      "components/entries/catalogue.js",
-      true
-    ],
-    [
-      "components/entries/gallery.html.js",
-      true
-    ]
-  ]
+  ],
+  "components_naming": "CUSTOM",
+  "enable_components": "STRICT"
 }

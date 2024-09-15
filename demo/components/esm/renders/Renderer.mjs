@@ -4,7 +4,7 @@
  */
 
 /** @template T */
-module.exports = class Renderer {
+export default class Renderer {
   /**
    * Append an element.
    *
@@ -214,4 +214,4 @@ module.exports = class Renderer {
     this.append(el);
     return el;
   }
-};
+}

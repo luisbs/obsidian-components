@@ -1,10 +1,10 @@
-const Obj = require('../generics/Obj.cjs');
-const Renderer = require('./Renderer.cjs');
+import * as Obj from '../generics/Obj.mjs';
+import Renderer from './Renderer.mjs';
 
-/** @typedef {import('./Renderer.js').ClassDefinition} ClassDefinition */
+/** @typedef {import('./Renderer.mjs').ClassDefinition} ClassDefinition */
 
 /** @extends {Renderer<HTMLElement>} */
-module.exports = class CodeRenderer extends Renderer {
+export default class CodeRenderer extends Renderer {
   /** @type {HTMLDivElement} */
   #container;
 
@@ -196,4 +196,4 @@ module.exports = class CodeRenderer extends Renderer {
   clink(resource, content, cls = null) {
     return super.clink(resource, content, cls);
   }
-};
+}

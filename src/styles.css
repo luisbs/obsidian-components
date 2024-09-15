@@ -8,6 +8,13 @@
   text-decoration: var(--tag-decoration);
   padding: var(--tag-padding-y) var(--tag-padding-x);
   line-height: 1;
+
+  /* custom */
+  display: inline-block;
+  margin-top: 4px;
+}
+.components-settings li:first-child code {
+  margin-top: 0;
 }
 
 .components-settings .setting-item-description .invalid-value {
@@ -29,9 +36,6 @@
 }
 .components-settings .components-list .setting-item:last-child {
   padding-bottom: none;
-}
-.components-settings .components-list .components-names:last-child {
-  margin-top: 4px;
 }
 .components-settings .components-list .component-form {
   width: 100%;
