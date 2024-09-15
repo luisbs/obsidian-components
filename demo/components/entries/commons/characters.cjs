@@ -1,10 +1,10 @@
-import { Obj, URI, serializeGroup } from '../../esm/index.js';
+const { Obj, URI, serializeGroup } = require('../../cjs/index.cjs');
 
 /** @type {Array<keyof CharacterMetadata>} */
-export const HEADER_ATTRS = ['alias', 'name'];
+module.exports.HEADER_ATTRS = ['alias', 'name'];
 
 /** @type {Map<keyof CharacterMetadata, MetadataField>} */
-export const ATTRS = new Map([
+module.exports.ATTRS = new Map([
   // header
   ['alias', { tag: 'h6' }],
   ['name', { tag: 'h3' }],
@@ -14,7 +14,7 @@ export const ATTRS = new Map([
  * @param {unknown} input
  * @returns {SerializedGroup<CharacterMetadata, 'items'>}
  */
-export function serializeCharacters(input) {
+module.exports.serializeCharacters = function (input) {
   return serializeGroup(input, 'items', (item) => {
     if (Obj.isNil(item)) return;
 
@@ -32,4 +32,4 @@ export function serializeCharacters(input) {
       return { url: meta, link: meta, name: meta?.label };
     }
   });
-}
+};

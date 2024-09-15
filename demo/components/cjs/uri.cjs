@@ -149,7 +149,7 @@ module.exports.getURIMetadata = function (uri) {
  * @param {string} notepath
  * @returns {Promise<string>}
  */
-module.exports.normalizeURI = function (path, notepath = 'utility/') {
+module.exports.normalizeURI = async function (path, notepath = 'utility/') {
   if (typeof path !== 'string') return '';
   if (path.startsWith('http')) return path;
 

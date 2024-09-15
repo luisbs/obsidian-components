@@ -1,31 +1,35 @@
-import { Obj, Renderer, URI, serialize } from '../../esm/index.mjs';
+const { Obj, Renderer, URI, serialize } = require('../../cjs/index.cjs');
 
 /**
  * @param {unknown} image
  * @returns {URIMetadata}
  */
-export function serializeImage(image) {
+module.exports.serializeImage = function (image) {
   if (Obj.isNil(image)) return;
   if (typeof image === 'object') return URI.getURIMetadata(image.url);
   else if (typeof image === 'string') return URI.getURIMetadata(image);
-}
+};
 
 /**
  * @param {unknown} input
  * @returns {SerializedGroup<URIMetadata, 'images'>[]}
  */
-export function serializeGallery(input) {
+module.exports.serializeGallery = function (input) {
   return serialize(input, 'images', serializeImage, ({ title: label, artist }, images) => {
     if (artist) return { label, link: URI.getURIMetadata(artist), images };
     return { label, images };
   });
-}
+};
 
 /**
  * @param {SerializedGroup<ImageMetadata, 'images'>} row
  * @param {Renderer} cardEl
  */
-export async function appendGalleryHeader(row, cardEl, HEADER_ATTRS = ['label', 'link']) {
+module.exports.appendGalleryHeader = async function (
+  row,
+  cardEl,
+  HEADER_ATTRS = ['label', 'link']
+) {
   // card-header
   if (Obj.includes(row, HEADER_ATTRS)) {
     const headerEl = cardEl.div('gallery-header');
@@ -38,4 +42,4 @@ export async function appendGalleryHeader(row, cardEl, HEADER_ATTRS = ['label', 
       }
     }
   }
-}
+};
