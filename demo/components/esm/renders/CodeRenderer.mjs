@@ -1,4 +1,4 @@
-import * as Obj from '../generics/Obj.mjs';
+import { isNil } from '../generics/Obj.mjs';
 import Renderer from './Renderer.mjs';
 
 /** @typedef {import('./Renderer.mjs').ClassDefinition} ClassDefinition */
@@ -99,7 +99,7 @@ export default class CodeRenderer extends Renderer {
     el.style.all = style;
 
     // content
-    if (Obj.isNil(content)) return el;
+    if (isNil(content)) return el;
 
     if (Array.isArray(content)) el.append(...content);
     else el.append(content);

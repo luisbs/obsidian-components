@@ -1,183 +1,106 @@
-const INTERNAL_BOTH_REGEX = () => /^\!?\[\[|\]\]$/gi;
-const INTERNAL_START_REGEX = () => /^\!?\[\[/gi;
+export default class URI {
+  /** @type {(path: string) => string} */
+  static #normalize(path) {
+    if (typeof path !== 'string') return '';
+    if (path.startsWith('http')) return path;
 
-const EXTERNAL_BOTH_REGEX = () => /^\!?\[|\)$/gi;
-const EXTERNAL_START_REGEX = () => /^\!?\[/gi;
-const EXTERNAL_MIDDLE_REGEX = () => /\]\(/gi;
-
-const URL_PARAMS_REGEX = () => /[\?\&]/gi;
-
-const PATH_REGEX = () => /[\\\/]/gi;
-const PARAMS_LABEL_REGEX = () => /^(label|title|name|l|t)/gi;
-const PARAMS_SIZE_REGEX = () => /^(size|width|s|w)/gi;
-
-const VIDEO_REGEX = () => /mp4|webm|ogg/gi;
-
-/**
- * @param {string[]} params
- * @returns {string | undefined}
- */
-export function getParamsLabel(params) {
-  if (params.length === 1 && !params[0].includes('=')) {
-    return params[0];
-  }
-
-  for (let param of params) {
-    if (PARAMS_SIZE_REGEX().test(param)) continue;
-    if (PARAMS_LABEL_REGEX().test(param)) {
-      return param.split('=').pop();
-    }
-  }
-}
-
-/**
- * @param {string[]} params
- * @returns {string | undefined}
- */
-export function getParamsSize(params) {
-  if (params.length === 1 && !params[0].includes('=') && PARAMS_SIZE_REGEX().test(params[0])) {
-    return params[0].replace(PARAMS_SIZE_REGEX(), '');
-  }
-
-  for (const param of params) {
-    if (PARAMS_SIZE_REGEX().test(param)) {
-      return !param.includes('=') //
-        ? param.replace(PARAMS_SIZE_REGEX(), '')
-        : param.split('=').pop();
-    }
-  }
-}
-
-/**
- * @param {string} url
- * @returns {string}
- */
-export function getURLDomain(url) {
-  const levels = url
-    .replace(/^https?:\/\//gi, '')
-    .split('/')
-    .first()
-    .split('.');
-  return levels[levels.length - 2] + '.' + levels[levels.length - 1];
-}
-
-/**
- * @param {string} path
- * @returns {string | undefined}
- */
-export function getURIExtension(path) {
-  const filename = path.split(PATH_REGEX()).pop() || '';
-  return filename.includes('.') ? filename.split('.').pop()?.toLowerCase() : undefined;
-}
-
-// /** @typedef {import('../typings/globals.js').URIMetadata} URIMetadata */
-/**
- * @param {string} uri
- * @returns {URIMetadata?}
- */
-export function getURIMetadata(uri) {
-  if (typeof uri !== 'string') return null;
-  uri = uri.trim();
-
-  if (!uri) return null;
-
-  /** @type {URIMetadata['type']} */
-  let mode = 'unknown';
-  let _ = '';
-  let path = '';
-  let label = undefined;
-  let params = [];
-
-  // internal URI
-  // ej: ![[image.png|label]]
-  if (INTERNAL_START_REGEX().test(uri)) {
-    mode = 'internal';
-    [path, ...params] = uri.replace(INTERNAL_BOTH_REGEX(), '').split('|');
-    label = params.length < 1 ? path.replace('#', ' > ') : getParamsLabel(params);
-  }
-
-  // external URI
-  // ej: ![label](https://dominio.com/ruta/de/image.png?params)
-  else if (EXTERNAL_START_REGEX().test(uri)) {
-    let params0 = '',
-      params1 = [],
-      params2 = [];
-    [params0, path] = uri.replace(EXTERNAL_BOTH_REGEX(), '').split(EXTERNAL_MIDDLE_REGEX());
-    [_, ...params2] = path.split(URL_PARAMS_REGEX());
-
-    if (params0.includes('|')) {
-      [label, ...params1] = params0.split('|');
-    } else {
-      params1 = [params0];
+    /** @type {Record<string, { type: 'folder' | 'file', realpath: string }>} */
+    const files = app.fileManager.vault.adapter.files;
+    for (const filepath in files) {
+      if (files[filepath].type !== 'file' || !filepath.includes(path)) continue;
+      return app.vault.adapter.getResourcePath(files[filepath].realpath);
     }
 
-    mode = 'external';
-    params = [...params1, ...params2];
-    label = label || getParamsLabel(params);
+    return '';
   }
 
-  // URL
-  // ej: https://dominio.com/ruta/de/image.png#label?params
-  else if (uri.startsWith('http')) {
-    mode = 'url';
-    [path, ...params] = uri.split(URL_PARAMS_REGEX());
-    label = path.contains('#') ? path.split('#')[1] : getParamsLabel(params);
-    path = uri;
+  //#region URI params
+
+  static #isSize = (param) => /^(size|width|s|w)/gi.test(param);
+  static #isLabel = (param) => /^(label|title|l|t)/gi.test(param);
+
+  static #rmSize = (param) => param.replace(/^(size|width|s|w)=?/gi, '');
+  static #rmLabel = (param) => param.replace(/^(label|title|l|t)=?/gi, '');
+
+  /** @type {(params: string[]) => string | undefined} */
+  static #getSize(params) {
+    if (params.length < 1) return undefined;
+    if (params.length === 1 && this.#isSize(params[0])) return this.#rmSize(params[0]);
+    for (const param of params) if (this.#isSize(param)) return this.#rmSize(param);
   }
 
-  const ext = getURIExtension(path);
-  return {
-    mode,
-    path,
-    ext,
-    label,
-    params,
-
-    isVideo: () => VIDEO_REGEX().test(ext),
-    getSize: () => getParamsSize(params),
-    hasLabel: () => !!label,
-    getLabel: () => label || path.split(PATH_REGEX()).pop(),
-    getSrc: (notepath) => normalizeURI(path, notepath),
-  };
-}
-
-/** @typedef {{ type: 'folder', realpath: string }} VaultFolder */
-/** @typedef {{ type: 'file', realpath: string, size: number, ctime: number, mtime: number }} VaultFile */
-
-/**
- * @param {string} path
- * @param {string} notepath
- * @returns {Promise<string>}
- */
-export async function normalizeURI(path, notepath = 'utility/') {
-  if (typeof path !== 'string') return '';
-  if (path.startsWith('http')) return path;
-
-  /** @type {Record<string, VaultFile | VaultFolder>} */
-  const files = app.fileManager.vault.adapter.files;
-
-  for (const filepath in files) {
-    if (
-      Object.hasOwnProperty.call(files, filepath) && //
-      files[filepath].type === 'file' && //
-      filepath.includes(path)
-    ) {
-      const match = files[filepath];
-      // console.log({ BASE_PATH, path, match })
-      // return BASE_PATH + match.realpath + '?' + match.mtime;
-      return app.vault.adapter.getResourcePath(match.realpath);
-    }
+  /** @type {(params: string[]) => string | undefined} */
+  static #getLabel(params) {
+    if (params.length < 1) return undefined;
+    if (params.length === 1 && !this.#isSize(params[0])) return this.#rmLabel(params[0]);
+    for (const param of params) if (this.#isLabel(param)) return this.#rmLabel(param);
   }
 
-  return '';
-}
+  //#endregion URI params
 
-/**
- * Stripe url params.
- *
- * @param   {string} url
- * @returns {string}
- */
-export function strip(url) {
-  return typeof url === 'string' ? url.replace(/\?.*/gi, '') : '';
+  /** @type {(url: string) => string} */
+  static #getURLDomain = (url) => url.replace(/^https?:\/\//gi, '').split('/')[0];
+
+  /** @type {(path_tail: string) => string | undefined} */
+  static #getExt(path_tail) {
+    const filename = path_tail.replace(/[#?].*$/gi, '');
+    return filename.includes('.') ? filename.split('.').pop()?.toLowerCase() : undefined;
+  }
+
+  /** @type {(value: string) => Pick<URLMetadata, 'type' | 'uri' | 'params'> | undefined} */
+  static #parseURL(value) {
+    if (!/^https?:\/\//gi.test(value)) return;
+    // good: https://example.net/image.png#id?label&param2=value2
+    const [_, ...params] = value.split(/[?&]+/gi);
+    return { type: 'url', uri: value, params };
+  }
+
+  /** @type {(value: string) => Pick<URLMetadata, 'type' | 'uri' | 'params'> | undefined} */
+  static #parseMarkdown(value) {
+    if (!/^\!?\[/gi.test(value)) return;
+    // good: ![label](https://example.net/image.png#id?param2=value2)
+    const [label, uri] = value.replace(/^\!?\[|\)$/gi, '').split(/\]\(/gi);
+    const [_, ...params] = value.split(/[?&]+/gi);
+    params.unshift(label);
+    return { type: 'md', uri, params };
+  }
+
+  /** @type {(value: string) => Pick<URLMetadata, 'type' | 'uri' | 'params'> | undefined} */
+  static #parseVault(value) {
+    if (!/^\!?\[\[/gi.test(value)) return;
+    // err : ![[image.png#id?param2=value2|label]]
+    // err : ![[image.png#id|label&param2=value2]]
+    // bad : ![[image.png#id|label|param2=value2]]
+    // good: ![[image.png#id|label]]
+    const [uri, ...params] = value.replace(/^\!?\[\[|\]\]$/gi, '').split('|');
+    return { type: 'vault', uri, params };
+  }
+
+  /** @type {(value: string) => URIMetadata?} */
+  static getMetadata(value) {
+    if (typeof value !== 'string') return null;
+    value = value.trim();
+
+    if (!value) return null;
+    const meta = this.#parseURL(value) || this.#parseVault(value) || this.#parseMarkdown(value);
+    if (!meta) return null;
+
+    //
+    const { type, uri, params } = meta;
+    const path_tail = uri.replace(/\?.*$/gi, '').match(/(?<=[/\\])[^/\\]+$/gi)[0] || '';
+    const ext = this.#getExt(path_tail);
+
+    return {
+      type,
+      uri,
+      params,
+
+      ext,
+      isVideo: /mp4|webm|ogg/gi.test(ext),
+
+      src: this.#normalize(uri) || '',
+      size: this.#getSize(params) || '1',
+      label: this.#getLabel(params) || path_tail.replace('#', ' > '),
+    };
+  }
 }

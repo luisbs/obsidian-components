@@ -12,24 +12,23 @@ module.exports.ATTRS = new Map([
 
 /**
  * @param {unknown} input
- * @returns {SerializedGroup<CharacterMetadata, 'items'>}
+ * @returns {ItemsGroup<'items', CharacterMetadata>}
  */
 module.exports.serializeCharacters = function (input) {
   return serializeGroup(input, 'items', (item) => {
     if (Obj.isNil(item)) return;
 
+    if (typeof item === 'string') {
+      const meta = URI.getMetadata(item.url);
+      return { url: meta, link: meta, name: meta?.label };
+    }
     if (typeof item === 'object') {
       return {
-        url: URI.getURIMetadata(item.url),
-        link: URI.getURIMetadata(item.link),
+        url: URI.getMetadata(item.url),
+        link: URI.getMetadata(item.link),
         name: item.name,
         alias: item.alias,
       };
-    }
-
-    if (typeof item === 'string') {
-      const meta = URI.getURIMetadata(item.url);
-      return { url: meta, link: meta, name: meta?.label };
     }
   });
 };

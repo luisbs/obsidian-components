@@ -3,9 +3,9 @@
  *
  * @returns {number}
  */
-module.exports.random = function () {
+function random() {
   return Math.floor(Math.random() * 1e7);
-};
+}
 
 /**
  * Checks if a value is `null` or `undefined`
@@ -13,9 +13,9 @@ module.exports.random = function () {
  * @param   {unknown} value
  * @returns {boolean}
  */
-module.exports.isNil = function (value) {
+function isNil(value) {
   return value === undefined || value === null;
-};
+}
 
 /**
  * Check if an object includes and is `truety` any of the passed fields.
@@ -23,8 +23,8 @@ module.exports.isNil = function (value) {
  * @param   {unknown[]} fields
  * @returns {boolean}
  */
-module.exports.includes = function (obj, ...fields) {
-  if (typeof obj !== 'object' || this.isNil(obj)) return false;
+function includes(obj, ...fields) {
+  if (typeof obj !== 'object' || isNil(obj)) return false;
 
   for (const field of fields) {
     if (Array.isArray(field) && field.some((f) => !!obj[f])) return true;
@@ -32,7 +32,7 @@ module.exports.includes = function (obj, ...fields) {
   }
 
   return false;
-};
+}
 
 /**
  * Iterate over the `truety` values of an object.
@@ -41,8 +41,8 @@ module.exports.includes = function (obj, ...fields) {
  * @param   {unknown[]} fields
  * @returns {Iterable<[string, unknown]>}
  */
-module.exports.flattenEntries = function* (obj, ...fields) {
-  if (typeof obj !== 'object' || this.isNil(obj)) return;
+function* flattenEntries(obj, ...fields) {
+  if (typeof obj !== 'object' || isNil(obj)) return;
 
   /** @type {string[]} */
   const filtered = fields
@@ -58,4 +58,6 @@ module.exports.flattenEntries = function* (obj, ...fields) {
       yield [(field, obj[field])];
     }
   }
-};
+}
+
+module.exports = { random, isNil, includes, flattenEntries };

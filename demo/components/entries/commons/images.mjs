@@ -1,28 +1,28 @@
 import { Obj, Renderer, URI, serialize } from '../../esm/index.mjs';
 
-/**
- * @param {unknown} image
- * @returns {URIMetadata}
- */
+/** @type {(image: unknown) => URIMetadata} */
 export function serializeImage(image) {
   if (Obj.isNil(image)) return;
-  if (typeof image === 'object') return URI.getURIMetadata(image.url);
-  else if (typeof image === 'string') return URI.getURIMetadata(image);
+  if (typeof image === 'object') return URI.getMetadata(image.url);
+  else if (typeof image === 'string') return URI.getMetadata(image);
 }
 
-/**
- * @param {unknown} input
- * @returns {SerializedGroup<URIMetadata, 'images'>[]}
- */
+/** @type {(items: URIMetadata[], data: Record<string, unknown>) => } */
+export function serializeGroup(images, { label, title, link, artist }) {
+  return {
+    images,
+    label: label || title || '',
+    link: URI.getMetadata(link || artist) || undefined,
+  };
+}
+
+/** @type {(input: unknown) => ImageGroupMetadata[]} */
 export function serializeGallery(input) {
-  return serialize(input, 'images', serializeImage, ({ title: label, artist }, images) => {
-    if (artist) return { label, link: URI.getURIMetadata(artist), images };
-    return { label, images };
-  });
+  return serialize(input, 'images', serializeImage, serializeGroup);
 }
 
 /**
- * @param {SerializedGroup<ImageMetadata, 'images'>} row
+ * @param {ImageGroupMetadata} row
  * @param {Renderer} cardEl
  */
 export async function appendGalleryHeader(row, cardEl, HEADER_ATTRS = ['label', 'link']) {
@@ -33,8 +33,8 @@ export async function appendGalleryHeader(row, cardEl, HEADER_ATTRS = ['label', 
       if (key === 'label') headerEl.el('h2', value);
       else if (key === 'link') {
         /** @type {URIMetadata} */
-        // const value = value
-        headerEl.clink(await value.getSrc(), value.label);
+        const value = value;
+        headerEl.clink(value.src, value.label);
       }
     }
   }

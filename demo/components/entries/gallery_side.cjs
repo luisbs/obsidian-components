@@ -1,7 +1,7 @@
 const { CodeRenderer, Obj } = require('../cjs/index.cjs');
 const { appendGalleryHeader, serializeGallery } = require('./commons/images.cjs');
 
-/** @param {SerializedGroup<ImageGroupMetadata, 'images'>} row */
+/** @param {ImageGroupMetadata} row */
 function innerCls(row) {
   return [
     'vault-gallery',
@@ -33,8 +33,6 @@ module.exports.render = async function (root, input, notepath) {
     for (let i = 0; i < row.images.length; i++) {
       const itemId = `${galleryId}-image-${Obj.random()}`;
       const media = row.images[i];
-      const mediaSrc = await media.getSrc(notepath);
-      const mediaLabel = media.getLabel() || '';
 
       // <div>
       //   <input type="radio" id="img-1" name="gallery" checked/>
@@ -47,13 +45,13 @@ module.exports.render = async function (root, input, notepath) {
       if (i === 0) inputEl.checked = true;
 
       const mediaEl = divEl.div();
-      if (media.hasLabel()) mediaEl.el('span', mediaLabel);
-      if (media.isVideo()) mediaEl.video(mediaSrc, true);
-      else mediaEl.image(mediaSrc, mediaLabel);
+      if (media.label) mediaEl.el('span', media.label);
+      if (media.isVideo) mediaEl.video(media.src, true);
+      else mediaEl.image(media.src, media.label);
 
       const labelEl = divEl.label(itemId);
-      if (media.isVideo()) labelEl.video(mediaSrc, false);
-      else labelEl.image(mediaSrc, mediaLabel);
+      if (media.isVideo) labelEl.video(media.src, false);
+      else labelEl.image(media.src, media.label);
     }
   }
 };

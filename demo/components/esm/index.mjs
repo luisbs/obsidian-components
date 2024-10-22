@@ -1,7 +1,7 @@
 export * from './tags.mjs';
 export * from './serialization.mjs';
 
-export * as URI from './uri.mjs';
+export { default as URI } from './uri.mjs';
 export * as SERVICES from './services.mjs';
 
 export * as Arr from './generics/Arr.mjs';

@@ -1,7 +1,7 @@
 import { HtmlRenderer } from '../esm/index.mjs';
 import { appendGalleryHeader, serializeGallery } from './commons/images.mjs';
 
-/** @param {SerializedGroup<ImageGroupMetadata, 'images'>} row */
+/** @param {ImageGroupMetadata} row */
 function innerCls(row) {
   return ['vault-gallery', 'vault-gallery-grid', row.label ? 'with-header' : ''];
 }
@@ -20,18 +20,15 @@ export default async function render(input, notepath) {
 
     // gallery-header
     await appendGalleryHeader(row, cardEl);
-    if (row.images.length < 1) return;
+    if (row.images.length < 1) continue;
 
     // gallery-content
     const galleryEl = cardEl.div('gallery-content');
     for (const media of row.images) {
-      const mediaSrc = await media.getSrc(notepath);
-      const mediaLabel = media.getLabel();
-
-      const mediaEl = galleryEl.div(['gallery-grid-image', `w${media.getSize() || 1}`]);
-      if (media.hasLabel()) mediaEl.el('span', mediaLabel);
-      if (media.isVideo()) mediaEl.video(mediaSrc, true);
-      else mediaEl.image(mediaSrc, mediaLabel);
+      const mediaEl = galleryEl.div(['gallery-grid-image', `w${media.size}`]);
+      if (media.label) mediaEl.el('span', media.label);
+      if (media.isVideo) mediaEl.video(media.src, true);
+      else mediaEl.image(media.src, media.label);
     }
   }
 

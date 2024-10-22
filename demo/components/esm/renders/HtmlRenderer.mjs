@@ -1,4 +1,4 @@
-import * as Obj from '../generics/Obj.mjs';
+import { isNil } from '../generics/Obj.mjs';
 import Renderer from './Renderer.mjs';
 
 /** @typedef {import('./Renderer.mjs').ClassDefinition} ClassDefinition */
@@ -95,6 +95,6 @@ export default class HtmlRenderer extends Renderer {
   #join(content) {
     if (typeof content === 'string') return content;
     if (Array.isArray(content)) return content.join('');
-    return Obj.isNil(content) ? '' : JSON.stringify(content);
+    return isNil(content) ? '' : JSON.stringify(content);
   }
 }

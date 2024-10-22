@@ -1,4 +1,4 @@
-const Obj = require('../generics/Obj.cjs');
+const { isNil } = require('../generics/Obj.cjs');
 const Renderer = require('./Renderer.cjs');
 
 /** @typedef {import('./Renderer.js').ClassDefinition} ClassDefinition */
@@ -99,7 +99,7 @@ module.exports = class CodeRenderer extends Renderer {
     el.style.all = style;
 
     // content
-    if (Obj.isNil(content)) return el;
+    if (isNil(content)) return el;
 
     if (Array.isArray(content)) el.append(...content);
     else el.append(content);

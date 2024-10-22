@@ -1,4 +1,4 @@
-const Obj = require('../generics/Obj.cjs');
+const { isNil } = require('../generics/Obj.cjs');
 const Renderer = require('./Renderer.cjs');
 
 /** @typedef {import('./Renderer.js').ClassDefinition} ClassDefinition */
@@ -95,6 +95,6 @@ module.exports = class HtmlRenderer extends Renderer {
   #join(content) {
     if (typeof content === 'string') return content;
     if (Array.isArray(content)) return content.join('');
-    return Obj.isNil(content) ? '' : JSON.stringify(content);
+    return isNil(content) ? '' : JSON.stringify(content);
   }
 };
