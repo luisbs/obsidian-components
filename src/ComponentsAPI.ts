@@ -41,7 +41,7 @@ export class ComponentAPI implements PluginAPI {
 
   public source(file: TFile, logger?: Logger): Promise<unknown> {
     try {
-      if (/\.js$/i.test(file.name)) {
+      if (/\.mjs$/i.test(file.name)) {
         const resolved = this.#vault.getResourcePath(file)
         this.#log.on(logger).debug(`import('${resolved}')`)
         return import(resolved)

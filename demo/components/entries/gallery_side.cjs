@@ -18,7 +18,7 @@ function innerCls(row) {
  */
 module.exports.render = async function (root, input, notepath) {
   const data = serializeGallery(input);
-  console.log({ input, data });
+  // console.log({ input, data });
 
   for (const row of data) {
     const containerEl = new CodeRenderer(root, innerCls(row));

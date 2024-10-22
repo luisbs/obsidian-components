@@ -38,7 +38,7 @@ export function serialize(data, itemsLabel, callback, headersCallback) {
  * @returns {G}
  */
 export function serializeGroup(group, itemsLabel, callback, headersCallback = null) {
-  const items = [];
+  let items = [];
   if (Array.isArray(group)) items = group;
   else if (typeof group !== 'object') items = [group];
   else if (itemsLabel in group) items = group[itemsLabel];
@@ -46,6 +46,6 @@ export function serializeGroup(group, itemsLabel, callback, headersCallback = nu
   // invalid can be omitted returning undefined
   const prepared = items.map(callback).filter((v) => !!v);
 
-  if (headersCallback) return headersCallback(group, prepared);
+  if (headersCallback) return headersCallback(prepared, group);
   return { [itemsLabel]: prepared };
 }

@@ -1,4 +1,4 @@
-import { HtmlRenderer } from '../esm/index.mjs';
+import { CodeRenderer } from '../esm/index.mjs';
 import { appendGalleryHeader, serializeGallery } from './commons/images.mjs';
 
 /** @param {ImageGroupMetadata} row */
@@ -7,23 +7,23 @@ function innerCls(row) {
 }
 
 /**
+ * @param {HTMLElement} root
  * @param {unknown} input
  * @param {string} notepath
  */
-export default async function render(input, notepath) {
+export default async function render(root, input, notepath) {
   const data = serializeGallery(input);
   // console.log({ input, data });
 
-  const containerEl = new HtmlRenderer();
   for (const row of data) {
-    const cardEl = containerEl.div(innerCls(row));
+    const containerEl = new CodeRenderer(root, innerCls(row));
 
     // gallery-header
-    await appendGalleryHeader(row, cardEl);
+    await appendGalleryHeader(row, containerEl);
     if (row.images.length < 1) continue;
 
     // gallery-content
-    const galleryEl = cardEl.div('gallery-content');
+    const galleryEl = containerEl.div('gallery-content');
     for (const media of row.images) {
       const mediaEl = galleryEl.div(['gallery-grid-image', `w${media.size}`]);
       if (media.label) mediaEl.el('span', media.label);
@@ -31,6 +31,4 @@ export default async function render(input, notepath) {
       else mediaEl.image(media.src, media.label);
     }
   }
-
-  return containerEl.getHtml();
 }

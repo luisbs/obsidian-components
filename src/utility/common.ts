@@ -50,7 +50,7 @@ export async function getHash(data: string, logger?: Logger): Promise<string> {
     .map((byte) => byte.toString(16).padStart(2, '0')) // hex
     .join('')
 
-  logger?.trace('hash', { encodedData, hashBytes, hashArray, hashString })
+  // logger?.trace('hash', { encodedData, hashBytes, hashArray, hashString })
   return hashString
 }
 
