@@ -25,7 +25,12 @@ export default async function render(root, input, notepath) {
     // gallery-content
     const galleryEl = containerEl.div('gallery-content');
     for (const media of row.images) {
-      const mediaEl = galleryEl.div(['gallery-grid-image', `w${media.size}`]);
+      // <div class="card-image w1">
+      //   <span></span>
+      //   <img src="" alt=""/>
+      // </div>
+
+      const mediaEl = galleryEl.div(['card-image', `w${media.size}`]);
       if (media.label) mediaEl.el('span', media.label);
       if (media.isVideo) mediaEl.video(media.src, true);
       else mediaEl.image(media.src, media.label);

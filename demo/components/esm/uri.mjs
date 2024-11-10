@@ -47,7 +47,7 @@ export default class URI {
     return filename.includes('.') ? filename.split('.').pop()?.toLowerCase() : undefined;
   }
 
-  /** @type {(value: string) => Pick<URLMetadata, 'type' | 'uri' | 'params'> | undefined} */
+  /** @type {(value: string) => Pick<URIMetadata, 'type' | 'uri' | 'params'> | undefined} */
   static #parseURL(value) {
     if (!/^https?:\/\//gi.test(value)) return;
     // good: https://example.net/image.png#id?label&param2=value2
@@ -55,7 +55,7 @@ export default class URI {
     return { type: 'url', uri: value, params };
   }
 
-  /** @type {(value: string) => Pick<URLMetadata, 'type' | 'uri' | 'params'> | undefined} */
+  /** @type {(value: string) => Pick<URIMetadata, 'type' | 'uri' | 'params'> | undefined} */
   static #parseMarkdown(value) {
     if (!/^\!?\[/gi.test(value)) return;
     // good: ![label](https://example.net/image.png#id?param2=value2)
@@ -65,7 +65,7 @@ export default class URI {
     return { type: 'md', uri, params };
   }
 
-  /** @type {(value: string) => Pick<URLMetadata, 'type' | 'uri' | 'params'> | undefined} */
+  /** @type {(value: string) => Pick<URIMetadata, 'type' | 'uri' | 'params'> | undefined} */
   static #parseVault(value) {
     if (!/^\!?\[\[/gi.test(value)) return;
     // err : ![[image.png#id?param2=value2|label]]
@@ -87,7 +87,8 @@ export default class URI {
 
     //
     const { type, uri, params } = meta;
-    const path_tail = uri.replace(/\?.*$/gi, '').match(/(?<=[/\\])[^/\\]+$/gi)[0] || '';
+    const clean = uri.replace(/\?.*$/gi, '');
+    const path_tail = !/[/\\]/.test(clean) ? clean : clean.match(/(?<=[/\\])[^/\\]+$/gi)[0] || '';
     const ext = this.#getExt(path_tail);
 
     return {

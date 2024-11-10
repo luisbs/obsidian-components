@@ -52,10 +52,10 @@ function* flattenEntries(obj, ...fields) {
   for (const field of filtered) {
     if (Array.isArray(obj[field])) {
       for (const value of obj[field]) {
-        yield [(field, value)];
+        yield [field, value];
       }
     } else {
-      yield [(field, obj[field])];
+      yield [field, obj[field]];
     }
   }
 }

@@ -1,7 +1,7 @@
 import { isNil } from './generics/Obj.mjs';
 
-/** @type {(item: unknown, itemsLabel: string) => boolean} */
-function shouldGroup(item, itemsLabel) {
+/** @type {(itemsLabel: string, item: unknown) => boolean} */
+function shouldGroup(itemsLabel, item) {
   if (isNil(item)) return false;
   if (Array.isArray(item)) return true;
   return typeof item === 'object' && itemsLabel in item;
@@ -20,7 +20,7 @@ function shouldGroup(item, itemsLabel) {
  * @returns {G[]}
  */
 export function serialize(data, itemsLabel, callback, headersCallback) {
-  if (Array.isArray(data) && data.some(shouldGroup)) {
+  if (Array.isArray(data) && data.some(shouldGroup.bind(null, itemsLabel))) {
     return data.map((group) => serializeGroup(group, itemsLabel, callback, headersCallback));
   }
 

@@ -31,17 +31,20 @@ module.exports.render = async function (root, input, notepath) {
     // gallery-content
     const galleryEl = containerEl.div('gallery-content');
     for (let i = 0; i < row.images.length; i++) {
-      const itemId = `${galleryId}-image-${Obj.random()}`;
+      const mediaId = `${galleryId}-image-${Obj.random()}`;
       const media = row.images[i];
 
-      // <div>
-      //   <input type="radio" id="img-1" name="gallery" checked/>
-      //   <img src="example.jpg" alt=""/>
-      //   <label for="img-1"><img src="example.jpg" alt=""/></label>
+      // <div class="card-image">
+      //   <input type="radio" id="mediaId" name="galleryId" checked/>
+      //   <div>
+      //     <span></span>
+      //     <img src="" alt=""/>
+      //   </div>
+      //   <label for="mediaId"><img src="" alt=""/></label>
       // </div>
 
-      const divEl = galleryEl.div('gallery-image');
-      const inputEl = divEl.input('radio', galleryId, itemId);
+      const divEl = galleryEl.div('card-image');
+      const inputEl = divEl.input('radio', galleryId, mediaId);
       if (i === 0) inputEl.checked = true;
 
       const mediaEl = divEl.div();
@@ -49,7 +52,7 @@ module.exports.render = async function (root, input, notepath) {
       if (media.isVideo) mediaEl.video(media.src, true);
       else mediaEl.image(media.src, media.label);
 
-      const labelEl = divEl.label(itemId);
+      const labelEl = divEl.label(mediaId);
       if (media.isVideo) labelEl.video(media.src, false);
       else labelEl.image(media.src, media.label);
     }
