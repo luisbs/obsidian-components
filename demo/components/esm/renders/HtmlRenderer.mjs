@@ -78,7 +78,7 @@ export default class HtmlRenderer extends Renderer {
   //#endregion
 
   /** @returns {string} */
-  #cls(...classess) {
+  #cls(classess) {
     const valid = this.clearClassess(classess);
     return valid.length < 1 ? '' : `class="${valid.join(' ')}"`;
   }

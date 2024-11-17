@@ -6,7 +6,7 @@
   border-radius: var(--lb-radius);
   border: var(--lb-border);
 
-  & > div { border-bottom: 1px solid var(--lb-border); }
+  & > div { border-bottom: var(--lb-border); }
   & > div:last-child { border-bottom: none; }
 }
 
@@ -234,34 +234,4 @@
       'summary summary  summary'
       'gallery gallery  gallery';
   }
-}
-
-/* Music components */
-
-@media (min-width: 520px) {
-  .cards-collection .music-card {
-    grid-template-columns: 7fr 5fr;
-    grid-template-areas:
-      'header header'
-      'links  links'
-      'media  media';
-  }
-  .cards-list .music-card {
-    grid-template-columns: 5fr 3fr 7fr;
-    grid-template-areas: 'header links media';
-  }
-
-  .music-card .card-links {
-    flex-direction: column;
-    align-items: center;
-  }
-}
-
-/* @media (min-width: 720px) {} */
-
-.cards-grid {
-  display: grid;
-}
-.cards-grid .vault-card {
-  margin: 0;
 }

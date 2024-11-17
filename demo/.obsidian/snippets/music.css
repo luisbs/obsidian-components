@@ -1,0 +1,44 @@
+/* Music components */
+
+/* prettier-ignore */
+.vault-soundtrack {
+  .soundtrack-header * { margin: 0 !important; }
+  .soundtrack-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    border-bottom: var(--lb-border);
+    padding: 8px 16px;
+  }
+
+  .soundtrack-links {
+    display: flex;
+    border-bottom: var(--lb-border);
+    padding: 8px 16px;
+  }
+  .soundtrack-media {
+    display: flex;
+    flex-direction: column;
+    padding: 8px 16px;
+  }
+  .soundtrack-media > iframe {
+  }
+}
+
+@media (min-width: 520px) {
+  .soundtrack-component {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  /* prettier-ignore */
+  .vault-soundtrack {
+    flex: 0 0 50%;
+    &:nth-child(2n-1) { border-right: var(--lb-border); }
+    &:nth-last-child(2) { border-bottom: none; }
+  }
+}
+
+/* @media (min-width: 720px) {} */

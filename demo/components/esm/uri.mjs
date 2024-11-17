@@ -39,7 +39,7 @@ export default class URI {
   //#endregion URI params
 
   /** @type {(url: string) => string} */
-  static #getURLDomain = (url) => url.replace(/^https?:\/\//gi, '').split('/')[0];
+  static getURLDomain = (url) => url.replace(/^https?:\/\//gi, '').split('/')[0];
 
   /** @type {(path_tail: string) => string | undefined} */
   static #getExt(path_tail) {

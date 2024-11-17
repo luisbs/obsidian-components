@@ -11,7 +11,7 @@
       "id": "soundtrack.html.cjs",
       "path": "components/entries/soundtrack.html.cjs",
       "names": "soundtrack_html\nsoundtrack",
-      "enabled": false
+      "enabled": true
     },
     {
       "id": "side_gallery.cjs",
