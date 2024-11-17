@@ -9,7 +9,7 @@ export default class Renderer {
    * Append an element.
    *
    * @param {T} el
-   * @returns {void}
+   * @returns {T}
    */
   append(el) {
     throw Error('Not implemented');
@@ -25,43 +25,19 @@ export default class Renderer {
     throw Error('Not implemented');
   }
 
-  //
-  //
-  //
+  //#region Detached Methods
 
   /**
    * Create a detached element.
    *
-   * @param {keyof HTMLElementTagNameMap} tag
+   * @template {keyof HTMLElementTagNameMap} K
+   * @param {K} tag
    * @param {unknown} content
    * @param {ClassDefinition} cls
    * @param {string} style
-   * @returns {T}
+   * @returns {T extends string ? string : HTMLElementTagNameMap[K]}
    */
   createEl(tag, content, cls = null, style = null) {
-    throw Error('Not implemented');
-  }
-
-  /**
-   * Create a detached `iframe` element.
-   *
-   * @param {string} src
-   * @param {ClassDefinition} cls
-   * @returns {T}
-   */
-  createIframe(src, cls = null) {
-    throw Error('Not implemented');
-  }
-
-  /**
-   * Create a detached `video` element.
-   *
-   * @param {string} src
-   * @param {boolean} withControls
-   * @param {ClassDefinition} cls
-   * @returns {T}
-   */
-  createVideo(src, withControls = true, cls = null) {
     throw Error('Not implemented');
   }
 
@@ -71,9 +47,32 @@ export default class Renderer {
    * @param {string} src
    * @param {string} title
    * @param {ClassDefinition} cls
-   * @returns {T}
+   * @returns {T extends string ? string : HTMLImageElement}
    */
   createImage(src, title = 'image', cls = null) {
+    throw Error('Not implemented');
+  }
+
+  /**
+   * Create a detached `video` element.
+   *
+   * @param {string} src
+   * @param {boolean} withControls
+   * @param {ClassDefinition} cls
+   * @returns {T extends string ? string : HTMLVideoElement}
+   */
+  createVideo(src, withControls = true, cls = null) {
+    throw Error('Not implemented');
+  }
+
+  /**
+   * Create a detached `iframe` element.
+   *
+   * @param {string} src
+   * @param {ClassDefinition} cls
+   * @returns {T extends string ? string : HTMLIFrameElement}
+   */
+  createIframe(src, cls = null) {
     throw Error('Not implemented');
   }
 
@@ -83,7 +82,7 @@ export default class Renderer {
    * @param {string} url
    * @param {unknown} content
    * @param {ClassDefinition} cls
-   * @returns {T}
+   * @returns {T extends string ? string : HTMLLinkElement}
    */
   createLink(url, content, cls = null) {
     throw Error('Not implemented');
@@ -95,7 +94,7 @@ export default class Renderer {
    * @param {string} resource
    * @param {unknown} content
    * @param {ClassDefinition} cls
-   * @returns {T}
+   * @returns {T extends string ? string : HTMLLinkElement}
    */
   createInternalLink(resource, content, cls = null) {
     throw Error('Not implemented');
@@ -107,56 +106,28 @@ export default class Renderer {
    * @param {string} resource
    * @param {unknown} content
    * @param {ClassDefinition} cls
-   * @returns {T}
+   * @returns {T extends string ? string : HTMLLinkElement}
    */
   createCodeLink(resource, content, cls = null) {
     return this.createInternalLink(resource, this.createEl('code', content, cls), 'internal-link');
   }
 
-  //
-  //
-  //
+  //#endregion
+
+  //#region Attaching Methods
 
   /**
    * Append an element.
    *
-   * @param {keyof HTMLElementTagNameMap} tag
+   * @template {keyof HTMLElementTagNameMap} K
+   * @param {K} tag
    * @param {unknown} content
    * @param {ClassDefinition} cls
    * @param {string} style
-   * @returns {T}
+   * @returns {T extends string ? string : HTMLElementTagNameMap[K]}
    */
   el(tag, content, cls = null, style = null) {
-    const el = this.createEl(tag, content, cls, style);
-    this.append(el);
-    return el;
-  }
-
-  /**
-   * Append an `iframe` element.
-   *
-   * @param {string} src
-   * @param {ClassDefinition} cls
-   * @returns {T}
-   */
-  iframe(src, cls = null) {
-    const el = this.createIframe(src, cls);
-    this.append(el);
-    return el;
-  }
-
-  /**
-   * Append a `video` element.
-   *
-   * @param {string} src
-   * @param {boolean} withControls
-   * @param {ClassDefinition} cls
-   * @returns {T}
-   */
-  video(src, withControls = true, cls = null) {
-    const el = this.createVideo(src, withControls, cls);
-    this.append(el);
-    return el;
+    return this.append(this.createEl(tag, content, cls, style));
   }
 
   /**
@@ -165,12 +136,33 @@ export default class Renderer {
    * @param {string} src
    * @param {string} title
    * @param {ClassDefinition} cls
-   * @returns {T}
+   * @returns {T extends string ? string : HTMLImageElement}
    */
   image(src, title = 'image', cls = null) {
-    const el = this.createImage(src, title, cls);
-    this.append(el);
-    return el;
+    return this.append(this.createImage(src, title, cls));
+  }
+
+  /**
+   * Append a `video` element.
+   *
+   * @param {string} src
+   * @param {boolean} withControls
+   * @param {ClassDefinition} cls
+   * @returns {T extends string ? string : HTMLVideoElement}
+   */
+  video(src, withControls = true, cls = null) {
+    return this.append(this.createVideo(src, withControls, cls));
+  }
+
+  /**
+   * Append an `iframe` element.
+   *
+   * @param {string} src
+   * @param {ClassDefinition} cls
+   * @returns {T extends string ? string : HTMLIFrameElement}
+   */
+  iframe(src, cls = null) {
+    return this.append(this.createIframe(src, cls));
   }
 
   /**
@@ -179,12 +171,10 @@ export default class Renderer {
    * @param {string} url
    * @param {unknown} content
    * @param {ClassDefinition} cls
-   * @returns {T}
+   * @returns {T extends string ? string : HTMLLinkElement}
    */
   link(url, content, cls = null) {
-    const el = this.createLink(url, content, cls);
-    this.append(el);
-    return el;
+    return this.append(this.createLink(url, content, cls));
   }
 
   /**
@@ -193,12 +183,10 @@ export default class Renderer {
    * @param {string} resource
    * @param {unknown} content
    * @param {ClassDefinition} cls
-   * @returns {T}
+   * @returns {T extends string ? string : HTMLLinkElement}
    */
   ilink(resource, content, cls = null) {
-    const el = this.createInternalLink(resource, content, cls);
-    this.append(el);
-    return el;
+    return this.append(this.createInternalLink(resource, content, cls));
   }
 
   /**
@@ -207,11 +195,29 @@ export default class Renderer {
    * @param {string} resource
    * @param {unknown} content
    * @param {ClassDefinition} cls
-   * @returns {T}
+   * @returns {T extends string ? string : HTMLLinkElement}
    */
   clink(resource, content, cls = null) {
-    const el = this.createCodeLink(resource, content, cls);
-    this.append(el);
-    return el;
+    return this.append(this.createCodeLink(resource, content, cls));
+  }
+
+  //#endregion
+
+  /**
+   * Normalize css classes.
+   *
+   * @param {string[]} classess
+   * @returns {string[]}
+   */
+  clearClassess(...classess) {
+    const valid = [];
+    for (const cls of classess) {
+      if (Array.isArray(cls)) {
+        cls.forEach((c) => typeof c === 'string' && c && valid.push(c));
+      } else if (typeof cls === 'string') {
+        cls.split(/\s+/gi).forEach((c) => c && valid.push(c));
+      }
+    }
+    return valid;
   }
 }

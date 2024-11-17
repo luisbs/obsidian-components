@@ -16,12 +16,13 @@ function innerCls(row) {
  * @param {unknown} input
  * @param {string} notepath
  */
-module.exports.render = async function (root, input, notepath) {
+module.exports.render = async function (root, input) {
   const data = serializeGallery(input);
   // console.log({ input, data });
 
+  const rootEl = CodeRenderer.init(root);
   for (const row of data) {
-    const containerEl = new CodeRenderer(root, innerCls(row));
+    const containerEl = rootEl.div(innerCls(row));
     const galleryId = `gallery-${Obj.random()}`;
 
     // gallery-header

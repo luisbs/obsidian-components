@@ -8,16 +8,11 @@ module.exports = class CodeRenderer extends Renderer {
   /** @type {HTMLDivElement} */
   #container;
 
-  /**
-   * @param {HTMLElement} element
-   * @param {ClassDefinition} cls
-   * @param {boolean} inner
-   */
-  constructor(element, cls = null, inner = true) {
-    super();
-
-    this.#container = inner ? element.createDiv() : element;
-    this.#container.addClasses(this.#cls(cls));
+  /** @type {HTMLElement} */
+  static init(rootEl) {
+    const child = new CodeRenderer();
+    child.#container = rootEl;
+    return child;
   }
 
   /** @type {Renderer<HTMLElement>['append']} */
@@ -30,7 +25,10 @@ module.exports = class CodeRenderer extends Renderer {
    * @returns {CodeRenderer}
    */
   div(cls) {
-    return new CodeRenderer(this.#container, cls);
+    const child = new CodeRenderer();
+    child.#container = this.#container.createDiv();
+    child.#container.addClasses(this.clearClassess(cls));
+    return child;
   }
 
   /**
@@ -65,37 +63,12 @@ module.exports = class CodeRenderer extends Renderer {
     return input;
   }
 
-  //
-  //
-  //
+  //#region Detached Methods
 
-  /**
-   * Append an element.
-   *
-   * @template {keyof HTMLElementTagNameMap} K
-   * @param {K} tag
-   * @param {unknown} content
-   * @param {ClassDefinition} cls
-   * @param {string} style
-   * @returns {HTMLElementTagNameMap[K]}
-   */
-  el(tag, content, cls = null, style = null) {
-    return super.el(tag, content, cls, style);
-  }
-
-  /**
-   * Create a detached element.
-   *
-   * @template {keyof HTMLElementTagNameMap} K
-   * @param {K} tag
-   * @param {unknown} content
-   * @param {ClassDefinition} cls
-   * @param {string} style
-   * @returns {HTMLElementTagNameMap[K]}
-   */
+  /** @type {Renderer<HTMLElement>['createEl']} */
   createEl(tag = 'span', content, cls = null, style = '') {
     const el = createEl(tag);
-    el.addClasses(this.#cls(cls));
+    el.addClasses(this.clearClassess(cls));
     el.style.all = style;
 
     // content
@@ -107,7 +80,26 @@ module.exports = class CodeRenderer extends Renderer {
     return el;
   }
 
-  /** @type {Renderer<HTMLIFrameElement>['createIframe']} */
+  /** @type {Renderer<HTMLElement>['createImage']} */
+  createImage(src, title = 'image', cls = null) {
+    const image = this.createEl('img', null, cls);
+    image.title = title;
+    image.src = src;
+    image.dataset.src = src;
+    return image;
+  }
+
+  /** @type {Renderer<HTMLElement>['createVideo']} */
+  createVideo(src, withControls = true, cls = null) {
+    const video = this.createEl('video', null, cls);
+    if (withControls) video.controls = true;
+    video.autoplay = true;
+    video.loop = true;
+    video.src = src;
+    return video;
+  }
+
+  /** @type {Renderer<HTMLElement>['createIframe']} */
   createIframe(src, cls = null) {
     const iframe = this.createEl('iframe', null, cls);
     iframe.width = '100%';
@@ -118,33 +110,14 @@ module.exports = class CodeRenderer extends Renderer {
     return iframe;
   }
 
-  /** @type {Renderer<HTMLVideoElement>['createVideo']} */
-  createVideo(src, withControls = true, cls = null) {
-    const video = this.createEl('video', null, cls);
-    if (withControls) video.controls = true;
-    video.autoplay = true;
-    video.loop = true;
-    video.src = src;
-    return video;
-  }
-
-  /** @type {Renderer<HTMLVideoElement>['createImage']} */
-  createImage(src, title = 'image', cls = null) {
-    const image = this.createEl('img', null, cls);
-    image.title = title;
-    image.src = src;
-    image.dataset.src = src;
-    return image;
-  }
-
-  /** @type {Renderer<HTMLLinkElement>['createLink']} */
+  /** @type {Renderer<HTMLElement>['createLink']} */
   createLink(url, content, cls = null) {
     const link = this.createEl('a', content, cls);
     link.href = url;
     return link;
   }
 
-  /** @type {Renderer<HTMLLinkElement>['createInternalLink']} */
+  /** @type {Renderer<HTMLElement>['createInternalLink']} */
   createInternalLink(resource, content, cls = null) {
     const link = this.createEl('a', content, cls);
     link.dataset.href = resource;
@@ -154,46 +127,5 @@ module.exports = class CodeRenderer extends Renderer {
     return link;
   }
 
-  /** @returns {string[]} */
-  #cls(...classess) {
-    const valid = [];
-    for (const cls of classess) {
-      if (Array.isArray(cls)) {
-        cls.forEach((c) => typeof c === 'string' && c && valid.push(c));
-      } else if (typeof cls === 'string') {
-        cls.split(/\s+/gi).forEach((c) => c && valid.push(c));
-      }
-    }
-    return valid;
-  }
-
-  /** @type {Renderer<HTMLIFrameElement>['iframe']} */
-  iframe(src, cls = null) {
-    return super.iframe(src, cls);
-  }
-
-  /** @type {Renderer<HTMLVideoElement>['video']} */
-  video(src, withControls = true, cls = null) {
-    return super.video(src, withControls, cls);
-  }
-
-  /** @type {Renderer<HTMLVideoElement>['image']} */
-  image(src, title = 'image', cls = null) {
-    return super.image(src, title, cls);
-  }
-
-  /** @type {Renderer<HTMLLinkElement>['link']} */
-  link(url, content, cls = null) {
-    return super.link(url, content, cls);
-  }
-
-  /** @type {Renderer<HTMLLinkElement>['ilink']} */
-  ilink(resource, content, cls = null) {
-    return super.ilink(resource, content, cls);
-  }
-
-  /** @type {Renderer<HTMLLinkElement>['clink']} */
-  clink(resource, content, cls = null) {
-    return super.clink(resource, content, cls);
-  }
+  //#endregion
 };

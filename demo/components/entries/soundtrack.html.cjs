@@ -6,15 +6,18 @@ function innerCls(row) {
   return [row.link || row.links ? 'with-links' : ''];
 }
 
-/** @param {unknown} input */
-module.exports.render = function (input) {
+/**
+ * @param {unknown} input
+ * @param {string} notepath
+ */
+module.exports.render = async function (input) {
   /** @type {MusicMetadata[]} */
   const data = Arr.wrap(input);
   // console.log({ input, data });
 
-  const containerEl = new HtmlRenderer('vault-music-list');
+  const rootEl = new HtmlRenderer();
   for (const row of data) {
-    const cardEl = containerEl.div(innerCls(row));
+    const cardEl = rootEl.div(innerCls(row));
 
     // music-header
     const headerEl = cardEl.div('music-header');
@@ -45,5 +48,5 @@ module.exports.render = function (input) {
     }
   }
 
-  return containerEl.getHtml();
+  return rootEl.getContent();
 };

@@ -11,12 +11,13 @@ function innerCls(row) {
  * @param {unknown} input
  * @param {string} notepath
  */
-export default async function render(root, input, notepath) {
+export default async function render(root, input) {
   const data = serializeGallery(input);
   // console.log({ input, data });
 
+  const rootEl = CodeRenderer.init(root);
   for (const row of data) {
-    const containerEl = new CodeRenderer(root, innerCls(row));
+    const containerEl = rootEl.div(innerCls(row));
 
     // gallery-header
     await appendGalleryHeader(row, containerEl);

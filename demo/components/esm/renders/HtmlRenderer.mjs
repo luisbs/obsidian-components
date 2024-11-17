@@ -11,15 +11,15 @@ export default class HtmlRenderer extends Renderer {
   #children = [];
 
   /** @returns {string} */
-  getHtml() {
-    const content = this.#children.map((e) => (e instanceof HtmlRenderer ? e.getHtml() : e));
-    return `<div ${this.#classess}>${content.join('')}</div>`;
+  #getHtml() {
+    return `<div ${this.#classess}>${this.getContent()}</div>`;
   }
 
-  /** @param {ClassDefinition} cls */
-  constructor(cls) {
-    super();
-    this.#classess = this.#cls(cls);
+  /** @returns {string} */
+  getContent() {
+    return this.#children //
+      .map((e) => (e instanceof HtmlRenderer ? e.#getHtml() : e))
+      .join('');
   }
 
   /** @type {Renderer<string>['append']} */
@@ -32,14 +32,14 @@ export default class HtmlRenderer extends Renderer {
    * @returns {HtmlRenderer}
    */
   div(cls) {
-    const child = new HtmlRenderer(cls);
-    this.#children.push(child);
+    const child = new HtmlRenderer();
+    child.#classess = this.#cls(cls);
+
+    this.append(child);
     return child;
   }
 
-  //
-  //
-  //
+  //#region Detached Methods
 
   /** @type {Renderer<string>['createEl']} */
   createEl(tag = 'span', content, cls = null, style = '') {
@@ -47,10 +47,9 @@ export default class HtmlRenderer extends Renderer {
     return `<${tag} ${this.#cls(cls)} ${style}>${this.#join(content)}</${tag}>`;
   }
 
-  /** @type {Renderer<string>['createIframe']} */
-  createIframe(src, cls = null) {
-    // prettier-ignore
-    return `<iframe ${this.#cls(cls)} width="100%" height="80" frameBorder="0" allow="encrypted-media; fullscreen" src="${src}"></iframe>`;
+  /** @type {Renderer<string>['createImage']} */
+  createImage(src, title = 'image', cls = null) {
+    return `<img ${this.#cls(cls)} title="${title}" src="${src}" />`;
   }
 
   /** @type {Renderer<string>['createVideo']} */
@@ -59,9 +58,10 @@ export default class HtmlRenderer extends Renderer {
     return `<video ${this.#cls(cls)} src="${src}" ${params} autoplay loop></video>`;
   }
 
-  /** @type {Renderer<string>['createImage']} */
-  createImage(src, title = 'image', cls = null) {
-    return `<img ${this.#cls(cls)} title="${title}" src="${src}" />`;
+  /** @type {Renderer<string>['createIframe']} */
+  createIframe(src, cls = null) {
+    // prettier-ignore
+    return `<iframe ${this.#cls(cls)} width="100%" height="80" frameBorder="0" allow="encrypted-media; fullscreen" src="${src}"></iframe>`;
   }
 
   /** @type {Renderer<string>['createLink']} */
@@ -75,20 +75,11 @@ export default class HtmlRenderer extends Renderer {
     return `<a ${this.#cls(cls)} data-href="${resource}" href="${resource}" target="_blank" rel="noopener">${content}</a>`;
   }
 
-  //
-  //
-  //
+  //#endregion
 
   /** @returns {string} */
   #cls(...classess) {
-    const valid = [];
-    for (const cls of classess) {
-      if (Array.isArray(cls)) {
-        cls.forEach((c) => typeof c === 'string' && c && valid.push(c));
-      } else if (typeof cls === 'string') {
-        cls.split(/\s+/gi).forEach((c) => c && valid.push(c));
-      }
-    }
+    const valid = this.clearClassess(classess);
     return valid.length < 1 ? '' : `class="${valid.join(' ')}"`;
   }
 
