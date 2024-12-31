@@ -134,21 +134,21 @@ cover: https://cdn.myanimelist.net/images/manga/2/37846l.jpg
 ## Soundtracks
 
 ```soundtrack
-- label: Season 1 Soundtrack
-  author: Hiroyuki Sawano
-  spotify: album/3WDkuVqT1OfkTdCyYQ2gXa
-
-- label: Season 2 Soundtrack
-  author: Hiroyuki Sawano
-  spotify: album/0jNwqmKIwudqqbMJRRtzQb
-
-- label: Season 3 Soundtrack
-  author: Hiroyuki Sawano
-  spotify: album/68QDg9053hXAeE2GR6lBmD
-
-- label: Season 4 Soundtrack
-  author: Hiroyuki Sawano
-  spotify: album/6ZhZFePX82sWsRzKMdaprL
+label: Season 1 Soundtrack
+author: Hiroyuki Sawano
+spotify: album/3WDkuVqT1OfkTdCyYQ2gXa
+---
+label: Season 2 Soundtrack
+author: Hiroyuki Sawano
+spotify: album/0jNwqmKIwudqqbMJRRtzQb
+---
+label: Season 3 Soundtrack
+author: Hiroyuki Sawano
+spotify: album/68QDg9053hXAeE2GR6lBmD
+---
+label: Season 4 Soundtrack
+author: Hiroyuki Sawano
+spotify: album/6ZhZFePX82sWsRzKMdaprL
 ```
 
 ## Openings & Endings

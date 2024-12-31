@@ -2,14 +2,23 @@
 
 ### Inline names
 
-Allows the user to use a **component** placing the name after the word `use` in the **Codeblock** first line (e.g. `use book`). Example:
+Allows the user to use a **component** placing the name after the word `use` in the **Codeblock** first line (e.g. `use book`). Example using `YAML`:
 
 ```use book
 title: 'Lord of the rings'
 author: 'J. R. Tolkien'
 ```
 
-### In params
+All the **Codeblocks** support the use of `JSON` too. Example:
+
+```use book
+{
+	"title": "Lord of the rings",
+	"author": "J. R. Tolkien"
+}
+```
+
+### Name in params
 
 > **This behavior is disabled by default** and can be enabled by changing the _'Codeblock usage method'_ setting.
 
@@ -33,22 +42,9 @@ title: 'Cien años de Soledad'
 author: 'Gabriel García Márquez'
 ```
 
----
-
-## Settings and other details
-
-All the **Codeblocks** support the use of `JSON` too. Example:
-
-```book
-{
-	"title": "Lord of the rings",
-	"author": "J. R. Tolkien"
-}
-```
-
---
-
 ## Codeblocks Separators
+
+> **This behavior is disabled by default** and can be enabled by changing the _'Enable Codeblock Separators'_ setting.
 
 First-level array items can be written as:
 
@@ -76,3 +72,12 @@ That will give the same result as:
   author: 'J. R. Tolkien'
 ```
 
+## Non standard content
+
+Maybe `YAML` nor `JSON` are adequate, in that case the content of the codeblock is handled as string.
+
+On `HTML` and `Markdown` **components** the placeholder `{{ __ }}` can be used. Example:
+
+```video
+https://www.youtube-nocookie.com/embed/h8t1cSSudVQ
+```
