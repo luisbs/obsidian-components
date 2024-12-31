@@ -1,5 +1,8 @@
 /* prettier-ignore */
-.component {
+.content-component,
+.grid_gallery-component,
+.side_gallery-component,
+.soundtrack-component {
   position: relative;
   margin: var(--size-4-4) auto;
   background-color: var(--lb-background);
@@ -83,32 +86,17 @@
   background-color: #00000005;
 }
 
-.card-header {
-  grid-area: header;
-}
-.card-tags {
-  grid-area: tags;
-}
-.card-details {
-  grid-area: details;
-}
-.card-chapters {
-  grid-area: chapters;
-}
-.card-summary {
-  grid-area: summary;
-}
-.card-links {
-  grid-area: links;
-}
-.card-media {
-  grid-area: media;
-}
-.card-cover {
-  grid-area: cover;
-}
-.card-gallery {
-  grid-area: gallery;
+/* prettier-ignore */
+.vault-card {
+  .card-header { grid-area: header; }
+  .card-tags { grid-area: tags; }
+  .card-details { grid-area: details; }
+  .card-chapters { grid-area: chapters; }
+  .card-summary { grid-area: summary; }
+  .card-links { grid-area: links; }
+  .card-media { grid-area: media; }
+  .card-cover { grid-area: cover; }
+  .card-gallery { grid-area: gallery; }
 }
 
 /* Commons */

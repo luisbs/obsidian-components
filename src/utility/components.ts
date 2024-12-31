@@ -69,7 +69,7 @@ export function prepareComponentMatchers(
       arr.push({
         id: component.id,
         path: component.path,
-        test: componentsEnabled.get(component.id).contains, // .bind()
+        test: [].contains.bind(componentsEnabled.get(component.id)),
         getTags: () => format.tags,
       })
     }
