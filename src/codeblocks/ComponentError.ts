@@ -2,7 +2,6 @@ type ErrorCode =
   // throwed on `codeblockProcessors`
   //| 'invalid-codeblock-syntax'
   | 'missing-component-name'
-  | 'unknown-component'
   // throwed on `getRenderer`
   | 'missing-component-renderer'
   // throwed on `render` method
@@ -29,8 +28,6 @@ export class ComponentError extends Error {
       //   return 'check json/yaml syntax on the codeblock'
       case 'missing-component-name':
         return 'check if Component-name is present and follows Plugin settings'
-      case 'unknown-component':
-        return "component-name doesn't match an active Component"
 
       case 'missing-component-renderer':
         return "refresh 'Components filter' on Plugin settings"
@@ -47,5 +44,15 @@ export class ComponentError extends Error {
       default:
         return 'try-reloading Obsidian'
     }
+  }
+}
+
+export class DisabledComponentError extends Error {
+  constructor(private componentName?: string) {
+    super(`Component "${componentName}" was disabled recently`)
+  }
+
+  toString(): string {
+    return `DisabledComponentError: "${this.componentName}" was disabled recently`
   }
 }

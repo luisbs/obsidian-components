@@ -8,7 +8,7 @@ import type {
 import { parseYaml } from 'obsidian'
 import { Logger } from 'obsidian-fnc'
 import { MapStore, getHash, isRecord, isString } from '@/utility'
-import { ComponentError } from './ComponentError'
+import { ComponentError, DisabledComponentError } from './ComponentError'
 import RenderManager from './RenderManager'
 
 interface CodeblockContent {
@@ -118,6 +118,15 @@ export class CodeblockHandler {
       logger.flush(`[${id}] Failed rendering Component ${componentId}`)
 
       const pre = element.createEl('pre')
+      if (error instanceof DisabledComponentError) {
+        pre.classList.add('unknown-component')
+        pre.append(String(error))
+        pre.createEl('br')
+        pre.createEl('br')
+        pre.append(source)
+        return
+      }
+
       if (error instanceof ComponentError) pre.classList.add(error.code)
       if (error instanceof Error) pre.append(error.stack || error.message)
       else pre.append(String(error))
@@ -172,7 +181,7 @@ export class CodeblockHandler {
     throw new ComponentError('missing-component-name')
   }
 
-  /** @throws {ComponentError} when component is not found or is not active. */
+  /** @throws {DisabledComponentError} when component is not found or is not active. */
   #getComponentMatcher(
     componentId?: string,
     used_name?: string,
@@ -189,6 +198,6 @@ export class CodeblockHandler {
       }
     }
 
-    throw new ComponentError('unknown-component')
+    throw new DisabledComponentError(used_name)
   }
 }
