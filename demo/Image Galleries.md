@@ -24,24 +24,6 @@ The used images are only limited to what the user implements on the **Component*
 
 ## Examples
 
-### Slide gallery
-
-The example **Component** `content.html.cjs` includes a `gallery` section which renders the images on a single row that can be swiped horizontally.
-
-```content
-label: Anime
-title: Shingeki no Kyojin
-gallery:
-- https://cdn.myanimelist.net/images/anime/5/44560l.jpg
-- https://cdn.myanimelist.net/images/anime/9/59221l.jpg
-- https://cdn.myanimelist.net/images/anime/8/69497l.jpg
-- https://cdn.myanimelist.net/images/anime/4/84177l.jpg
-- https://cdn.myanimelist.net/images/anime/1039/91943l.jpg
-- https://cdn.myanimelist.net/images/anime/1173/92110l.jpg
-- https://cdn.myanimelist.net/images/anime/1159/95649l.jpg
-```
-
-
 ### Grid gallery
 
 The example **Component** `grid_gallery.mjs` renders the images on a grid adding rows when necessary.

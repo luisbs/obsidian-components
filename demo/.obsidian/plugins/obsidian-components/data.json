@@ -23,19 +23,25 @@
       "id": "soundtrack.html.cjs",
       "path": "components/entries/soundtrack.html.cjs",
       "names": "soundtrack_html\nsoundtrack",
-      "enabled": false
+      "enabled": true
     },
     {
       "id": "side_gallery.cjs",
       "path": "components/entries/side_gallery.cjs",
       "names": "side_gallery",
-      "enabled": false
+      "enabled": true
+    },
+    {
+      "id": "content.html.mjs",
+      "path": "components/entries/content.html.mjs",
+      "names": "content_html,content",
+      "enabled": true
     },
     {
       "id": "grid_gallery.mjs",
       "path": "components/entries/grid_gallery.mjs",
       "names": "grid_gallery",
-      "enabled": false
+      "enabled": true
     }
   ],
   "components_naming": "CUSTOM",

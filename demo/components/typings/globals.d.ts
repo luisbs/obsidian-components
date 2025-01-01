@@ -53,31 +53,13 @@ interface MusicMetadata {
 type ComponentData = Record<string, unknown>;
 
 type ContentMetadata = {
-  // header
+  alias?: string | string[];
   label?: string | string[];
   title?: string | string[];
-  alias?: string | string[];
   tags?: string | string[];
   cover?: string;
-  gallery?: unknown;
 
-  // metadata
-  art?: string | string[];
-  story?: string | string[];
-  artist?: string | string[];
-  mangaka?: string | string[];
-  author?: string | string[];
-  studio?: string | string[];
-  magazine?: string | string[];
-
-  // opinion
-  rating?: string;
-  comment?: string;
-  comments?: string;
-  summary?: string;
-
-  // progress
-  day?: string;
+  // chapters
   volumes?: number;
   chapters?: number;
   episodes?: number;
@@ -85,14 +67,6 @@ type ContentMetadata = {
   // links
   ap?: string | string[];
   mal?: string | string[];
-  fandom?: string | string[];
-  website?: string | string[];
-  mangadex?: string | string[];
-
-  read?: string | string[];
-  watch?: string | string[];
-  sources?: string | string[];
-  download?: string | string[];
 };
 
 //#endregion

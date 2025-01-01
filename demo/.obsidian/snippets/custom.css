@@ -41,6 +41,8 @@
   --lb-lightbox: var(--tl-neutral-800);
 
   --lb-border: 1px solid var(--tl-neutral-300);
+  --lb-border-color: var(--tl-neutral-300);
+  --lb-border-size: 1px;
 }
 
 .theme-dark {
@@ -62,6 +64,8 @@
   --lb-lightbox: var(--tl-neutral-800);
 
   --lb-border: 1px solid var(--tl-neutral-700);
+  --lb-border-color: var(--tl-neutral-700);
+  --lb-border-size: 1px;
 }
 
 .component {
