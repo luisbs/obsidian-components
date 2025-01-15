@@ -9,9 +9,9 @@ function innerCls(row) {
 /**
  * @param {HTMLElement} root
  * @param {unknown} input
- * @param {string} notepath
+ * @param {CodeblockContext} context
  */
-export default async function render(root, input) {
+export default async function render(root, input, context) {
   const data = serializeGallery(input);
   // console.log({ input, data });
 
@@ -31,7 +31,7 @@ export default async function render(root, input) {
       //   <img src="" alt=""/>
       // </div>
 
-      const mediaEl = galleryEl.div(['card-image', `w${media.size}`]);
+      const mediaEl = galleryEl.div(['gallery-image', `w${media.size}`]);
       if (media.label) mediaEl.el('span', media.label);
       if (media.isVideo) mediaEl.video(media.src, true);
       else mediaEl.image(media.src, media.label);

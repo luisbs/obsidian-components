@@ -1,3 +1,14 @@
+interface CodeblockContext {
+  /** Vault-path of the note containing the **Codeblock**. */
+  notepath: string;
+  /** Component name used on the **Codeblock**. */
+  used_name: string;
+  /** Syntax of the **Codeblock**. */
+  syntax: 'json' | 'yaml' | 'unknown';
+  /** Hash result of the **Codeblock** content. */
+  hash: string;
+}
+
 type ItemsGroup<L extends string, T> = Record<L, NonNullable<T>[]>;
 
 interface URIMetadata {
@@ -6,11 +17,10 @@ interface URIMetadata {
   params: RegExpMatchArray[];
 
   ext: string;
-  isVideo: boolean;
-
   src: string;
   size: string;
   label: string;
+  isVideo: boolean;
 }
 
 interface MetadataField {
@@ -24,13 +34,6 @@ interface MetadataField {
 interface ImageGroupMetadata extends ItemsGroup<'images', URIMetadata> {
   label?: string | string[];
   link?: string;
-}
-
-interface CharacterMetadata {
-  url?: URIMetadata;
-  link?: URIMetadata;
-  name?: string | string[];
-  alias?: string | string[];
 }
 
 interface MusicMetadata {

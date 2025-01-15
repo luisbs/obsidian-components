@@ -2,11 +2,6 @@ import { Arr, HtmlRenderer, Obj, URI, tagsCleaner } from '../esm/index.mjs';
 import { ATTRS, HEADER_ATTRS, CHAPTERS_ATTRS, LINKS_ATTRS } from './commons/content.mjs';
 import { serializeImage } from './commons/images.mjs';
 
-/** @param {ContentMetadata} row */
-function innerCls(row) {
-  return ['vault-content', row.cover ? 'with-cover' : ''];
-}
-
 /**
  * @param {ContentMetadata} row
  * @param {Array<keyof ContentMetadata>} attrs
@@ -23,11 +18,16 @@ function* iterate(row, attrs, parentEl, divClass) {
   }
 }
 
+/** @param {ContentMetadata} row */
+function innerCls(row) {
+  return ['vault-content', row.cover ? 'with-cover' : ''];
+}
+
 /**
  * @param {unknown} input
- * @param {string} notepath
+ * @param {CodeblockContext} context
  */
-export default async function render(input) {
+export default async function render(input, context) {
   /** @type {ContentMetadata[]} */
   const data = Arr.wrap(input);
   // console.log({ input, data });

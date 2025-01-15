@@ -14,9 +14,9 @@ function innerCls(row) {
 /**
  * @param {HTMLElement} root
  * @param {unknown} input
- * @param {string} notepath
+ * @param {CodeblockContext} context
  */
-module.exports.render = async function (root, input) {
+module.exports.render = async function (root, input, context) {
   const data = serializeGallery(input);
   // console.log({ input, data });
 
@@ -35,7 +35,7 @@ module.exports.render = async function (root, input) {
       const mediaId = `${galleryId}-image-${Obj.random()}`;
       const media = row.images[i];
 
-      // <div class="card-image">
+      // <div class="gallery-image">
       //   <input type="radio" id="mediaId" name="galleryId" checked/>
       //   <div>
       //     <span></span>
@@ -44,7 +44,7 @@ module.exports.render = async function (root, input) {
       //   <label for="mediaId"><img src="" alt=""/></label>
       // </div>
 
-      const divEl = galleryEl.div('card-image');
+      const divEl = galleryEl.div('gallery-image');
       const inputEl = divEl.input('radio', galleryId, mediaId);
       if (i === 0) inputEl.checked = true;
 

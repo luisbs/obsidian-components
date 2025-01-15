@@ -1,2 +1,2 @@
 import './obsidian';
-import './globals';
+import './components';

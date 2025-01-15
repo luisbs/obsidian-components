@@ -97,11 +97,10 @@ export default class URI {
       params,
 
       ext,
-      isVideo: /mp4|webm|ogg/gi.test(ext),
-
       src: this.#normalize(uri) || '',
       size: this.#getSize(params) || '1',
       label: this.#getLabel(params) || path_tail.replace('#', ' > '),
+      isVideo: /mp4|webm|ogg/gi.test(ext),
     };
   }
 }

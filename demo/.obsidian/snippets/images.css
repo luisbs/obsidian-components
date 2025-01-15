@@ -33,7 +33,7 @@ img[src*='stripe'] {
 }
 /* #endregion basic */
 
-.card-image {
+.gallery-image {
   flex: 0 0 var(--img-width);
   padding: 8px 4px;
   text-align: center;
@@ -102,7 +102,7 @@ img[src*='stripe'] {
   }
 }
 /* prettier-ignore */
-.vault-gallery-side .card-image {
+.vault-gallery-side .gallery-image {
   max-width: var(--img-max-width);
   max-height: var(--img-max-height);
 
@@ -122,7 +122,7 @@ img[src*='stripe'] {
 }
 
 /* prettier-ignore */
-.vault-gallery-grid .card-image {
+.vault-gallery-grid .gallery-image {
   position: relative;
   padding: 4px;
 
