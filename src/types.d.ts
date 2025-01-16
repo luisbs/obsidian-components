@@ -119,6 +119,8 @@ export interface ComponentConfig {
   names: string
   /** Whether the **Component** should run. */
   enabled: boolean
+  /** Whether the **Component** should use **Dataview**. */
+  dataview: boolean
 }
 
 //#endregion

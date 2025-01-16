@@ -2,6 +2,7 @@ import type { ComponentsPlugin, PluginSettings } from '@/types'
 import type { TextAreaComponent, TextComponent } from 'obsidian'
 import { PluginSettingTab, Setting } from 'obsidian'
 import { FolderSuggester } from 'obsidian-fnc'
+import { isPluginEnabled as isDataviewEnabled } from 'obsidian-dataview'
 import { SettingsTabComponents } from './SettingsTabComponents'
 import * as Tools from './SettingsTabTools'
 
@@ -44,6 +45,20 @@ export class SettingsTab extends PluginSettingTab {
   }
 
   #displayGeneralSettings(): void {
+    if (isDataviewEnabled(this.app)) {
+      this.containerEl
+        .createEl('blockquote')
+        .append(
+          'Dataview is enabled.',
+          createEl('br'),
+          'Components can help you to stylize the results.',
+          createEl('br'),
+          'For more details see ',
+          Tools.docsLink('dataview-integration', 'Dataview Integration'),
+          '.',
+        )
+    }
+
     const modeDesc = createFragment((div) => {
       div.append(
         "Enable design mode only if you're editing your components code.",

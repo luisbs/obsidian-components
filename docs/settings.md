@@ -79,3 +79,11 @@ This feature can also be used with `JSON`.
 { "param1": "value5", "param2": "value6" }
 ```
 ````
+
+## Dataview Integration
+
+When a **Component** is marked as **Dataview Behavior**:
+
+- The **Codeblock** using the **Component** should contain a **Dataview** query.
+- The query will be executed using the **Dataview** API.
+- The result will be piped into the **Component** as the data.

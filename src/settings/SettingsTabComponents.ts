@@ -114,15 +114,23 @@ export class SettingsTabComponents {
       const el = new Setting(this.#componentsEl)
       el.setName(this.#componentName(c.id, c.enabled))
       el.setDesc(this.#componentDesc(c.id))
-      el.addExtraButton((button) => {
-        button.setTooltip('Edit names')
-        button.setIcon('pencil')
-        button.onClick(() => this.#componentForm(el, c))
+      el.addDropdown((dropdown) => {
+        dropdown.addOption('standard', 'Standard Component')
+        dropdown.addOption('dataview', 'Dataview Component')
+        dropdown.setValue(c.dataview ? 'dataview' : 'standard')
+        dropdown.onChange((value) => {
+          this.#changeComponent(c.id, 'dataview', value === 'dataview')
+        })
       })
       el.addToggle((toggle) => {
         toggle.setTooltip('Is enabled?')
         toggle.setValue(c.enabled)
         toggle.onChange(this.#toggleComponents.bind(this, [c.id]))
+      })
+      el.addExtraButton((button) => {
+        button.setTooltip('Edit names')
+        button.setIcon('pencil')
+        button.onClick(() => this.#componentForm(el, c))
       })
     }
   }
