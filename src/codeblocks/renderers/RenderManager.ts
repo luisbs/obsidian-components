@@ -1,9 +1,9 @@
 import type { ComponentsPlugin, FormatMatcher, RendererParams } from '@/types'
 import { Logger } from 'obsidian-fnc'
-import { ComponentError } from './ComponentError'
-import { ComponentRenderer } from './Renderers/ComponentRenderer'
-import * as TextRenderers from './Renderers/TextRenderers'
-import * as JsRenderers from './Renderers/JavascriptRenderers'
+import { ComponentError } from '../ComponentError'
+import { BaseRenderer } from './BaseRenderer'
+import * as TextRenderers from './TextRenderers'
+import * as JsRenderers from './JavascriptRenderers'
 
 export default class RenderManager {
   #log = new Logger('Renderer')
@@ -27,7 +27,7 @@ export default class RenderManager {
   }
 
   /** @throws {ComponentError} */
-  #getRenderer(tags: FormatMatcher['tags']): ComponentRenderer {
+  #getRenderer(tags: FormatMatcher['tags']): BaseRenderer {
     if (tags.length === 1) {
       if (tags.includes('html')) return this.#textHtmlRenderer
       return this.#textMdRenderer

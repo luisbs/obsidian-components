@@ -2,6 +2,7 @@ import { TFile } from 'obsidian'
 import { Logger } from 'obsidian-fnc'
 import { MapStore } from './utility'
 import ComponentsPlugin from './main'
+import { CodeblockSyntax } from './codeblocks/parsers'
 
 export { ComponentsPlugin }
 
@@ -36,7 +37,7 @@ export interface CodeblockContext {
   /** Component name used on the **Codeblock**. */
   used_name: string
   /** Syntax of the **Codeblock**. */
-  syntax: 'json' | 'yaml' | 'unknown'
+  syntax: CodeblockSyntax
   /** Hash result of the **Codeblock** content. */
   hash: string
 }
@@ -119,8 +120,6 @@ export interface ComponentConfig {
   names: string
   /** Whether the **Component** should run. */
   enabled: boolean
-  /** Whether the **Component** should use **Dataview**. */
-  dataview: boolean
 }
 
 //#endregion

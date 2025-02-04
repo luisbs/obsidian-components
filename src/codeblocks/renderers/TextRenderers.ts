@@ -2,9 +2,9 @@ import type { CodeblockContext } from '@/types'
 import type { TFile } from 'obsidian'
 import { Logger } from 'obsidian-fnc'
 import { isRecord } from '@/utility'
-import { ComponentRenderer } from './ComponentRenderer'
+import { BaseRenderer } from './BaseRenderer'
 
-export abstract class TextRenderer extends ComponentRenderer {
+export abstract class TextRenderer extends BaseRenderer {
   #log = new Logger('TextRenderer')
 
   protected async getComponentContent(

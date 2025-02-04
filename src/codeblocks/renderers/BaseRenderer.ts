@@ -1,9 +1,9 @@
 import type { CodeblockContext, ComponentsPlugin } from '@/types'
-import { Logger } from 'obsidian-fnc'
 import { MarkdownRenderer, TFile } from 'obsidian'
+import { Logger } from 'obsidian-fnc'
 
-export abstract class ComponentRenderer {
-  #log = new Logger('ComponentRenderer')
+export abstract class BaseRenderer {
+  #log = new Logger('BaseRenderer')
 
   constructor(protected plugin: ComponentsPlugin) {}
 

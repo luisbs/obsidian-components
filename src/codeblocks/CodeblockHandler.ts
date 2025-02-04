@@ -5,23 +5,15 @@ import type {
   ComponentsPlugin,
   RendererParams,
 } from '@/types'
-import { parseYaml } from 'obsidian'
 import { Logger } from 'obsidian-fnc'
 import { MapStore, getHash, isRecord, isString } from '@/utility'
 import { ComponentError, DisabledComponentError } from './ComponentError'
-import RenderManager from './RenderManager'
-
-interface CodeblockContent {
-  /** Syntax of the **Codeblock**. */
-  syntax: CodeblockContext['syntax']
-  /** Hash result of the **Codeblock** content. */
-  hash: string
-  /** **Codeblock** content parsed. */
-  data: unknown
-}
+import { ParserManager } from './parsers'
+import RenderManager from './renderers/RenderManager'
 
 export class CodeblockHandler {
   #plugin: ComponentsPlugin
+  #parser: ParserManager
   #relay: RenderManager
 
   #log = new Logger('CodeblockHandler')
@@ -30,6 +22,7 @@ export class CodeblockHandler {
 
   constructor(plugin: ComponentsPlugin) {
     this.#plugin = plugin
+    this.#parser = new ParserManager(plugin)
     this.#relay = new RenderManager(plugin)
   }
 
@@ -97,13 +90,15 @@ export class CodeblockHandler {
     const logger = this.#log.group(`Codeblock Execution ${id}`)
 
     try {
-      const { hash, syntax, data } = await this.#parseCodeblock(source)
+      const notepath = elContext.sourcePath
+      const hash = await getHash(source, this.#log)
+      const { data, syntax } = await this.#parser.parse(source, notepath)
+
       const used_name = name || this.#getComponentName(elContext, element, data)
       const matcher = this.#getComponentMatcher(componentId, used_name)
       element.classList.add('component', `${used_name}-component`)
 
       // prepare parames
-      const notepath = elContext.sourcePath
       const context: CodeblockContext = { notepath, used_name, syntax, hash }
       const params: RendererParams = { matcher, context, element, data }
       logger.debug('Codeblock Context', context)
@@ -130,28 +125,6 @@ export class CodeblockHandler {
       if (error instanceof ComponentError) pre.classList.add(error.code)
       if (error instanceof Error) pre.append(error.stack || error.message)
       else pre.append(String(error))
-    }
-  }
-
-  async #parseCodeblock(source: string): Promise<CodeblockContent> {
-    source = source.trim()
-    const hash = await getHash(source, this.#log)
-    const isJson = source.startsWith('{')
-    const separator = new RegExp(this.#plugin.settings.usage_separator, 'ig')
-
-    try {
-      let data = null
-      if (!this.#plugin.settings.enable_separators || !separator.test(source)) {
-        data = isJson ? JSON.parse(source) : parseYaml(source)
-      } else {
-        data = isJson
-          ? source.split(separator).map((fragment) => JSON.parse(fragment))
-          : source.split(separator).map((fragment) => parseYaml(fragment))
-      }
-
-      return { hash, data, syntax: isJson ? 'json' : 'yaml' }
-    } catch (ignored) {
-      return { hash, data: source, syntax: 'unknown' }
     }
   }
 

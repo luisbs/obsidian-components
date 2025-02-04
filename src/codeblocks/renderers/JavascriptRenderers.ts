@@ -2,33 +2,8 @@ import type { CodeblockContext } from '@/types'
 import type { TFile } from 'obsidian'
 import { Logger } from 'obsidian-fnc'
 import { isRecord } from '@/utility'
+import { BaseRenderer } from './BaseRenderer'
 import { ComponentError } from '../ComponentError'
-import { ComponentRenderer } from './ComponentRenderer'
-
-export abstract class CodeRenderer extends ComponentRenderer {
-  #log = new Logger('CodeRenderer')
-
-  protected async getRenderFunction(
-    logger: Logger,
-    component: TFile,
-  ): Promise<Function> {
-    this.#log.on(logger).debug('getRenderFunction')
-    const module = await this.plugin.api.source(component, logger)
-
-    // default export on cjs
-    if (typeof module === 'function') return module
-    if (!isRecord(module)) {
-      throw new ComponentError('missing-component-render-function')
-    }
-
-    // default export on esm
-    if (typeof module.default === 'function') return module.default
-    // named export on cjs & esm
-    if (typeof module.render === 'function') return module.render
-
-    throw new ComponentError('missing-component-render-function')
-  }
-}
 
 export type ITextRenderer = (
   data: unknown,
@@ -39,6 +14,41 @@ export type ICodeRenderer = (
   data: unknown,
   context: CodeblockContext,
 ) => Promise<void>
+
+export abstract class CodeRenderer extends BaseRenderer {
+  #log = new Logger('CodeRenderer')
+
+  protected async getRenderFunction<T extends ITextRenderer | ICodeRenderer>(
+    logger: Logger,
+    component: TFile,
+  ): Promise<T> {
+    this.#log.on(logger).debug('getRenderFunction')
+    const module = await this.plugin.api.source(component, logger)
+
+    // default export on cjs
+    if (typeof module === 'function') {
+      // @ts-ignore
+      return module
+    }
+
+    if (!isRecord(module)) {
+      throw new ComponentError('missing-component-render-function')
+    }
+
+    // default export on esm
+    if (typeof module.default === 'function') {
+      // @ts-ignore
+      return module.default
+    }
+    // named export on cjs & esm
+    if (typeof module.render === 'function') {
+      // @ts-ignore
+      return module.render
+    }
+
+    throw new ComponentError('missing-component-render-function')
+  }
+}
 
 export class JavascriptHTMLRenderer extends CodeRenderer {
   #log = new Logger('JavascriptHTMLRenderer')

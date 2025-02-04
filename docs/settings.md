@@ -82,8 +82,14 @@ This feature can also be used with `JSON`.
 
 ## Dataview Integration
 
-When a **Component** is marked as **Dataview Behavior**:
+When a **Codeblock** content starts with some of the **Dataview** [Query Types](https://blacksmithgu.github.io/obsidian-dataview/queries/query-types). Ex: `TABLE`, `LIST`, `TASK` or `CALENDAR`
 
-- The **Codeblock** using the **Component** should contain a **Dataview** query.
+````md
+```books
+LIST SORT title
+```
+````
+
+- The content of the **Codeblock** will be considered a **Dataview** query.
 - The query will be executed using the **Dataview** API.
 - The result will be piped into the **Component** as the data.
