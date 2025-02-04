@@ -5,23 +5,19 @@ import { isRecord } from '@/utility'
 import { BaseRenderer } from './BaseRenderer'
 
 export abstract class TextRenderer extends BaseRenderer {
-  #log = new Logger('TextRenderer')
+  #log = Logger.consoleLogger(TextRenderer.name)
 
-  protected async getComponentContent(
-    logger: Logger,
-    component: TFile,
-  ): Promise<string> {
-    this.#log.on(logger).debug('getComponentContent')
+  protected async getComponentContent(component: TFile): Promise<string> {
+    this.#log.debug('getComponentContent')
     return this.plugin.app.vault.read(component)
   }
 
   protected replaceData(
-    logger: Logger,
     source: string,
     data: unknown,
     fallback = '[missing]',
   ): string {
-    this.#log.on(logger).debug('replaceData')
+    this.#log.debug('replaceData')
 
     if (!isRecord(data) && !Array.isArray(data)) {
       const value = data ? String(data) : fallback
@@ -37,37 +33,35 @@ export abstract class TextRenderer extends BaseRenderer {
 }
 
 export class HTMLRenderer extends TextRenderer {
-  #log = new Logger('HTMLRenderer')
+  #log = Logger.consoleLogger(HTMLRenderer.name)
 
   async render(
-    logger: Logger,
     component: TFile,
     element: HTMLElement,
     context: CodeblockContext,
     data: unknown,
   ): Promise<void> {
-    this.#log.on(logger).debug('render')
+    this.#log.debug('render')
 
-    const content = await this.getComponentContent(logger, component)
-    const html = this.replaceData(logger, content, data)
-    this.renderHTML(logger, element, html)
+    const content = await this.getComponentContent(component)
+    const html = this.replaceData(content, data)
+    this.renderHTML(element, html)
   }
 }
 
 export class MarkdownRenderer extends TextRenderer {
-  #log = new Logger('MarkdownRenderer')
+  #log = Logger.consoleLogger(MarkdownRenderer.name)
 
   async render(
-    logger: Logger,
     component: TFile,
     element: HTMLElement,
     context: CodeblockContext,
     data: unknown,
   ): Promise<void> {
-    this.#log.on(logger).debug('render')
+    this.#log.debug('render')
 
-    const content = await this.getComponentContent(logger, component)
-    const markdown = this.replaceData(logger, content, data)
-    this.renderMarkdown(logger, element, markdown, context.notepath)
+    const content = await this.getComponentContent(component)
+    const markdown = this.replaceData(content, data)
+    this.renderMarkdown(element, markdown, context.notepath)
   }
 }

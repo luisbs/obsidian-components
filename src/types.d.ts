@@ -1,5 +1,4 @@
 import { TFile } from 'obsidian'
-import { Logger } from 'obsidian-fnc'
 import { MapStore } from './utility'
 import ComponentsPlugin from './main'
 import { CodeblockSyntax } from './codeblocks/parsers'
@@ -10,14 +9,13 @@ export { ComponentsPlugin }
 
 export interface PluginAPI {
   /** Tries to refresh the components rendered instances. */
-  refresh(filepath: string, logger?: Logger): void
-
+  refresh(filepath: string): void
   /** Maps a file to its more recent version. */
-  latest(filePath: string, logger?: Logger): TFile
+  latest(filePath: string): TFile
   /** Tries to import/request the latest version of a file. */
-  resolve(filePath: string, logger?: Logger): Promise<unknown>
+  resolve(filePath: string): Promise<unknown>
   /** Tries to import/request a file. */
-  source(file: TFile, logger?: Logger): Promise<unknown>
+  source(file: TFile): Promise<unknown>
 }
 
 export interface RendererParams {

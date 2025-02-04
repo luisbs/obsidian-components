@@ -16,14 +16,13 @@ export type ICodeRenderer = (
 ) => Promise<void>
 
 export abstract class CodeRenderer extends BaseRenderer {
-  #log = new Logger('CodeRenderer')
+  #log = Logger.consoleLogger(CodeRenderer.name)
 
   protected async getRenderFunction<T extends ITextRenderer | ICodeRenderer>(
-    logger: Logger,
     component: TFile,
   ): Promise<T> {
-    this.#log.on(logger).debug('getRenderFunction')
-    const module = await this.plugin.api.source(component, logger)
+    this.#log.debug('getRenderFunction')
+    const module = await this.plugin.api.source(component)
 
     // default export on cjs
     if (typeof module === 'function') {
@@ -51,55 +50,52 @@ export abstract class CodeRenderer extends BaseRenderer {
 }
 
 export class JavascriptHTMLRenderer extends CodeRenderer {
-  #log = new Logger('JavascriptHTMLRenderer')
+  #log = Logger.consoleLogger(JavascriptHTMLRenderer.name)
 
   async render(
-    logger: Logger,
     component: TFile,
     element: HTMLElement,
     context: CodeblockContext,
     data: unknown,
   ): Promise<void> {
-    this.#log.on(logger).debug('render')
+    this.#log.debug('render')
 
-    const render = await this.getRenderFunction(logger, component)
+    const render = await this.getRenderFunction(component)
     const html = await (render as ITextRenderer)(data, context)
-    this.renderHTML(logger, element, html)
+    this.renderHTML(element, html)
   }
 }
 
 export class JavascriptMarkdownRenderer extends CodeRenderer {
-  #log = new Logger('JavascriptMarkdownRenderer')
+  #log = Logger.consoleLogger(JavascriptMarkdownRenderer.name)
 
   async render(
-    logger: Logger,
     component: TFile,
     element: HTMLElement,
     context: CodeblockContext,
     data: unknown,
   ): Promise<void> {
-    this.#log.on(logger).debug('render')
+    this.#log.debug('render')
 
-    const render = await this.getRenderFunction(logger, component)
+    const render = await this.getRenderFunction(component)
     const markdown = await (render as ITextRenderer)(data, context)
-    this.renderMarkdown(logger, element, markdown, context.notepath)
+    this.renderMarkdown(element, markdown, context.notepath)
   }
 }
 
 export class JavascriptCodeRenderer extends CodeRenderer {
-  #log = new Logger('JavascriptCodeRenderer')
+  #log = Logger.consoleLogger(JavascriptCodeRenderer.name)
 
   async render(
-    logger: Logger,
     component: TFile,
     element: HTMLElement,
     context: CodeblockContext,
     data: unknown,
   ): Promise<void> {
-    this.#log.on(logger).debug('render')
+    this.#log.debug('render')
 
     element.empty() // clear element eagerly
-    const render = await this.getRenderFunction(logger, component)
+    const render = await this.getRenderFunction(component)
     await (render as ICodeRenderer)(element, data, context)
   }
 }

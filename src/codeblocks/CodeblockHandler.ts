@@ -16,7 +16,7 @@ export class CodeblockHandler {
   #parser: ParserManager
   #relay: RenderManager
 
-  #log = new Logger('CodeblockHandler')
+  #log = Logger.consoleLogger(CodeblockHandler.name)
   #rendered = new MapStore<RendererParams>()
   #registered: string[] = []
 
@@ -44,13 +44,13 @@ export class CodeblockHandler {
    * Force all the instances of a component to re-render.
    */
   public refresh(filePath: string): void {
-    const logger = this.#log.group(`Refreshing Components「${filePath}」`)
+    this.#log.debug(`Refreshing Components「${filePath}」`)
     for (const params of this.#rendered.get(filePath) || []) {
-      logger.debug('Refreshing Context', params.context)
-      this.#relay.render(params, logger)
-      logger.info(`Refreshed Component with Hash「${params.context.hash}」`)
+      this.#log.trace('Refreshing Context', params.context)
+      this.#relay.render(params)
+      this.#log.debug(`Refreshed Component with Hash「${params.context.hash}」`)
     }
-    logger.flush('Refreshed Components')
+    this.#log.info('Refreshed Components')
   }
 
   /**
@@ -87,11 +87,11 @@ export class CodeblockHandler {
     name?: string,
   ): Promise<void> {
     const id = String(Math.floor(Math.random() * 1e6)).padStart(6, '-')
-    const logger = this.#log.group(`Codeblock Execution ${id}`)
+    this.#log.debug(`Codeblock Execution ${id}`)
 
     try {
       const notepath = elContext.sourcePath
-      const hash = await getHash(source, this.#log)
+      const hash = await getHash(source)
       const { data, syntax } = await this.#parser.parse(source, notepath)
 
       const used_name = name || this.#getComponentName(elContext, element, data)
@@ -101,16 +101,16 @@ export class CodeblockHandler {
       // prepare parames
       const context: CodeblockContext = { notepath, used_name, syntax, hash }
       const params: RendererParams = { matcher, context, element, data }
-      logger.debug('Codeblock Context', context)
+      this.#log.debug('Codeblock Context', context)
 
       // run renderer
       this.#rendered.push(matcher.path, params)
-      this.#relay.render(params, logger)
-      logger.flush(`[${id}] Rendered Component ${matcher.id}`)
+      this.#relay.render(params)
+      this.#log.info(`[${id}] Rendered Component ${matcher.id}`)
       //
     } catch (error) {
-      logger.error(error)
-      logger.flush(`[${id}] Failed rendering Component ${componentId}`)
+      this.#log.warn(`[${id}] Failed rendering Component ${componentId}`)
+      this.#log.warn(error)
 
       const pre = element.createEl('pre')
       if (error instanceof DisabledComponentError) {

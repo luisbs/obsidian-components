@@ -6,7 +6,7 @@ import * as TextRenderers from './TextRenderers'
 import * as JsRenderers from './JavascriptRenderers'
 
 export default class RenderManager {
-  #log = new Logger('Renderer')
+  #log = Logger.consoleLogger(RenderManager.name)
 
   #textHtmlRenderer: TextRenderers.HTMLRenderer
   #textMdRenderer: TextRenderers.MarkdownRenderer
@@ -43,17 +43,16 @@ export default class RenderManager {
   }
 
   /** @throws {ComponentError} */
-  public async render(params: RendererParams, logger: Logger): Promise<void> {
-    this.#log.on(logger).group('render')
+  public async render(params: RendererParams): Promise<void> {
+    this.#log.debug('Rendering')
 
     // prettier-ignore
     const renderer = this.#getRenderer(params.matcher.getTags())
-    const component = this.plugin.api.latest(params.matcher.path, logger)
+    const component = this.plugin.api.latest(params.matcher.path)
 
     // clear the element
     params.element.empty()
     await renderer.render(
-      logger,
       component,
       params.element,
       params.context,

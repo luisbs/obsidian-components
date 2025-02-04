@@ -6,8 +6,8 @@ settings:
 
 dependencies:
   obsidian-fnc:
-    specifier: github:luisbs/obsidian-fnc#v1.1.0
-    version: github.com/luisbs/obsidian-fnc/96e0509244342d6a3ac3a73068ccc6f075d18140
+    specifier: github:luisbs/obsidian-fnc#v1.2.0
+    version: github.com/luisbs/obsidian-fnc/eaec4ab37d7aded3fd3944e21be2d47ffb8f5bd8
 
 devDependencies:
   '@types/node':
@@ -29,8 +29,8 @@ devDependencies:
     specifier: ^4.1.5
     version: 4.1.5
   obsidian:
-    specifier: ^1.5.7
-    version: 1.5.7(@codemirror/state@6.4.1)(@codemirror/view@6.28.4)
+    specifier: ^1.7.2
+    version: 1.7.2(@codemirror/state@6.4.1)(@codemirror/view@6.28.4)
   obsidian-dataview:
     specifier: ^0.5.67
     version: 0.5.67
@@ -1836,8 +1836,8 @@ packages:
       preact: 10.25.4
     dev: true
 
-  /obsidian@1.5.7(@codemirror/state@6.4.1)(@codemirror/view@6.28.4):
-    resolution: {integrity: sha512-DNcvQJ6TvMflHZqWfO9cLGbOUbKTy2KBi6B6vjo5RG8XsftKZZq1zS/OQFhII2BnXK/DWan/lUcb2JYxfM3p5A==}
+  /obsidian@1.7.2(@codemirror/state@6.4.1)(@codemirror/view@6.28.4):
+    resolution: {integrity: sha512-k9hN9brdknJC+afKr5FQzDRuEFGDKbDjfCazJwpgibwCAoZNYHYV8p/s3mM8I6AsnKrPKNXf8xGuMZ4enWelZQ==}
     peerDependencies:
       '@codemirror/state': ^6.0.0
       '@codemirror/view': ^6.0.0
@@ -2519,10 +2519,10 @@ packages:
       style-mod: 4.1.2
     dev: true
 
-  github.com/luisbs/obsidian-fnc/96e0509244342d6a3ac3a73068ccc6f075d18140:
-    resolution: {tarball: https://codeload.github.com/luisbs/obsidian-fnc/tar.gz/96e0509244342d6a3ac3a73068ccc6f075d18140}
+  github.com/luisbs/obsidian-fnc/eaec4ab37d7aded3fd3944e21be2d47ffb8f5bd8:
+    resolution: {tarball: https://codeload.github.com/luisbs/obsidian-fnc/tar.gz/eaec4ab37d7aded3fd3944e21be2d47ffb8f5bd8}
     name: obsidian-fnc
-    version: 1.1.0
+    version: 1.2.0
     prepare: true
     requiresBuild: true
     dependencies:

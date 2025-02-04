@@ -4,7 +4,8 @@ import { Logger } from 'obsidian-fnc'
 import { ComponentError } from '@/codeblocks'
 
 export class ComponentAPI implements PluginAPI {
-  #log = new Logger('ComponentAPI')
+  #log = Logger.consoleLogger(ComponentAPI.name)
+
   #plugin: ComponentsPlugin
   #vault: Vault
 
@@ -13,13 +14,13 @@ export class ComponentAPI implements PluginAPI {
     this.#vault = plugin.app.vault
   }
 
-  public refresh(filepath: string, logger?: Logger): void {
+  public refresh(filepath: string): void {
     this.#plugin.parser.refresh(filepath)
   }
 
-  public latest(filepath: string, logger?: Logger): TFile {
+  public latest(filepath: string): TFile {
     const latestPath = this.#plugin.versions.resolveLatest(filepath)
-    this.#log.on(logger).debug(`Latest <${latestPath}>`)
+    this.#log.debug(`Latest <${latestPath}>`)
 
     const latestFile = this.#vault.getFileByPath(latestPath)
     if (!latestFile) throw new ComponentError('missing-component-file')
@@ -27,34 +28,35 @@ export class ComponentAPI implements PluginAPI {
     return latestFile
   }
 
-  public async resolve(filepath: string, logger?: Logger): Promise<unknown> {
-    const log = logger || this.#log.group(`Resolving <${filepath}>`)
+  public async resolve(filepath: string): Promise<unknown> {
+    this.#log.debug(`Resolving <${filepath}>`)
 
-    const latestFile = this.latest(filepath, log)
-    this.#log.on(log).debug(`Sourcing <${latestFile.path}>`)
+    const latestFile = this.latest(filepath)
+    this.#log.debug(`Sourcing <${latestFile.path}>`)
 
-    const module = await this.source(latestFile, log)
-    this.#log.on(log).debug(`Resolved`, module)
+    const module = await this.source(latestFile)
+    this.#log.info(`Resolved <${latestFile.path}>`)
+    this.#log.trace(`Resolved <${latestFile.path}>`, module)
 
     return module
   }
 
-  public source(file: TFile, logger?: Logger): Promise<unknown> {
+  public source(file: TFile): Promise<unknown> {
     try {
       if (/\.mjs$/i.test(file.name)) {
         const resolved = this.#vault.getResourcePath(file)
-        this.#log.on(logger).debug(`import('${resolved}')`)
+        this.#log.debug(`import('${resolved}')`)
         return import(resolved)
       }
       if (/\.cjs$/i.test(file.name)) {
         const resolved = this.#plugin.fs.getRealPath(file.path)
-        this.#log.on(logger).debug(`require('${resolved}')`)
+        this.#log.debug(`require('${resolved}')`)
         return require(resolved)
       }
 
       throw new Error('unsupported javascript syntax, use CJS or ESM instead')
     } catch (error) {
-      this.#log.on(logger).error(error)
+      this.#log.warn(error)
       throw new ComponentError('invalid-component-syntax', error)
     }
   }

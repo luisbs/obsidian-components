@@ -11,7 +11,6 @@ import { FilesystemAdapter, VersionController } from './filesystem'
 import { CodeblockHandler } from './codeblocks'
 import { ComponentAPI } from './ComponentsAPI'
 
-
 export const DEFAULT_SETTINGS: PluginSettings = {
   enable_codeblocks: false,
   enable_separators: false,
@@ -27,7 +26,7 @@ export const DEFAULT_SETTINGS: PluginSettings = {
 }
 
 export default class ComponentsPlugin extends Plugin {
-  #log = new Logger('ComponentsPlugin')
+  #log = Logger.consoleLogger(ComponentsPlugin.name)
 
   public settings = {} as PluginSettings
   public state = {} as PluginState
@@ -62,31 +61,31 @@ export default class ComponentsPlugin extends Plugin {
   }
 
   async loadSettings(): Promise<void> {
-    const log = this.#log.group('Loading Settings')
+    this.#log.debug('Loading Components Settings')
     const primitives = (await this.loadData()) || {}
 
     // ensure a fallback value is present
     this.settings = Object.assign({}, DEFAULT_SETTINGS, primitives)
-    log.debug('Loaded: ', this.settings)
-    log.flush('Loaded Settings')
+    this.#log.info('Loaded Components Settings')
+    this.#log.trace('Loaded Components Settings: ', this.settings)
 
     this.#prepareState()
   }
 
   async saveSettings(): Promise<void> {
-    const log = this.#log.group('Saving Settings')
+    this.#log.debug('Saving Components Settings')
     const primitives = Object.assign({}, this.settings)
     // serialize special data types (Map, Set, etc)
 
     await this.saveData(primitives)
-    log.debug('Saved: ', primitives)
-    log.flush('Saved Settings')
+    this.#log.info('Saved Components Settings')
+    this.#log.trace('Saved Components Settings: ', primitives)
 
     this.#prepareState()
   }
 
   #prepareState(): void {
-    this.#log.info('Prepare state')
+    this.#log.info('Preparing Components state')
     const names = prepareComponentNames(this.settings)
     this.state = {
       name_params: parseStringList(this.settings.usage_naming),

@@ -5,9 +5,9 @@ import { MapStore } from '@/utility'
 import { FilesystemAdapter } from './FilesystemAdapter'
 
 export class VersionController {
+  #log = Logger.consoleLogger(VersionController.name)
   #plugin: ComponentsPlugin
 
-  #log = new Logger('VersionController')
   // like { 'music.html.cjs': ['music.html-23f29a.cjs'] }
   #versions = new MapStore<string>()
   // like { 'HtmlRenderer.cjs': ['music.html.cjs', 'content.html.cjs'] }
@@ -27,7 +27,8 @@ export class VersionController {
 
   public clear(): void {
     // prettier-ignore
-    this.#plugin.app.vault.off('modify', this.#handleFileModification.bind(this))
+    // TODO: check to re-implement
+    // this.#plugin.app.vault.off('modify', this.#handleFileModification.bind(this))
 
     this.#dependencies.clear()
     this.#versions.clear()
@@ -61,18 +62,18 @@ export class VersionController {
       )
     }
 
-    const logger = this.#log.group('Exploring dependencies')
+    this.#log.debug('Exploring dependencies')
 
     // recursive tree exploring
     const explore = async (folder: TFolder) => {
       for (const child of folder.children) {
         if (child instanceof TFolder) await explore(child)
-        await this.#exploreImports(child.path, logger)
+        await this.#exploreImports(child.path)
       }
     }
 
     await explore(componentsFolder)
-    logger.flush('Explored dependencies')
+    this.#log.debug('Explored dependencies')
   }
 
   /**
@@ -87,9 +88,9 @@ export class VersionController {
       file.path.startsWith(this.#plugin.settings.components_folder) ||
       this.#dependencies.has(file.path)
     ) {
-      const logger = this.#log.group(`Listening changes on <${file.path}>`)
-      await this.#trackFile(file, logger)
-      logger.flush(`Listened changes on <${file.path}>`)
+      this.#log.debug(`Listening changes on <${file.path}>`)
+      await this.#trackFile(file)
+      this.#log.info(`Listened changes on <${file.path}>`)
     }
   }
 
@@ -97,42 +98,39 @@ export class VersionController {
    * Tracks the modifications on a file.
    * `refresh()` should be called after `trackFile()`.
    */
-  async #trackFile(
-    fileOrPath: string | TFile,
-    logger: Logger,
-  ): Promise<boolean> {
+  async #trackFile(fileOrPath: string | TFile): Promise<boolean> {
     if (!this.#plugin.isDesignModeEnabled) {
-      this.#log.on(logger).info(`DesignMode is disabled <${fileOrPath}>`)
+      this.#log.info(`DesignMode is disabled <${fileOrPath}>`)
       return false
     }
 
     const changedFile = this.#plugin.fs.resolveFile(fileOrPath)
     if (!changedFile) {
-      this.#log.on(logger).warn(`File not found <${fileOrPath}>`)
+      this.#log.warn(`File not found <${fileOrPath}>`)
       return false
     }
 
     const dependents = this.#calculateDependents(changedFile.path)
-    this.#log.on(logger).info('Dependents: ', dependents)
+    this.#log.info('Dependents: ', dependents)
 
     // cache new versions
-    this.#log.on(logger).debug('Caching files')
+    this.#log.debug('Caching files')
     for (const dependent of dependents) {
       const file = this.#plugin.fs.resolveFile(dependent)
       if (!file) {
-        this.#log.on(logger).error(`Not Found <${dependent}>`)
+        this.#log.warn(`Not Found <${dependent}>`)
         continue
       }
       const hash = await this.#plugin.fs.getFileHash(dependent)
-      const cacheName = await this.#cacheFile(file, hash, logger)
+      const cacheName = await this.#cacheFile(file, hash)
       this.#versions.prepend(dependent, cacheName)
     }
-    this.#log.on(logger).info('Cached files')
+    this.#log.info('Cached files')
 
     // refresh dependents
-    this.#log.on(logger).debug('Refreshing components')
+    this.#log.debug('Refreshing components')
     for (const dependent of dependents) this.#plugin.parser.refresh(dependent)
-    this.#log.on(logger).info('Refreshed components')
+    this.#log.info('Refreshed components')
 
     return true
   }
@@ -158,7 +156,7 @@ export class VersionController {
    *
    * @returns the file name on the cache folder.
    */
-  async #cacheFile(file: TFile, hash: string, logger: Logger): Promise<string> {
+  async #cacheFile(file: TFile, hash: string): Promise<string> {
     const cacheName = `${file.basename}.${hash}.${file.extension}`
     const cachePath = this.#plugin.fs.getCachePath(cacheName)
 
@@ -168,15 +166,15 @@ export class VersionController {
       const clonePath = this.#plugin.fs.getCachePath(cloneName)
 
       await this.#plugin.fs.copy(cachePath, clonePath)
-      this.#log.on(logger).debug(`Cloned <${cacheName}> to <${cloneName}>`)
+      this.#log.debug(`Cloned <${cacheName}> to <${cloneName}>`)
 
       return cloneName
     }
 
     await this.#plugin.fs.copy(file, cachePath, (content) => {
-      return this.#replaceImports(file, content, logger)
+      return this.#replaceImports(file, content)
     })
-    this.#log.on(logger).debug(`Cached <${file.name}> to <${cacheName}>`)
+    this.#log.debug(`Cached <${file.name}> to <${cacheName}>`)
 
     return cacheName
   }
@@ -184,13 +182,13 @@ export class VersionController {
   /**
    * Replace the imports/require statements to allow dynamic resolution.
    */
-  #replaceImports(file: TFile, content: string, logger: Logger): string {
+  #replaceImports(file: TFile, content: string): string {
     const parentPath = file.parent?.path || ''
     return content.replaceAll(this.#importRegex(), ($0) => {
       const source = FilesystemAdapter.join(parentPath, $0)
       const latest = this.resolveLatest(source)
 
-      this.#log.on(logger).trace(`Replacing import path <${latest}>`)
+      this.#log.trace(`Replacing import path <${latest}>`)
       return this.#plugin.fs.getRealPath(latest)
     })
   }
@@ -198,25 +196,25 @@ export class VersionController {
   /**
    * Explore the tree of file dependencies.
    */
-  async #exploreImports(filepath: string, logger: Logger): Promise<void> {
+  async #exploreImports(filepath: string): Promise<void> {
     if (!this.#plugin.isDesignModeEnabled) return
     if (this.#dependencies.hasValue(filepath)) return
 
-    const parentPath = filepath.replace(/[\\\/][^\\\/]*$/gi, '')
+    const parentPath = filepath.replace(/[\\/][^\\/]*$/gi, '')
     const content = await this.#plugin.fs.read(filepath)
     const queue: string[] = []
 
-    this.#log.on(logger).debug(`Explore imports on <${filepath}>`)
+    this.#log.debug(`Explore imports on <${filepath}>`)
     for (const match of content.matchAll(this.#importRegex())) {
       const path = FilesystemAdapter.join(parentPath, match[0] || '')
-      this.#log.on(logger).trace(`Found import for <${path}>`)
+      this.#log.trace(`Found import for <${path}>`)
       this.#dependencies.push(path, filepath)
 
       queue.push(path)
     }
 
     // explore inner dependencies
-    for (const item of queue) await this.#exploreImports(item, logger)
+    for (const item of queue) await this.#exploreImports(item)
   }
 
   #importRegex() {
