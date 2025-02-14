@@ -46,8 +46,8 @@ export default class ComponentsPlugin extends Plugin {
     this.versions = new VersionController(this)
 
     // thrid-party API
-    // @ts-ignore non-standard API
-    globalThis.Components = this.api
+    // @ts-expect-error non-standard API
+    window.Components = this.api
   }
 
   async onload(): Promise<void> {

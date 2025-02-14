@@ -1,9 +1,10 @@
-import type { ComponentsPlugin, PluginAPI } from '@/types'
+import type { ComponentsPlugin } from '@/types'
+import type { ComponentsPluginAPI } from '.'
 import { TFile, Vault } from 'obsidian'
 import { Logger } from 'obsidian-fnc'
 import { ComponentError } from '@/codeblocks'
 
-export class ComponentAPI implements PluginAPI {
+export class ComponentAPI implements ComponentsPluginAPI {
   #log = new Logger('ComponentAPI')
   #plugin: ComponentsPlugin
   #vault: Vault
