@@ -1,6 +1,0 @@
-# Ignore artifacts:
-build
-coverage
-
-# Ignore testing enviroment:
-test-vault

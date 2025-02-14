@@ -1,41 +1,5 @@
 {
-  "compilerOptions": {
-    "baseUrl": ".",
-    "inlineSourceMap": true,
-    "inlineSources": true,
-    "strict": true,
-    "module": "ESNext",
-    "target": "ES2021",
-    "allowJs": false,
-    "jsx": "react",
-    "jsxFactory": "h",
-
-    // linting
-    "noImplicitAny": true,
-    "noImplicitReturns": true,
-    "noImplicitThis": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true,
-    "allowSyntheticDefaultImports": true,
-    "strictFunctionTypes": true,
-    "strictNullChecks": true,
-
-    "esModuleInterop": true,
-    "resolveJsonModule": true,
-    "downlevelIteration": true,
-
-    "moduleResolution": "node",
-    "isolatedModules": true,
-    "importHelpers": true,
-    "skipDefaultLibCheck": true,
-    "lib": ["DOM", "ES2021"],
-    "paths": {
-      "obsidian-fnc": ["node_modules/obsidian-fnc/src"],
-      "@ui/*": ["src/components/*"],
-      "@/*": ["src/*"]
-    }
-  },
-  "include": ["src/**/*", "vite.config.ts"],
-  "exclude": ["lib/**/*"]
+    "extends": ["./scripts/tsconfig.lib"],
+    "include": ["src/**/*.ts"],
+    "exclude": ["lib/**/*.ts"]
 }

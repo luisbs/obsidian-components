@@ -1,0 +1,38 @@
+{
+    "include": ["../src/index.ts"],
+    "compilerOptions": {
+        "baseUrl": ".",
+        "paths": {
+            "@/*": ["../src/*"]
+        },
+        "declaration": true,
+        "declarationMap": false,
+        "emitDeclarationOnly": true,
+        "declarationDir": "../lib",
+
+        "strict": true,
+        "module": "ESNext",
+        "target": "ES2022",
+        "allowJs": false,
+        "removeComments": false,
+
+        "noImplicitAny": true,
+        "noImplicitReturns": true,
+        "noImplicitThis": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "noFallthroughCasesInSwitch": true,
+        "allowSyntheticDefaultImports": true,
+        "strictFunctionTypes": true,
+        "strictNullChecks": true,
+
+        "esModuleInterop": true,
+        "resolveJsonModule": true,
+        "downlevelIteration": true,
+
+        "importHelpers": true,
+        "skipDefaultLibCheck": true,
+        "moduleResolution": "node",
+        "lib": ["DOM", "ES2022"],
+    }
+}

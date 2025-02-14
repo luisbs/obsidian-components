@@ -1,26 +1,23 @@
-# vscode
-.vscode
+# Dependency directories
+node_modules/
 
-# Intellij
-*.iml
-.idea
-
-# Exclude macOS Finder (System Explorer) View States
-.DS_Store
-
-# npm
-node_modules
-
-# Don't include the compiled dist folder in the repo.
-# They should be uploaded to GitHub releases instead.
-build
+# Artifacts
 dist
+lib
 
-# Exclude sourcemaps
-*.map
+# Local artifacts
+.vscode
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
 
-# obsidian
-data.json
-
-# keep discarted code
-.no-track
+# dotenv environment variable files
+.env
+.env.development.local
+.env.test.local
+.env.production.local
+.env.local
