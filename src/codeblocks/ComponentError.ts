@@ -1,58 +1,78 @@
 type ErrorCode =
-  // throwed on `codeblockProcessors`
-  //| 'invalid-codeblock-syntax'
-  | 'missing-component-name'
-  // throwed on `getRenderer`
-  | 'missing-component-renderer'
-  // throwed on `render` method
-  // | 'invalid-component-params'
-  | 'missing-component-file'
-  | 'invalid-component-syntax'
-  | 'missing-component-render-function'
+    | 'not-supported'
+    // throwed on `codeblockProcessors`
+    //| 'invalid-codeblock-syntax'
+    | 'missing-component-name'
+    // throwed on `render` method
+    // | 'invalid-component-params'
+    | 'missing-component-file'
+// throwed on `getRenderer`
+// ! | 'missing-component-renderer'
+// ! | 'invalid-component-syntax'
+// ! | 'missing-component-render-function'
 
-export class ComponentError extends Error {
-  constructor(public code: ErrorCode, public cause?: unknown) {
-    super(ComponentError.#suggestion(code))
-    this.name = 'ComponentError(' + this.code + ')'
-  }
+export abstract class BaseComponentError extends Error {
+    public abstract name: string
+    public code: string
 
-  toString(): string {
-    let print = this.name + ': ' + this.message
-    if (this.cause) print += ', cause:\n\n' + String(this.cause)
-    return print
-  }
-
-  static #suggestion(code: ErrorCode): string {
-    switch (code) {
-      // case 'invalid-codeblock-syntax':
-      //   return 'check json/yaml syntax on the codeblock'
-      case 'missing-component-name':
-        return 'check if Component-name is present and follows Plugin settings'
-
-      case 'missing-component-renderer':
-        return "refresh 'Components filter' on Plugin settings"
-
-      // case 'invalid-component-params':
-      //   return 'codeblock json/yaml should be object-ish'
-      case 'missing-component-file':
-        return "refresh 'Components filter' on Plugin settings"
-      case 'invalid-component-syntax':
-        return 'check the code on the Component file'
-      case 'missing-component-render-function':
-        return "check the Component file exports a function or a 'render' method"
-
-      default:
-        return 'try-reloading Obsidian'
+    constructor(message: string, options: { code: string; cause?: unknown }) {
+        super(message)
+        this.code = options.code
+        this.cause = options.cause
     }
-  }
+
+    toString(): string {
+        if (!this.cause) return `${this.name}: ${this.message}`
+
+        const base = `${this.name}: ${this.message}, cause:\n\n`
+        if (this.cause instanceof Error) return `${base}${this.cause}`
+        return `${base}${JSON.stringify(this.cause)}`
+    }
+}
+export class DisabledComponentError extends BaseComponentError {
+    public name = 'DisabledComponentError'
+
+    constructor(componentName: string) {
+        super(`'${componentName}' was disabled recently`, {
+            code: 'disabled-component',
+        })
+    }
 }
 
-export class DisabledComponentError extends Error {
-  constructor(private componentName?: string) {
-    super(`Component "${componentName}" was disabled recently`)
-  }
+export class ComponentError extends Error {
+    constructor(
+        public code: ErrorCode,
+        public cause?: unknown,
+    ) {
+        super(ComponentError.#suggestion(code))
+        this.name = 'ComponentError(' + this.code + ')'
+    }
 
-  toString(): string {
-    return `DisabledComponentError: "${this.componentName}" was disabled recently`
-  }
+    toString(): string {
+        let print = this.name + ': ' + this.message
+        if (!this.cause) return print
+
+        print += ', cause:\n\n'
+        if (this.cause instanceof Error) return print + String(this.cause)
+        return print + JSON.stringify(this.cause)
+    }
+
+    static #suggestion(code: ErrorCode): string {
+        switch (code) {
+            // case 'invalid-codeblock-syntax':
+            //   return 'check json/yaml syntax on the codeblock'
+            case 'missing-component-name':
+                return 'check if Component-name is present and follows Plugin settings'
+
+            // case 'invalid-component-params':
+            //   return 'codeblock json/yaml should be object-ish'
+            case 'not-supported':
+                return 'unknown behavior, open an issuer'
+            case 'missing-component-file':
+                return "refresh 'Components filter' on Plugin settings"
+
+            default:
+                return 'try-reloading Obsidian'
+        }
+    }
 }
