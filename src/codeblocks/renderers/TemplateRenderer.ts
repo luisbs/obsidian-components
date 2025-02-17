@@ -1,8 +1,7 @@
-import type { CodeblockContext } from '@/types'
 import type { Logger } from '@luis.bs/obsidian-fnc'
 import type { TFile } from 'obsidian'
 import { isRecord } from '@/utility'
-import BaseRenderer from './BaseRenderer'
+import BaseRenderer, { CodeblockContext } from './BaseRenderer'
 
 export default class TemplateRenderer extends BaseRenderer {
     public test(component: TFile): boolean {

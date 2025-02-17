@@ -11,8 +11,8 @@ type ErrorCode =
 // ! | 'invalid-component-syntax'
 // ! | 'missing-component-render-function'
 
-export abstract class BaseComponentError extends Error {
-    public abstract name: string
+export class ComponentError extends Error {
+    public name = 'ComponentError'
     public code: string
 
     constructor(message: string, options: { code: string; cause?: unknown }) {
@@ -29,7 +29,7 @@ export abstract class BaseComponentError extends Error {
         return `${base}${JSON.stringify(this.cause)}`
     }
 }
-export class DisabledComponentError extends BaseComponentError {
+export class DisabledComponentError extends ComponentError {
     public name = 'DisabledComponentError'
 
     constructor(componentName: string) {
@@ -39,13 +39,13 @@ export class DisabledComponentError extends BaseComponentError {
     }
 }
 
-export class ComponentError extends Error {
+export class OldComponentError extends Error {
     constructor(
         public code: ErrorCode,
         public cause?: unknown,
     ) {
-        super(ComponentError.#suggestion(code))
-        this.name = 'ComponentError(' + this.code + ')'
+        super(OldComponentError.#suggestion(code))
+        this.name = 'OldComponentError(' + this.code + ')'
     }
 
     toString(): string {

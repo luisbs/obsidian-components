@@ -1,8 +1,7 @@
-import type { CodeblockContext } from '@/types'
 import type { Logger } from '@luis.bs/obsidian-fnc'
 import type { TFile } from 'obsidian'
-import { isRecord } from '@/utility'
-import BaseRenderer, { ComponentRendererError } from './BaseRenderer'
+import { ComponentError, isRecord } from '@/utility'
+import BaseRenderer, { CodeblockContext } from './BaseRenderer'
 
 type TemplateRenderer = (
     data: unknown,
@@ -41,7 +40,6 @@ export default class JavascriptRenderer extends BaseRenderer {
         else await (renderer as CodeRenderer)(element, data, context)
     }
 
-    /** @throws {ComponentRendererError} */
     async #getRenderer<T extends TemplateRenderer | CodeRenderer>(
         component: TFile,
         log: Logger,
@@ -52,7 +50,7 @@ export default class JavascriptRenderer extends BaseRenderer {
         // default export on cjs
         if (typeof module === 'function') return module as T
         if (!isRecord(module)) {
-            throw new ComponentRendererError(
+            throw new ComponentError(
                 `component ${component.name} should export a function or a 'render' method`,
                 { code: 'missing-component-renderer' },
             )
@@ -63,13 +61,12 @@ export default class JavascriptRenderer extends BaseRenderer {
         // named export on cjs & esm
         if (typeof module.render === 'function') return module.render as T
 
-        throw new ComponentRendererError(
+        throw new ComponentError(
             `component ${component.name} should export a function or a 'render' method`,
             { code: 'missing-component-renderer' },
         )
     }
 
-    /** @throws {ComponentRendererError} */
     async #source(file: TFile, log: Logger): Promise<unknown> {
         log.debug('Sourcing Renderer')
 
@@ -87,7 +84,7 @@ export default class JavascriptRenderer extends BaseRenderer {
             // eslint-disable-next-line @typescript-eslint/no-require-imports
             return require(resolved)
         } catch (cause) {
-            throw new ComponentRendererError(
+            throw new ComponentError(
                 `component '${file.name}' could not be imported/required`,
                 { cause, code: 'invalid-component-syntax' },
             )

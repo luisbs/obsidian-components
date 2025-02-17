@@ -1,10 +1,16 @@
-import type { CodeblockContext, ComponentsPlugin } from '@/types'
+import type { ComponentsPlugin } from '@/types'
 import type { Logger } from '@luis.bs/obsidian-fnc'
 import { MarkdownRenderer, TFile } from 'obsidian'
-import { BaseComponentError } from '../codeblocks/ComponentError'
 
-export class ComponentRendererError extends BaseComponentError {
-    public name = 'ComponentRendererError'
+export interface CodeblockContext {
+    /** Vault-path of the note containing the **Codeblock**. */
+    notepath: string
+    /** Component name used on the **Codeblock**. */
+    usedname: string
+    /** Syntax of the **Codeblock**. */
+    syntax: string
+    /** Hash result of the **Codeblock** content. */
+    hash: string
 }
 
 export default abstract class BaseRenderer {
@@ -13,11 +19,7 @@ export default abstract class BaseRenderer {
     /** Test if the **Renderer** supports the **Component**. */
     public abstract test(component: TFile): boolean
 
-    /**
-     * Renders the _data_ into the _element_ using the **Component**
-     *
-     * @throws {ComponentRendererError}
-     */
+    /** Renders the _data_ into the _element_ using the **Component**. */
     public abstract render(
         component: TFile,
         context: CodeblockContext,
@@ -39,7 +41,7 @@ export default abstract class BaseRenderer {
     /**
      * Render the **Markdown _content_** inside the _element_.
      *
-     * Any present link will be resolved from the _notepath_.
+     * Any link present will be resolved from the _notepath_.
      */
     protected renderMarkdown(
         element: HTMLElement,

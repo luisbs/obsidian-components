@@ -1,9 +1,12 @@
-import type { CodeblockContext, ComponentsPlugin } from '@/types'
+import type { ComponentsPlugin } from '@/types'
 import type { Logger } from '@luis.bs/obsidian-fnc'
 import type { TFile } from 'obsidian'
-import BaseRenderer, { ComponentRendererError } from './BaseRenderer'
+import { ComponentError } from '@/utility'
+import BaseRenderer, { CodeblockContext } from './BaseRenderer'
 import TemplateRenderer from './TemplateRenderer'
 import JavascriptRenderer from './JavascriptRender'
+
+export { CodeblockContext }
 
 export default class RenderManager {
     #renderers: BaseRenderer[]
@@ -19,7 +22,6 @@ export default class RenderManager {
         ]
     }
 
-    /** @throws {ComponentRendererError} */
     public async render(
         component: TFile,
         context: CodeblockContext,
@@ -35,7 +37,7 @@ export default class RenderManager {
             }
         }
 
-        throw new ComponentRendererError(
+        throw new ComponentError(
             `component ${component.name} is not supported`,
             { code: 'unsupported-component' },
         )
