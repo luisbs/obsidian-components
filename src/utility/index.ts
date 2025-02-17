@@ -1,4 +1,3 @@
-export * from './ComponentError'
 export * from './MapStore'
 export * from './common'
 export * from './formats'

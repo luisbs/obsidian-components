@@ -1,6 +1,7 @@
 import type { Logger } from '@luis.bs/obsidian-fnc'
 import type { TFile } from 'obsidian'
-import { ComponentError, isRecord } from '@/utility'
+import { isRecord } from '@/utility'
+import { ComponentError } from '../ComponentError'
 import BaseRenderer, { CodeblockContext } from './BaseRenderer'
 
 type TemplateRenderer = (

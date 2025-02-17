@@ -66,12 +66,6 @@
 }
 
 /* .invalid-codeblock-syntax, */
-.missing-component-name,
-.unknown-component,
-.missing-component-renderer,
-/* .invalid-component-params, */
-.missing-component-file,
-.invalid-component-syntax,
-.missing-component-render-function {
+.component-error {
   border: 1px solid orangered;
 }

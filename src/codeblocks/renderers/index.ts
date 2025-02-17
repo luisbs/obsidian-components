@@ -1,7 +1,7 @@
 import type { ComponentsPlugin } from '@/types'
 import type { Logger } from '@luis.bs/obsidian-fnc'
 import type { TFile } from 'obsidian'
-import { ComponentError } from '@/utility'
+import { ComponentError } from '../ComponentError'
 import BaseRenderer, { CodeblockContext } from './BaseRenderer'
 import TemplateRenderer from './TemplateRenderer'
 import JavascriptRenderer from './JavascriptRender'

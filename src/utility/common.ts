@@ -1,11 +1,5 @@
-import type { Logger } from 'obsidian-fnc'
-
 export function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null
-}
-
-export function isString(value: unknown): value is string {
-  return typeof value === 'string' && !!value
 }
 
 /**
@@ -41,7 +35,7 @@ export function parseStringList(source: string): string[] {
 /**
  * Obtains a `SHA-1` hash from the data.
  */
-export async function getHash(data: string, logger?: Logger): Promise<string> {
+export async function getHash(data: string): Promise<string> {
   const encoder = new TextEncoder()
   const encodedData = encoder.encode(data)
   const hashBytes = await crypto.subtle.digest('SHA-1', encodedData)
@@ -49,8 +43,6 @@ export async function getHash(data: string, logger?: Logger): Promise<string> {
   const hashString = Array.from(hashArray)
     .map((byte) => byte.toString(16).padStart(2, '0')) // hex
     .join('')
-
-  // logger?.trace('hash', { encodedData, hashBytes, hashArray, hashString })
   return hashString
 }
 

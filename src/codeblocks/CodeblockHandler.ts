@@ -1,203 +1,174 @@
 import type { MarkdownPostProcessorContext } from 'obsidian'
-import type {
-  CodeblockContext,
-  ComponentMatcher,
-  ComponentsPlugin,
-  RendererParams,
-} from '@/types'
-import { parseYaml } from 'obsidian'
-import { Logger } from 'obsidian-fnc'
-import { MapStore, getHash, isRecord, isString } from '@/utility'
+import type { Logger } from '@luis.bs/obsidian-fnc'
+import type { ComponentMatcher, ComponentsPlugin } from '@/types'
+import { MapStore, getHash } from '@/utility'
 import { ComponentError, DisabledComponentError } from './ComponentError'
-import RenderManager from './RenderManager'
+import ParserManager from './parsers'
+import RenderManager, { CodeblockContext } from './renderers'
 
-interface CodeblockContent {
-  /** Syntax of the **Codeblock**. */
-  syntax: CodeblockContext['syntax']
-  /** Hash result of the **Codeblock** content. */
-  hash: string
-  /** **Codeblock** content parsed. */
-  data: unknown
+interface RenderParams {
+    /** **Codeblock Context** shared to the **Component**. */
+    context: CodeblockContext
+    /** **ParentElement** to render the **Component** in. */
+    element: HTMLElement
+    /** **Codeblock** content parsed. */
+    data: unknown
 }
 
 export class CodeblockHandler {
-  #plugin: ComponentsPlugin
-  #relay: RenderManager
+    #log: Logger
+    #plugin: ComponentsPlugin
+    #parser: ParserManager
+    #renderer: RenderManager
 
-  #log = new Logger('CodeblockHandler')
-  #rendered = new MapStore<RendererParams>()
-  #registered: string[] = []
+    #rendered = new MapStore<RenderParams>()
+    #registered: string[] = []
 
-  constructor(plugin: ComponentsPlugin) {
-    this.#plugin = plugin
-    this.#relay = new RenderManager(plugin)
-  }
-
-  public clear(): void {
-    this.#rendered.clear()
-    // todo check a way to un-register the processors
-  }
-
-  /**
-   * Force all instances of all components to re-render.
-   */
-  public refreshAll(): void {
-    for (const key of this.#rendered.keys()) {
-      this.refresh(key)
+    constructor(plugin: ComponentsPlugin) {
+        this.#log = plugin.log.make(CodeblockHandler.name)
+        this.#plugin = plugin
+        this.#parser = new ParserManager(plugin)
+        this.#renderer = new RenderManager(plugin)
     }
-  }
 
-  /**
-   * Force all the instances of a component to re-render.
-   */
-  public refresh(filePath: string): void {
-    const logger = this.#log.group(`Refreshing Components「${filePath}」`)
-    for (const params of this.#rendered.get(filePath) || []) {
-      logger.debug('Refreshing Context', params.context)
-      this.#relay.render(params, logger)
-      logger.info(`Refreshed Component with Hash「${params.context.hash}」`)
+    public clear(): void {
+        this.#rendered.clear()
+        // todo check a way to un-register the processors
     }
-    logger.flush('Refreshed Components')
-  }
 
-  /**
-   * Register the handler for default codeblocks.
-   */
-  public registerBaseCodeblock(): void {
-    this.#plugin.registerMarkdownCodeBlockProcessor('use', (source, el, ctx) =>
-      this.#handleExecution(ctx, el, source),
-    )
-  }
+    /** Force all instances of all components to re-render. */
+    public refreshAll(): void {
+        const group = this.#log.group()
+        for (const componentPath of this.#rendered.keys()) {
+            group.debug(`Refreshing Components「${componentPath}」`)
+            for (const params of this.#rendered.get(componentPath)) {
+                group.trace('Refreshing Codeblock', params)
+                this.#render(componentPath, params, group)
+            }
+        }
+        group.flush('Refreshed Components')
+    }
 
-  /**
-   * Register the handler for user-defined codeblocks.
-   */
-  public registerCustomCodeblocks(): void {
-    for (const [id, names] of this.#plugin.state.components_enabled.entries()) {
-      for (const name of names) {
-        // avoid re-registering a processor
-        if (this.#registered.includes(name)) continue
-        this.#registered.push(name)
+    #render(
+        componentPath: string,
+        { context, element, data }: RenderParams,
+        log: Logger,
+    ): void {
+        const component = this.#plugin.api.latest(componentPath)
+        void this.#renderer.render(component, context, element, data, log)
+    }
+
+    /** Register the handler for codeblocks. */
+    public registerCodeblocks(): void {
+        // default codeblocks
         this.#plugin.registerMarkdownCodeBlockProcessor(
-          name,
-          (source, el, ctx) => this.#handleExecution(ctx, el, source, id, name),
+            'use',
+            this.#handler.bind(this),
+            -100,
         )
-      }
-    }
-  }
 
-  async #handleExecution(
-    elContext: MarkdownPostProcessorContext,
-    element: HTMLElement,
-    source: string,
-    componentId?: string,
-    name?: string,
-  ): Promise<void> {
-    const id = String(Math.floor(Math.random() * 1e6)).padStart(6, '-')
-    const logger = this.#log.group(`Codeblock Execution ${id}`)
+        // user-defined codeblocks
+        for (const [
+            id,
+            names,
+        ] of this.#plugin.state.components_enabled.entries()) {
+            for (const name of names) {
+                // avoid re-registering a processor
+                if (this.#registered.includes(name)) continue
 
-    try {
-      const { hash, syntax, data } = await this.#parseCodeblock(source)
-      const used_name = name || this.#getComponentName(elContext, element, data)
-      const matcher = this.#getComponentMatcher(componentId, used_name)
-      element.classList.add('component', `${used_name}-component`)
-
-      // prepare parames
-      const notepath = elContext.sourcePath
-      const context: CodeblockContext = { notepath, used_name, syntax, hash }
-      const params: RendererParams = { matcher, context, element, data }
-      logger.debug('Codeblock Context', context)
-
-      // run renderer
-      this.#rendered.push(matcher.path, params)
-      this.#relay.render(params, logger)
-      logger.flush(`[${id}] Rendered Component ${matcher.id}`)
-      //
-    } catch (error) {
-      logger.error(error)
-      logger.flush(`[${id}] Failed rendering Component ${componentId}`)
-
-      const pre = element.createEl('pre')
-      if (error instanceof DisabledComponentError) {
-        pre.classList.add('unknown-component')
-        pre.append(String(error))
-        pre.createEl('br')
-        pre.createEl('br')
-        pre.append(source)
-        return
-      }
-
-      if (error instanceof ComponentError) pre.classList.add(error.code)
-      if (error instanceof Error) pre.append(error.stack || error.message)
-      else pre.append(String(error))
-    }
-  }
-
-  async #parseCodeblock(source: string): Promise<CodeblockContent> {
-    source = source.trim()
-    const hash = await getHash(source, this.#log)
-    const isJson = source.startsWith('{')
-    const separator = new RegExp(this.#plugin.settings.usage_separator, 'ig')
-
-    try {
-      let data = null
-      if (!this.#plugin.settings.enable_separators || !separator.test(source)) {
-        data = isJson ? JSON.parse(source) : parseYaml(source)
-      } else {
-        data = isJson
-          ? source.split(separator).map((fragment) => JSON.parse(fragment))
-          : source.split(separator).map((fragment) => parseYaml(fragment))
-      }
-
-      return { hash, data, syntax: isJson ? 'json' : 'yaml' }
-    } catch (ignored) {
-      return { hash, data: source, syntax: 'unknown' }
-    }
-  }
-
-  /** @throws {ComponentError} when componentName is not found */
-  #getComponentName(
-    ctx: MarkdownPostProcessorContext,
-    el: HTMLElement,
-    data: unknown,
-    prefix = '```use',
-  ): string {
-    // try to identify the name from codeblock header
-    if (this.#plugin.settings.usage_method !== 'PARAM') {
-      const info = ctx.getSectionInfo(el)
-      if (info) {
-        const header = info.text.split('\n').at(info.lineStart) ?? ''
-        return header.replace(prefix, '').trim()
-      }
+                this.#registered.push(name)
+                this.#plugin.registerMarkdownCodeBlockProcessor(
+                    name,
+                    (source, element, context) => {
+                        void this.#handler(source, element, context, id, name)
+                    },
+                    -100,
+                )
+            }
+        }
     }
 
-    // try to identify the name from the data
-    if (this.#plugin.settings.usage_method !== 'INLINE' && isRecord(data)) {
-      for (const paramName of this.#plugin.state.name_params) {
-        if (isString(data[paramName])) return data[paramName] as string
-      }
+    async #handler(
+        source: string,
+        element: HTMLElement,
+        elContext: MarkdownPostProcessorContext,
+        componentId?: string,
+        name?: string,
+    ): Promise<void> {
+        const group = this.#log.group()
+
+        try {
+            group.debug(`Parsing Codeblock Name ${name ?? 'use'}`)
+            const notepath = elContext.sourcePath
+            const used_name = name ?? this.#getComponentName(elContext, element)
+
+            group.debug(`Parsing Codeblock Content ${used_name}`)
+            const { syntax, data } = this.#parser.parse(source, notepath, group)
+            const matcher = this.#getComponentMatcher(componentId, used_name)
+            const hash = await getHash(source)
+
+            group.debug(`Serializing Codeblock ${used_name}`)
+            const context = { notepath, used_name, syntax, hash }
+            const params = { context, element, data }
+            group.trace('Serialized Codeblock', params)
+
+            group.debug(`Rendering Codeblock ${used_name}`)
+            element.classList.add('component', `${used_name}-component`)
+            this.#rendered.push(matcher.path, params)
+            this.#render(matcher.path, params, group)
+
+            group.flush(`Rendered Component ${used_name}`)
+        } catch (err) {
+            group.error(err)
+            group.flush(`Failed Rendering Component on ${elContext.sourcePath}`)
+
+            const pre = element.createEl('pre')
+            pre.classList.add('component-error')
+
+            if (err instanceof DisabledComponentError) err.cause = source
+            if (err instanceof Error) pre.append(err.stack ?? err.message)
+            else pre.append(JSON.stringify(err))
+        }
     }
 
-    throw new ComponentError('missing-component-name')
-  }
+    /** @throws {ComponentError} when componentName is not found */
+    #getComponentName(
+        context: MarkdownPostProcessorContext,
+        element: HTMLElement,
+    ): string {
+        // try to identify the name from codeblock header
+        const info = context.getSectionInfo(element)
+        if (info) {
+            const header = info.text.split('\n').at(info.lineStart) ?? ''
+            const used_name = header.replace('```use', '').trim()
+            if (used_name) return used_name
+        }
 
-  /** @throws {DisabledComponentError} when component is not found or is not active. */
-  #getComponentMatcher(
-    componentId?: string,
-    used_name?: string,
-  ): ComponentMatcher {
-    if (componentId) {
-      for (const matcher of this.#plugin.state.components_matchers) {
-        if (matcher.id === componentId) return matcher
-      }
+        throw new ComponentError(
+            `component name could not be found on ${context.sourcePath}`,
+            { cause: info, code: 'missing-component-name' },
+        )
     }
 
-    if (used_name) {
-      for (const matcher of this.#plugin.state.components_matchers) {
-        if (matcher.test(used_name)) return matcher
-      }
-    }
+    /** @throws {ComponentError} when component is not found or is not active. */
+    #getComponentMatcher(
+        componentId?: string,
+        used_name?: string,
+    ): ComponentMatcher {
+        if (componentId) {
+            for (const matcher of this.#plugin.state.components_matchers) {
+                if (matcher.id === componentId) return matcher
+            }
+        }
 
-    throw new DisabledComponentError(used_name)
-  }
+        if (used_name) {
+            for (const matcher of this.#plugin.state.components_matchers) {
+                if (matcher.test(used_name)) return matcher
+            }
+        }
+
+        throw new DisabledComponentError(
+            `component '${used_name}' was disabled recently`,
+        )
+    }
 }

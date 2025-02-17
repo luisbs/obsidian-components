@@ -6,7 +6,7 @@ export interface CodeblockContext {
     /** Vault-path of the note containing the **Codeblock**. */
     notepath: string
     /** Component name used on the **Codeblock**. */
-    usedname: string
+    used_name: string
     /** Syntax of the **Codeblock**. */
     syntax: string
     /** Hash result of the **Codeblock** content. */
