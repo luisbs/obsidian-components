@@ -52,7 +52,7 @@ export default class JavascriptRenderer extends BaseRenderer {
         if (typeof module === 'function') return module as T
         if (!isRecord(module)) {
             throw new ComponentError(
-                `component ${component.name} should export a function or a 'render' method`,
+                `component(${component.name}) should export a function or a 'render' method`,
                 { code: 'missing-component-renderer' },
             )
         }
@@ -63,7 +63,7 @@ export default class JavascriptRenderer extends BaseRenderer {
         if (typeof module.render === 'function') return module.render as T
 
         throw new ComponentError(
-            `component ${component.name} should export a function or a 'render' method`,
+            `component(${component.name}) should export a function or a 'render' method`,
             { code: 'missing-component-renderer' },
         )
     }
@@ -86,7 +86,7 @@ export default class JavascriptRenderer extends BaseRenderer {
             return require(resolved)
         } catch (cause) {
             throw new ComponentError(
-                `component '${file.name}' could not be imported/required`,
+                `component(${file.name}) could not be imported/required`,
                 { cause, code: 'invalid-component-syntax' },
             )
         }

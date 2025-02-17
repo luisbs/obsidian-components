@@ -1,17 +1,9 @@
 // Idea taken from obsidian-dataview
-import type { App, TFile } from 'obsidian'
+import type { App } from 'obsidian'
 
 /** Public API for third-party integration. */
-export interface ComponentsPluginAPI {
-    /** Tries to refresh the components rendered instances. */
-    refresh(filepath: string): void
-    /** Maps a file to its more recent version. */
-    latest(filePath: string): TFile
-    /** Tries to import/request the latest version of a file. */
-    resolve(filePath: string): Promise<unknown>
-    /** Tries to import/request a file. */
-    source(file: TFile): Promise<unknown>
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface ComponentsPluginAPI {}
 
 ///////////////////////
 // Utility Functions //

@@ -38,7 +38,7 @@ export default class RenderManager {
         }
 
         throw new ComponentError(
-            `component ${component.name} is not supported`,
+            `component(${component.name}) is not supported`,
             { code: 'unsupported-component' },
         )
     }

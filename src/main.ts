@@ -9,7 +9,7 @@ import {
 import { SettingsTab } from './settings/SettingsTab'
 import { FilesystemAdapter, VersionController } from './filesystem'
 import { CodeblockHandler } from './codeblocks'
-import { ComponentAPI } from './ComponentsAPI'
+import { ComponentsAPI } from './ComponentsAPI'
 
 export const DEFAULT_SETTINGS: PluginSettings = {
     enable_codeblocks: false,
@@ -31,7 +31,7 @@ export default class ComponentsPlugin extends Plugin {
     public settings = {} as PluginSettings
     public state = {} as PluginState
 
-    public api: ComponentAPI
+    public api: ComponentsAPI
     public fs: FilesystemAdapter
     public parser: CodeblockHandler
     public versions: VersionController
@@ -44,7 +44,7 @@ export default class ComponentsPlugin extends Plugin {
         this.log.setLevel(LogLevel.DEBUG)
         this.log.setFormat('[hh:mm:ss.ms] level:')
 
-        this.api = new ComponentAPI(this)
+        this.api = new ComponentsAPI(this)
         this.fs = new FilesystemAdapter(this)
         this.parser = new CodeblockHandler(this)
         this.versions = new VersionController(this)

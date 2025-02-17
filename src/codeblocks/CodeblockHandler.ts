@@ -40,7 +40,7 @@ export class CodeblockHandler {
     public refreshAll(): void {
         const group = this.#log.group()
         for (const componentPath of this.#rendered.keys()) {
-            group.debug(`Refreshing Components「${componentPath}」`)
+            group.debug(`Refreshing Components(${componentPath})`)
             for (const params of this.#rendered.get(componentPath)) {
                 group.trace('Refreshing Codeblock', params)
                 this.#render(componentPath, params, group)
@@ -54,8 +54,16 @@ export class CodeblockHandler {
         { context, element, data }: RenderParams,
         log: Logger,
     ): void {
-        const component = this.#plugin.api.latest(componentPath)
-        void this.#renderer.render(component, context, element, data, log)
+        const latestPath = this.#plugin.versions.resolveLatest(componentPath)
+        log.debug(`LatestPath '${latestPath}'`)
+
+        const file = this.#plugin.app.vault.getFileByPath(latestPath)
+        if (file) void this.#renderer.render(file, context, element, data, log)
+
+        throw new ComponentError(
+            `component(${latestPath}) could not be located, try reloading Obsidian`,
+            { code: 'missing-component-file' },
+        )
     }
 
     /** Register the handler for codeblocks. */
@@ -131,7 +139,6 @@ export class CodeblockHandler {
         }
     }
 
-    /** @throws {ComponentError} when componentName is not found */
     #getComponentName(
         context: MarkdownPostProcessorContext,
         element: HTMLElement,
@@ -145,12 +152,11 @@ export class CodeblockHandler {
         }
 
         throw new ComponentError(
-            `component name could not be found on ${context.sourcePath}`,
+            `component name could not be found on '${context.sourcePath}'`,
             { cause: info, code: 'missing-component-name' },
         )
     }
 
-    /** @throws {ComponentError} when component is not found or is not active. */
     #getComponentMatcher(
         componentId?: string,
         used_name?: string,
@@ -168,7 +174,7 @@ export class CodeblockHandler {
         }
 
         throw new DisabledComponentError(
-            `component '${used_name}' was disabled recently`,
+            `component(${used_name}) was disabled recently`,
         )
     }
 }
