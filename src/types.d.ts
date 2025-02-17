@@ -1,8 +1,5 @@
-import { TFile } from 'obsidian'
-import { Logger } from 'obsidian-fnc'
 import { MapStore } from './utility'
 import ComponentsPlugin from './main'
-import { RendererFormat } from './codeblocks/renderers/BaseRenderer'
 
 export { ComponentsPlugin }
 
@@ -25,19 +22,12 @@ export interface ComponentMatcher {
     /** Checks if the `customName` matches the user-defined names. */
     test(customName: string): boolean
     /** Obtains the related format tags. */
-    getTags(): RendererFormat[]
+    getTags(): string[]
 }
 
 export interface FormatMatcher {
-    /**
-     * Defines the behavior of the **Component**:
-     * - `md` the **Component** returns **Markdown**
-     * - `html` the **Component** returns **HTML**
-     * - `code` the **Component** handles the **DOM** (**javascript**)
-     * - `esm` the **Component** uses **ESModules** syntax
-     * - `cjs` the **Component** uses **CommonJS** syntax
-     */
-    tags: RendererFormat[]
+    /** Defines the behavior of the **Component**. */
+    tags: string[]
     /** Checks if the `componentPath` matches the expected extension. */
     test(componentPath: string): boolean
 }

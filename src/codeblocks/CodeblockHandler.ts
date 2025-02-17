@@ -38,13 +38,19 @@ export class CodeblockHandler {
 
     /** Force all instances of all components to re-render. */
     public refreshAll(): void {
-        const group = this.#log.group()
+        this.#log.info('Refreshing All Components')
         for (const componentPath of this.#rendered.keys()) {
-            group.debug(`Refreshing Components(${componentPath})`)
-            for (const params of this.#rendered.get(componentPath)) {
-                group.trace('Refreshing Codeblock', params)
-                this.#render(componentPath, params, group)
-            }
+            this.refresh(componentPath)
+        }
+        this.#log.info('Refreshed Components')
+    }
+
+    public refresh(componentPath: string): void {
+        const group = this.#log.group()
+        group.debug(`Refreshing Components(${componentPath})`)
+        for (const params of this.#rendered.get(componentPath)) {
+            group.trace('Refreshing Codeblock', params)
+            this.#render(componentPath, params, group)
         }
         group.flush('Refreshed Components')
     }

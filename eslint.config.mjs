@@ -34,6 +34,10 @@ export default ts.config(
                 'error',
                 { allowBoolean: true, allowNumber: true },
             ],
+            '@typescript-eslint/no-unused-vars': [
+                'error',
+                { args: 'all', argsIgnorePattern: '^_' },
+            ],
         },
     },
     {
