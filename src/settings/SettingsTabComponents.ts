@@ -1,6 +1,5 @@
 import type { ComponentConfig, ComponentsPlugin } from '@/types'
 import { SearchComponent, Setting, TextAreaComponent } from 'obsidian'
-import { loadComponentsOnVault } from '@/utility'
 import * as Tools from './SettingsTabTools'
 
 export class SettingsTabComponents {
@@ -44,7 +43,7 @@ export class SettingsTabComponents {
     }
 
     #searchComponentsOnVault(): void {
-        const components = loadComponentsOnVault(
+        const components = Tools.loadComponentsOnVault(
             this.#plugin.app.vault,
             this.#plugin.settings.components_folder,
             this.#plugin.settings.components_config,

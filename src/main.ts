@@ -1,12 +1,16 @@
 import type { PluginSettings, PluginState } from './types'
 import { App, Plugin, PluginManifest } from 'obsidian'
 import { Logger, LogLevel } from '@luis.bs/obsidian-fnc'
-import { prepareComponentMatchers, prepareComponentNames } from '@/utility'
+import { prepareState } from '@/utility'
 import { SettingsTab } from './settings/SettingsTab'
-import ComponentsAPI from './ComponentsAPI'
 import CodeblockHandler from './codeblocks'
+import ComponentsAPI from './ComponentsAPI'
 
-export const DEFAULT_SETTINGS: PluginSettings = {
+const DEFAULT_SETTINGS: PluginSettings = {
+    // * 'WARN' level to force the user to choose a lower level when is required
+    // * this decition, prevents the console from been overpopulated by default
+    plugin_level: 'WARN',
+    //
     enable_codeblocks: false,
     enable_separators: false,
     usage_separator: '---',
@@ -80,11 +84,8 @@ export default class ComponentsPlugin extends Plugin {
     #prepareState(log: Logger): void {
         log.info('Preparing state')
 
-        const names = prepareComponentNames(this.settings)
-        this.state = {
-            components_enabled: names,
-            components_matchers: prepareComponentMatchers(this.settings, names),
-        }
+        this.log.setLevel(LogLevel[this.settings.plugin_level])
+        this.state = prepareState(this)
         this.#handler.registerCodeblocks()
     }
 

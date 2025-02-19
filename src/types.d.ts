@@ -1,4 +1,5 @@
 import { MapStore } from './utility'
+import { PluginLevel } from './settings/values'
 import ComponentsPlugin from './main'
 
 export { ComponentsPlugin }
@@ -26,6 +27,9 @@ export interface ComponentMatcher {
 //#region Plugin Settings
 
 export interface PluginSettings {
+    /** Defines the minimun level to log while running. */
+    plugin_level: PluginLevel
+
     /** Stores the user desition to allow custom codeblocks. */
     enable_codeblocks: boolean
     /** Stores the user desition to allow separators on codeblocks. */

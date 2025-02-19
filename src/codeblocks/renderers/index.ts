@@ -7,7 +7,7 @@ import TemplateRenderer from './TemplateRenderer'
 import JavascriptRenderer from './JavascriptRender'
 import { FilesystemAdapter } from '@/utility'
 
-export { CodeblockContext }
+export type { CodeblockContext }
 
 export default class RenderManager {
     #renderers: BaseRenderer[]

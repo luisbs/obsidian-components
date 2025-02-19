@@ -1,27 +1,27 @@
-import type { ComponentConfig, ComponentMatcher, PluginSettings } from '@/types'
-import type { Vault } from 'obsidian'
-import { getFilesOnFolder } from '@luis.bs/obsidian-fnc'
-import { parseStringList } from './common'
+import type {
+    ComponentMatcher,
+    ComponentsPlugin,
+    PluginSettings,
+    PluginState,
+} from '@/types'
 import { MapStore } from './MapStore'
 
-export function loadComponentsOnVault(
-    vault: Vault,
-    componentsFolder: string,
-    previousComponents: ComponentConfig[],
-): ComponentConfig[] {
-    const files = getFilesOnFolder(vault, componentsFolder)
-    files.sort((a, b) => a.path.localeCompare(b.path, 'en'))
+export function prepareState(plugin: ComponentsPlugin): PluginState {
+    const names = prepareComponentNames(plugin.settings)
+    return {
+        components_enabled: names,
+        components_matchers: prepareComponentMatchers(plugin.settings, names),
+    }
+}
 
-    // keep previous configuration
-    return files.map((file) => {
-        const prev = previousComponents.find((c) => c.id === file.name)
-        return {
-            id: file.name,
-            path: file.path,
-            names: prev?.names ?? file.basename.replaceAll('.', '_'),
-            enabled: prev?.enabled ?? false,
-        } as ComponentConfig
-    })
+export function parseStringList(source: string): string[] {
+    return source.split(/[|;,\s]+/gi).reduce<string[]>((arr, str) => {
+        // keep only basic values [A-Za-z0-9_]
+        str = str.replace(/\W*/gi, '')
+        // add values only onces
+        if (str.length > 0 && !arr.includes(str)) arr.push(str)
+        return arr
+    }, [])
 }
 
 export function prepareComponentNames(
