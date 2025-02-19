@@ -1,11 +1,7 @@
 import type { PluginSettings, PluginState } from './types'
 import { App, Plugin, PluginManifest } from 'obsidian'
 import { Logger, LogLevel } from '@luis.bs/obsidian-fnc'
-import {
-    parseStringList,
-    prepareComponentMatchers,
-    prepareComponentNames,
-} from '@/utility'
+import { prepareComponentMatchers, prepareComponentNames } from '@/utility'
 import { SettingsTab } from './settings/SettingsTab'
 import ComponentsAPI from './ComponentsAPI'
 import CodeblockHandler from './codeblocks'
@@ -13,13 +9,9 @@ import CodeblockHandler from './codeblocks'
 export const DEFAULT_SETTINGS: PluginSettings = {
     enable_codeblocks: false,
     enable_separators: false,
-
-    cache_folder: '__temp/',
-
-    usage_method: 'INLINE',
-    usage_naming: '__name',
     usage_separator: '---',
 
+    cache_folder: '__temp/',
     components_folder: '',
     components_config: [],
 }
@@ -90,7 +82,6 @@ export default class ComponentsPlugin extends Plugin {
 
         const names = prepareComponentNames(this.settings)
         this.state = {
-            name_params: parseStringList(this.settings.usage_naming),
             components_enabled: names,
             components_matchers: prepareComponentMatchers(this.settings, names),
         }

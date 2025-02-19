@@ -6,8 +6,6 @@ export { ComponentsPlugin }
 //#region Plugin State
 
 export interface PluginState {
-    /** Stores the currently parameters that can be used to define a **Component** name. */
-    name_params: string[]
     /** Stores the currently enabled **Component** name references. */
     components_enabled: MapStore<string>
     /** Stores the currently active **Component**. */
@@ -41,23 +39,11 @@ export interface PluginSettings {
     enable_codeblocks: boolean
     /** Stores the user desition to allow separators on codeblocks. */
     enable_separators: boolean
-
-    /** Stores the route where the components versions should be cached. */
-    cache_folder: string
-
-    /**
-     * The **Component** naming method.
-     * - `'INLINE'` specify the name as an inline string (e.g. `use book`)
-     * - `'PARAM'` specify the name as a param (e.g. `__name: 'book'`)
-     * - `'BOTH'` use both methods
-     * @deprecated
-     */
-    usage_method: 'INLINE' | 'PARAM' | 'BOTH'
-    /** Which params can be used to retrive a **Component** name. */
-    usage_naming: string
     /** Separator to use inside codeblocks. */
     usage_separator: string
 
+    /** Stores the route where the components versions should be cached. */
+    cache_folder: string
     /** Vault-path where the components are located. */
     components_folder: string
     /** The Components found on the vault. */

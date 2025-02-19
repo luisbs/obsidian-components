@@ -67,7 +67,7 @@ export class SettingsTab extends PluginSettingTab {
                     // allows only enable
                     if (enabled) return
                     input.setDisabled(true)
-                    void this.#plugin.enableDesignMode()
+                    this.#plugin.enableDesignMode()
                 })
             })
     }
@@ -92,56 +92,7 @@ export class SettingsTab extends PluginSettingTab {
             })
 
         //
-        const isDisabled = (value: string): boolean => value === 'INLINE'
-        let namingMethodInput: TextAreaComponent | null = null
-
-        const methodDesc = createFragment((div) => {
-            div.createEl('ul', undefined, (ul) => {
-                ul.createEl('li').append(
-                    'Inline names: like',
-                    createEl('code', { text: "'```use book```'" }),
-                )
-                ul.createEl('li').append(
-                    'Param names: like',
-                    createEl('code', { text: `'__name: "book"'` }),
-                    '(inside the codeblock)',
-                )
-            })
-        })
-
-        this.#newSetting()
-            .setName('Base Codeblock usage method')
-            .setDesc(methodDesc)
-            .addDropdown((input) => {
-                input.addOptions({
-                    INLINE: 'Use inline names',
-                    PARAM: 'Use param names',
-                    BOTH: 'Use both methods',
-                })
-                input.setValue(this.#plugin.settings.usage_method)
-                input.onChange((value) => {
-                    void this.#update('usage_method', value)
-                    namingMethodInput?.setDisabled(isDisabled(value))
-                })
-            })
-
-        this.#newSetting()
-            .setName('Base Codeblock name parameters')
-            .setDesc('Defines the parameters used to identify a component.')
-            .addTextArea((input) => {
-                namingMethodInput = input
-                input.setDisabled(
-                    isDisabled(this.#plugin.settings.usage_method),
-                )
-                input.setValue(this.#plugin.settings.usage_naming)
-                input.onChange(this.#update.bind(this, 'usage_naming'))
-            })
-
-        //
-        //
-        //
         let usageSeparatorInput: TextComponent | null = null
-
         const separatorDesc = createFragment((div) => {
             div.append(
                 'Allows the usage of separators inside codeblocks.',
