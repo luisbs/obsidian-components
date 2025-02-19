@@ -135,22 +135,24 @@ export default class VersionsManager {
         const cacheName = `${file.basename}.${cacheHash}.${file.extension}`
         const cachePath = this.#fs.getCachePath(cacheName)
 
-        // first time cached, should replace imports
+        // first time cached
         if (await this.#fs.missing(cachePath)) {
-            log.debug(`Caching <${file.name}>`)
+            log.debug(`Caching <${file.name}> to <${cacheName}>`)
             await this.#fs.copy(file, cachePath, (content) => {
                 return this.#replaceImports(file, content, log)
             })
             return cachePath
         }
 
-        // n+1 time cached, imports are already replaced
+        // n+1 time cached
         const timestamp = Date.now().toString()
         const cloneName = `${file.basename}.${cacheHash}-${timestamp}.${file.extension}`
         const clonePath = this.#fs.getCachePath(cloneName)
 
-        log.debug(`Cloning <${cacheName}>`)
-        await this.#fs.copy(cachePath, clonePath)
+        log.debug(`Cloning <${cacheName}> to <${cloneName}>`)
+        await this.#fs.copy(file, clonePath, (content) => {
+            return this.#replaceImports(file, content, log)
+        })
         return clonePath
     }
 
@@ -217,7 +219,6 @@ export default class VersionsManager {
             this.#tracked.push(importedPath, filepath)
             imports.push(importedPath)
         }
-        log.debug(`Indexed imports on <${filepath}>`)
 
         // index imports on imported files
         for (const importedPath of imports) {

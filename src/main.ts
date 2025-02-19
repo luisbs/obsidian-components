@@ -64,6 +64,7 @@ export default class ComponentsPlugin extends Plugin {
 
         // ensure a fallback value is present
         this.settings = Object.assign({}, DEFAULT_SETTINGS, primitives)
+
         group.debug('Loaded: ', this.settings)
 
         this.#prepareState(group)

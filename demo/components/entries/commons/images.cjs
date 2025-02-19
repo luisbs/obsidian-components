@@ -30,7 +30,7 @@ async function appendGalleryHeader(row, cardEl, HEADER_ATTRS = ['label', 'link']
     if (Obj.includes(row, HEADER_ATTRS)) {
         const headerEl = cardEl.div('gallery-header');
         for (const [key, value] of Obj.flattenEntries(row, HEADER_ATTRS)) {
-            if (key === 'label') headerEl.el('h2', value);
+            if (key === 'label') headerEl.el('h2', `${value}`);
             else if (key === 'link') {
                 /** @type {URIMetadata} */
                 const value = value;
