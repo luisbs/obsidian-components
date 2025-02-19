@@ -1,12 +1,6 @@
-import type {
-    ComponentConfig,
-    ComponentMatcher,
-    FormatMatcher,
-    PluginSettings,
-} from '@/types'
-import type { TFile, Vault } from 'obsidian'
+import type { ComponentConfig, ComponentMatcher, PluginSettings } from '@/types'
+import type { Vault } from 'obsidian'
 import { getFilesOnFolder } from '@luis.bs/obsidian-fnc'
-import { compareFormats, getFormatByPath } from './formats'
 import { parseStringList } from './common'
 import { MapStore } from './MapStore'
 
@@ -15,23 +9,11 @@ export function loadComponentsOnVault(
     componentsFolder: string,
     previousComponents: ComponentConfig[],
 ): ComponentConfig[] {
-    // filter valid component files
-    const files = [] as Array<{ file: TFile; format: FormatMatcher }>
-    for (const file of getFilesOnFolder(vault, componentsFolder)) {
-        const format = getFormatByPath(file.name)
-        if (format) files.push({ file, format })
-    }
-
-    // sort components by format and path
-    files.sort((a, b) => {
-        const comparison = compareFormats(a.format.tags, b.format.tags)
-        if (comparison !== 0) return comparison
-        // on same format, sort by path
-        return a.file.path.localeCompare(b.file.path, 'en')
-    })
+    const files = getFilesOnFolder(vault, componentsFolder)
+    files.sort((a, b) => a.path.localeCompare(b.path, 'en'))
 
     // keep previous configuration
-    return files.map(({ file }) => {
+    return files.map((file) => {
         const prev = previousComponents.find((c) => c.id === file.name)
         return {
             id: file.name,
@@ -63,19 +45,14 @@ export function prepareComponentMatchers(
     settings: PluginSettings,
     componentsEnabled: MapStore<string>,
 ): ComponentMatcher[] {
-    return settings.components_config.reduce<ComponentMatcher[]>(
-        (arr, component) => {
-            const format = getFormatByPath(component.path)
-            if (format && component.enabled) {
-                arr.push({
-                    id: component.id,
-                    path: component.path,
-                    test: [].contains.bind(componentsEnabled.get(component.id)),
-                    getTags: () => format.tags,
-                })
-            }
-            return arr
-        },
-        [],
-    )
+    const result: ComponentMatcher[] = []
+    for (const component of settings.components_config) {
+        if (!component.enabled) continue
+        result.push({
+            id: component.id,
+            path: component.path,
+            test: [].contains.bind(componentsEnabled.get(component.id)),
+        })
+    }
+    return result
 }

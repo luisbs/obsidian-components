@@ -19,15 +19,6 @@ export interface ComponentMatcher {
     path: string
     /** Checks if the `customName` matches the user-defined names. */
     test(customName: string): boolean
-    /** Obtains the related format tags. */
-    getTags(): string[]
-}
-
-export interface FormatMatcher {
-    /** Defines the behavior of the **Component**. */
-    tags: string[]
-    /** Checks if the `componentPath` matches the expected extension. */
-    test(componentPath: string): boolean
 }
 
 //#endregion
