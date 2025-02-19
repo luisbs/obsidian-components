@@ -3,6 +3,7 @@ import type { TFile } from 'obsidian'
 import { isRecord } from '@/utility'
 import { ComponentError } from '../ComponentError'
 import BaseRenderer, { CodeblockContext } from './BaseRenderer'
+import FilesystemAdapter from '../FilesystemAdapter'
 
 type TemplateRenderer = (
     data: unknown,
@@ -80,7 +81,7 @@ export default class JavascriptRenderer extends BaseRenderer {
             }
 
             // CommonJS
-            const resolved = this.plugin.fs.getRealPath(file.path)
+            const resolved = FilesystemAdapter.getRealPath(this.plugin, file)
             log.debug(`require('${resolved}')`)
             // eslint-disable-next-line @typescript-eslint/no-require-imports
             return require(resolved)

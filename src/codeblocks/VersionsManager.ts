@@ -66,10 +66,7 @@ export default class VersionsManager {
      */
     public resolveLatest(filepath: string): string {
         if (!this.#plugin.isDesignModeEnabled) return filepath
-
-        // TODO: check if 'getCachePath' can be reduced storing the cachePath since the begining
-        const versionName = this.#versions.getFirst(filepath)
-        return versionName ? this.#fs.getCachePath(versionName) : filepath
+        return this.#versions.getFirst(filepath) ?? filepath
     }
 
     /**
