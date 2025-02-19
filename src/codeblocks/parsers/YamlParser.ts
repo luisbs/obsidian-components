@@ -5,7 +5,10 @@ export class YamlParser implements CodeblockParser {
     id: CodeblockSyntax = 'yaml'
 
     test(source: string): boolean {
-        return /^\s*\w+:/.test(source)
+        // Arrays, ex: `- value`
+        if (source.startsWith('-')) return true
+        // Objects: ex: `param: value`
+        return /^\w+:/.test(source)
     }
 
     parse(source: string, _notepath: string): Promise<unknown> {

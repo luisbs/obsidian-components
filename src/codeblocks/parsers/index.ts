@@ -56,7 +56,7 @@ export default class ParserManager {
             log.debug(err)
         }
 
-        log.debug(`Failed parsing of <${source}>`)
+        log.debug(`Failed parsing`, source)
         return { syntax: 'unknown', data: source }
     }
 }
