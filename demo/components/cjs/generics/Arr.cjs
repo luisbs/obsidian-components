@@ -8,6 +8,6 @@ const { isNil } = require('./Obj.cjs');
  * @returns {T extends Array ? T : T[]}
  */
 module.exports.wrap = function (value) {
-  if (Array.isArray(value)) return value;
-  return isNil(value) ? [] : [value];
+    if (Array.isArray(value)) return value;
+    return isNil(value) ? [] : [value];
 };

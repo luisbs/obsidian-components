@@ -8,6 +8,6 @@ import { isNil } from './Obj.mjs';
  * @returns {T extends Array ? T : T[]}
  */
 export function wrap(value) {
-  if (Array.isArray(value)) return value;
-  return isNil(value) ? [] : [value];
+    if (Array.isArray(value)) return value;
+    return isNil(value) ? [] : [value];
 }

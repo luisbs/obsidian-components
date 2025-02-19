@@ -150,7 +150,7 @@ export default class CodeblockHandler {
             group.flush(`Rendered Component '${used_name}'`)
         } catch (err) {
             group.error(err)
-            group.flush(`Failed Rendering Component on ${elContext.sourcePath}`)
+            group.flush(`Failed Component on '${elContext.sourcePath}'`)
 
             const pre = element.createEl('pre')
             pre.classList.add('component-error')
@@ -202,14 +202,14 @@ export default class CodeblockHandler {
 
     async #renderComponent(
         componentPath: string,
-        { context, element, data }: RenderParams,
+        { context, element: el, data }: RenderParams,
         log: Logger,
     ): Promise<void> {
         const latestPath = this.#versions.resolveLatest(componentPath)
         log.debug(`Rendering with LatestPath '${latestPath}'`)
 
         const file = this.#plugin.app.vault.getFileByPath(latestPath)
-        if (file) await this.#renderer.render(file, context, element, data, log)
+        if (file) return this.#renderer.render(file, context, el, data, log)
 
         throw new ComponentError(
             `component(${latestPath}) could not be located, try reloading Obsidian`,

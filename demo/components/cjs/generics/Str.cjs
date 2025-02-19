@@ -7,8 +7,8 @@ const { isNil } = require('./Obj.cjs');
  * @returns {string[]}
  */
 module.exports.split = function (value) {
-  if (typeof value === 'string') return value.split(/[|;,\s]+/gi);
-  return Array.isArray(value) ? value : [];
+    if (typeof value === 'string') return value.split(/[|;,\s]+/gi);
+    return Array.isArray(value) ? value : [];
 };
 
 /**
@@ -19,6 +19,6 @@ module.exports.split = function (value) {
  * @returns {string}
  */
 module.exports.stringify = function (value) {
-  if (typeof value === 'string') return value;
-  return isNil(value) ? '' : JSON.stringify(value);
+    if (typeof value === 'string') return value;
+    return isNil(value) ? '' : JSON.stringify(value);
 };

@@ -13,17 +13,17 @@ const HtmlRenderer = require('./renders/HtmlRenderer.cjs');
 const CodeRenderer = require('./renders/CodeRenderer.cjs');
 
 module.exports = {
-  ...tags,
-  ...serialization,
+    ...tags,
+    ...serialization,
 
-  URI,
-  SERVICES,
+    URI,
+    SERVICES,
 
-  Arr,
-  Obj,
-  Str,
+    Arr,
+    Obj,
+    Str,
 
-  Renderer,
-  HtmlRenderer,
-  CodeRenderer,
+    Renderer,
+    HtmlRenderer,
+    CodeRenderer,
 };

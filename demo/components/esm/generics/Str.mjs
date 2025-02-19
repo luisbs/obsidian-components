@@ -7,8 +7,8 @@ import { isNil } from './Obj.mjs';
  * @returns {string[]}
  */
 export function split(value) {
-  if (typeof value === 'string') return value.split(/[|;,\s]+/gi);
-  return Array.isArray(value) ? value : [];
+    if (typeof value === 'string') return value.split(/[|;,\s]+/gi);
+    return Array.isArray(value) ? value : [];
 }
 
 /**
@@ -19,6 +19,6 @@ export function split(value) {
  * @returns {string}
  */
 export function stringify(value) {
-  if (typeof value === 'string') return value;
-  return isNil(value) ? '' : JSON.stringify(value);
+    if (typeof value === 'string') return value;
+    return isNil(value) ? '' : JSON.stringify(value);
 }
