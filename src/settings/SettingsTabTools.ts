@@ -40,10 +40,3 @@ export function append<K extends keyof HTMLElementTagNameMap>(
 ): HTMLElementTagNameMap[K] {
     return parent.createEl(tag, undefined, (el) => el.append(content))
 }
-
-export function docsLink(id: string, text: string): HTMLAnchorElement {
-    return createEl('a', {
-        text,
-        href: `https://github.com/luisbs/obsidian-components/blob/main/docs/settings.md#${id}`,
-    })
-}

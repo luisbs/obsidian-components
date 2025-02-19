@@ -82,16 +82,21 @@ export default class CodeblockHandler {
     }
 
     /**
-     * Register the handler for codeblocks.
+     * Register the handler for `use` codeblocks.
      */
-    public registerCodeblocks(): void {
+    public registerBaseCodeblock(): void {
         // default codeblocks
         this.#plugin.registerMarkdownCodeBlockProcessor(
             'use',
             this.#handler.bind(this),
             -100,
         )
+    }
 
+    /**
+     * Register the handler for custom codeblocks.
+     */
+    public registerCustomCodeblocks(): void {
         // user-defined codeblocks
         for (const [
             id,

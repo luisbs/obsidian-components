@@ -4,6 +4,13 @@ export function isRecord(value: unknown): value is Record<string, unknown> {
     return typeof value === 'object' && value !== null
 }
 
+export function prepareHash(source: string): string {
+    return source
+        .replaceAll(' ', '-')
+        .replaceAll(/[^\w-]/gi, '')
+        .toLowerCase()
+}
+
 /**
  * Obtains a portion of a `SHA-256` hash from the data.
  */

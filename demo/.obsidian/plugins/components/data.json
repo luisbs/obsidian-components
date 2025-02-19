@@ -1,34 +1,15 @@
 {
+  "plugin_level": "DEBUG",
   "enable_codeblocks": true,
   "enable_separators": true,
-  "cache_folder": "__temp",
-  "usage_method": "INLINE",
-  "usage_naming": "__name",
   "usage_separator": "---",
+  "cache_folder": "__temp",
   "components_folder": "components/entries",
   "components_config": [
-    {
-      "id": "video.html",
-      "path": "components/entries/video.html",
-      "names": "video",
-      "enabled": true
-    },
     {
       "id": "book.md",
       "path": "components/entries/book.md",
       "names": "book",
-      "enabled": true
-    },
-    {
-      "id": "soundtrack.html.cjs",
-      "path": "components/entries/soundtrack.html.cjs",
-      "names": "soundtrack_html\nsoundtrack",
-      "enabled": true
-    },
-    {
-      "id": "side_gallery.cjs",
-      "path": "components/entries/side_gallery.cjs",
-      "names": "side_gallery",
       "enabled": true
     },
     {
@@ -42,6 +23,26 @@
       "path": "components/entries/grid_gallery.mjs",
       "names": "grid_gallery",
       "enabled": true
+    },
+    {
+      "id": "side_gallery.cjs",
+      "path": "components/entries/side_gallery.cjs",
+      "names": "side_gallery",
+      "enabled": true
+    },
+    {
+      "id": "soundtrack.html.cjs",
+      "path": "components/entries/soundtrack.html.cjs",
+      "names": "soundtrack_html\nsoundtrack",
+      "enabled": true
+    },
+    {
+      "id": "video.html",
+      "path": "components/entries/video.html",
+      "names": "video",
+      "enabled": true
     }
-  ]
+  ],
+  "usage_method": "INLINE",
+  "usage_naming": "__name"
 }

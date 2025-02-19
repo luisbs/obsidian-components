@@ -48,6 +48,7 @@ export default class ComponentsPlugin extends Plugin {
     async onload(): Promise<void> {
         await this.loadSettings()
         this.addSettingTab(new SettingsTab(this))
+        this.#handler.registerBaseCodeblock()
     }
 
     onunload(): void {
@@ -86,7 +87,7 @@ export default class ComponentsPlugin extends Plugin {
 
         this.log.setLevel(LogLevel[this.settings.plugin_level])
         this.state = prepareState(this)
-        this.#handler.registerCodeblocks()
+        this.#handler.registerCustomCodeblocks()
     }
 
     // Design Mode

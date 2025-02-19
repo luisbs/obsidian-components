@@ -1,9 +1,20 @@
 import type { ComponentsPlugin, PluginSettings } from '@/types'
 import { PluginSettingTab, Setting, TextComponent } from 'obsidian'
 import { FolderSuggester } from '@luis.bs/obsidian-fnc'
-import { FilesystemAdapter } from '@/utility'
+import { FilesystemAdapter, prepareHash } from '@/utility'
 import { SettingsTabComponents } from './SettingsTabComponents'
-import * as Tools from './SettingsTabTools'
+import { LEVEL_LABELS } from './values'
+
+export function docs(name: string, desc: string): DocumentFragment {
+    return createFragment((div) => {
+        div.appendText(desc + '. Check the ')
+        div.createEl('a', {
+            text: 'Docs',
+            href: `https://github.com/luisbs/obsidian-components/blob/main/docs/settings.md#${prepareHash(name)}`,
+        })
+        div.appendText('.')
+    })
+}
 
 export class SettingsTab extends PluginSettingTab {
     #plugin: ComponentsPlugin
@@ -25,109 +36,92 @@ export class SettingsTab extends PluginSettingTab {
         this.containerEl.empty()
         this.containerEl.addClass('components-settings')
 
-        this.#newSetting().setName('Plugin Settings').setHeading()
+        new Setting(this.containerEl).setName('Plugin Settings').setHeading()
         this.#displayGeneralSettings()
 
-        this.#newSetting().setName('Codeblocks Settings').setHeading()
+        new Setting(this.containerEl).setName('Codeblock Settings').setHeading()
         this.#displayCodeblocksSettings()
 
-        this.#newSetting().setName('Components Settings').setHeading()
+        new Setting(this.containerEl).setName('Component Settings').setHeading()
         this.#displayComponentsSettings()
 
         new SettingsTabComponents(this.#plugin, this.containerEl)
     }
 
-    #newSetting() {
-        return this.#newSettingAt(this.containerEl)
-    }
-
-    #newSettingAt(container: HTMLElement) {
-        return new Setting(container)
-    }
-
     #displayGeneralSettings(): void {
-        const modeDesc = createFragment((div) => {
-            div.append(
-                "Enable design mode only if you're editing your components code.",
-                createEl('br'),
-                'It will not disabled until you close the app.',
-                createEl('br'),
-                'For more details see ',
-                Tools.docsLink('design-mode-setting', 'design mode'),
-                '.',
-            )
+        const levelSetting = new Setting(this.containerEl)
+        levelSetting.setName('Plugging LogLevel')
+        levelSetting.setDesc(
+            docs('Plugging LogLevel', 'To check the plugin logs'),
+        )
+        levelSetting.addDropdown((dropdown) => {
+            dropdown.addOptions(LEVEL_LABELS)
+            dropdown.setValue(this.#plugin.settings.plugin_level)
+            dropdown.onChange(this.#update.bind(this, 'plugin_level'))
         })
 
-        this.#newSetting()
-            .setName('Design mode')
-            .setDesc(modeDesc)
-            .addToggle((input) => {
-                const enabled = this.#plugin.isDesignModeEnabled
-                input.setDisabled(enabled)
-                input.setValue(enabled)
-                input.onChange(() => {
-                    // allows only enable
-                    if (enabled) return
-                    input.setDisabled(true)
-                    this.#plugin.enableDesignMode()
-                })
+        const modeSetting = new Setting(this.containerEl)
+        modeSetting.setName('Design mode')
+        modeSetting.setDesc(
+            docs(
+                'Design mode',
+                "Enable design mode only if you're editing your components code. It will not disabled until you close the app",
+            ),
+        )
+        modeSetting.addToggle((input) => {
+            const enabled = this.#plugin.isDesignModeEnabled
+            input.setDisabled(enabled)
+            input.setValue(enabled)
+            input.onChange(() => {
+                // allows only enable
+                if (enabled) return
+                input.setDisabled(true)
+                this.#plugin.enableDesignMode()
             })
+        })
     }
 
     #displayCodeblocksSettings(): void {
-        // Custom codeblocks setting
-        const codeblocksDesc = createFragment()
-        codeblocksDesc.append(
-            'Allows the usage of the components custom names as codeblocks identifiers.',
-            createEl('br'),
-            'For more details see ',
-            Tools.docsLink('custom-codeblocks-setting', 'custom codeblocks'),
-            '.',
+        const codeblockSettings = new Setting(this.containerEl)
+        codeblockSettings.setName('Custom Codeblocks')
+        codeblockSettings.setDesc(
+            docs(
+                'Custom Codeblocks',
+                'Allows the usage of the components custom names as codeblocks identifiers',
+            ),
         )
-
-        this.#newSetting()
-            .setName('Custom Codeblocks')
-            .setDesc(codeblocksDesc)
-            .addToggle((input) => {
-                input.setValue(this.#plugin.settings.enable_codeblocks)
-                input.onChange(this.#update.bind(this, 'enable_codeblocks'))
-            })
+        codeblockSettings.addToggle((input) => {
+            input.setValue(this.#plugin.settings.enable_codeblocks)
+            input.onChange(this.#update.bind(this, 'enable_codeblocks'))
+        })
 
         //
         let usageSeparatorInput: TextComponent | null = null
-        const separatorDesc = createFragment((div) => {
-            div.append(
-                'Allows the usage of separators inside codeblocks.',
-                createEl('br'),
-                'For more details see ',
-                Tools.docsLink(
-                    'codeblocks-separators-setting',
-                    'codeblock separators',
-                ),
-                '.',
-            )
+        const enableSeparatorSettings = new Setting(this.containerEl)
+        enableSeparatorSettings.setName('Enable Codeblocks Separators')
+        enableSeparatorSettings.setDesc(
+            docs(
+                'Enable Codeblocks Separators',
+                'Allows the usage of separators inside codeblocks',
+            ),
+        )
+        enableSeparatorSettings.addToggle((input) => {
+            input.setValue(this.#plugin.settings.enable_separators)
+            input.onChange((value) => {
+                void this.#update('enable_separators', value)
+                usageSeparatorInput?.setDisabled(!value)
+            })
         })
 
-        this.#newSetting()
-            .setName('Enable Codeblocks Separators')
-            .setDesc(separatorDesc)
-            .addToggle((input) => {
-                input.setValue(this.#plugin.settings.enable_separators)
-                input.onChange((value) => {
-                    void this.#update('enable_separators', value)
-                    usageSeparatorInput?.setDisabled(!value)
-                })
-            })
-
-        this.#newSetting()
-            .setName('Codeblocks Separator')
-            .setDesc('Separator to use inside codeblocks.')
-            .addText((input) => {
-                usageSeparatorInput = input
-                input.setDisabled(!this.#plugin.settings.enable_separators)
-                input.setValue(this.#plugin.settings.usage_separator)
-                input.onChange(this.#update.bind(this, 'usage_separator'))
-            })
+        const separatorSetting = new Setting(this.containerEl)
+        separatorSetting.setName('Codeblocks Separator')
+        separatorSetting.setDesc('Separator to use inside codeblocks.')
+        separatorSetting.addText((input) => {
+            usageSeparatorInput = input
+            input.setDisabled(!this.#plugin.settings.enable_separators)
+            input.setValue(this.#plugin.settings.usage_separator)
+            input.onChange(this.#update.bind(this, 'usage_separator'))
+        })
     }
 
     #displayComponentsSettings(): void {
@@ -158,15 +152,15 @@ export class SettingsTab extends PluginSettingTab {
         )
         const sourceLog = sourceDesc.createEl('p', 'invalid-value')
 
-        this.#newSetting()
-            .setName('Components templates folder')
-            .setDesc(sourceDesc)
-            .addText((input) => {
-                new FolderSuggester(this.app, input.inputEl, this.containerEl)
-                input.setPlaceholder('Example: folder1/folder2')
-                input.setValue(this.#plugin.settings.components_folder)
-                attachPathHandler('components_folder', input, sourceLog)
-            })
+        const componentsfolderSetting = new Setting(this.containerEl)
+        componentsfolderSetting.setName('Components templates folder')
+        componentsfolderSetting.setDesc(sourceDesc)
+        componentsfolderSetting.addText((input) => {
+            new FolderSuggester(this.app, input.inputEl, this.containerEl)
+            input.setPlaceholder('Example: folder1/folder2')
+            input.setValue(this.#plugin.settings.components_folder)
+            attachPathHandler('components_folder', input, sourceLog)
+        })
 
         //
         // Cache folder setting
@@ -174,14 +168,14 @@ export class SettingsTab extends PluginSettingTab {
         cacheDesc.append('Folder used to cache pre-processed components.')
         const cacheLog = cacheDesc.createEl('p', 'invalid-value')
 
-        this.#newSetting()
-            .setName('Components cache folder')
-            .setDesc(cacheDesc)
-            .addText((input) => {
-                new FolderSuggester(this.app, input.inputEl, this.containerEl)
-                input.setPlaceholder('Example: folder1/folder2')
-                input.setValue(this.#plugin.settings.cache_folder)
-                attachPathHandler('cache_folder', input, cacheLog)
-            })
+        const cachefolderSetting = new Setting(this.containerEl)
+        cachefolderSetting.setName('Components cache folder')
+        cachefolderSetting.setDesc(cacheDesc)
+        cachefolderSetting.addText((input) => {
+            new FolderSuggester(this.app, input.inputEl, this.containerEl)
+            input.setPlaceholder('Example: folder1/folder2')
+            input.setValue(this.#plugin.settings.cache_folder)
+            attachPathHandler('cache_folder', input, cacheLog)
+        })
     }
 }
