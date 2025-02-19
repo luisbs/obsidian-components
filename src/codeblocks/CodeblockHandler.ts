@@ -5,6 +5,7 @@ import { MapStore, getHash } from '@/utility'
 import { ComponentError, DisabledComponentError } from './ComponentError'
 import ParserManager from './parsers'
 import RenderManager, { CodeblockContext } from './renderers'
+import VersionsManager from './VersionsManager'
 
 interface RenderParams {
     /** **Codeblock Context** shared to the **Component**. */
@@ -15,11 +16,13 @@ interface RenderParams {
     data: unknown
 }
 
-export class CodeblockHandler {
+export default class CodeblockHandler {
     #log: Logger
     #plugin: ComponentsPlugin
+
     #parser: ParserManager
     #renderer: RenderManager
+    #versions: VersionsManager
 
     #rendered = new MapStore<RenderParams>()
     #registered: string[] = []
@@ -29,50 +32,58 @@ export class CodeblockHandler {
         this.#plugin = plugin
         this.#parser = new ParserManager(plugin)
         this.#renderer = new RenderManager(plugin)
+        this.#versions = new VersionsManager(plugin, this.refresh.bind(this))
     }
 
-    public clear(): void {
+    public async clear(log: Logger): Promise<void> {
+        log.info('Clearing in-memory cache')
         this.#rendered.clear()
+        this.#versions.clear()
+
+        // remove all temporal files
+        await this.#versions.resetCache(log)
         // todo check a way to un-register the processors
     }
 
-    /** Force all instances of all components to re-render. */
-    public refreshAll(): void {
-        this.#log.info('Refreshing All Components')
-        for (const componentPath of this.#rendered.keys()) {
-            this.refresh(componentPath)
+    public async prepareDesignMode(): Promise<void> {
+        const group = this.#log.group('Preparing DesignMode')
+
+        try {
+            // clear so when components are re-render they start tracking
+            // and the HotComponentReload works correctly
+            group.info('Clearing cache')
+            await this.#versions.resetCache(group)
+            await this.#versions.indexComponents(group)
+
+            group.info('Refreshing All Components')
+            await this.refresh(Array.from(this.#rendered.keys()), group)
+        } catch (err) {
+            group.warn(err)
         }
-        this.#log.info('Refreshed Components')
+        group.flush('DesignMode Enabled')
     }
 
-    public refresh(componentPath: string): void {
-        const group = this.#log.group()
-        group.debug(`Refreshing Components(${componentPath})`)
-        for (const params of this.#rendered.get(componentPath)) {
-            group.trace('Refreshing Codeblock', params)
-            this.#render(componentPath, params, group)
+    /**
+     * Force all instances of the listed components to re-render.
+     * @note if no components is provided, all components are refreshed.
+     */
+    public async refresh(paths: string[], log: Logger): Promise<void> {
+        const componentsPaths = paths.length ? paths : this.#rendered.keys()
+
+        log.debug('Refreshing Components', paths)
+        for (const componentPath of componentsPaths) {
+            log.debug(`Refreshing Components(${componentPath})`)
+            for (const params of this.#rendered.get(componentPath)) {
+                log.trace('Refreshing Codeblock', params)
+                await this.#renderComponent(componentPath, params, log)
+            }
         }
-        group.flush('Refreshed Components')
+        log.info('Refreshed Components')
     }
 
-    #render(
-        componentPath: string,
-        { context, element, data }: RenderParams,
-        log: Logger,
-    ): void {
-        const latestPath = this.#plugin.versions.resolveLatest(componentPath)
-        log.debug(`LatestPath '${latestPath}'`)
-
-        const file = this.#plugin.app.vault.getFileByPath(latestPath)
-        if (file) void this.#renderer.render(file, context, element, data, log)
-
-        throw new ComponentError(
-            `component(${latestPath}) could not be located, try reloading Obsidian`,
-            { code: 'missing-component-file' },
-        )
-    }
-
-    /** Register the handler for codeblocks. */
+    /**
+     * Register the handler for codeblocks.
+     */
     public registerCodeblocks(): void {
         // default codeblocks
         this.#plugin.registerMarkdownCodeBlockProcessor(
@@ -112,26 +123,26 @@ export class CodeblockHandler {
         const group = this.#log.group()
 
         try {
-            group.debug(`Parsing Codeblock Name ${name ?? 'use'}`)
+            group.debug(`Parsing Codeblock Name '${name ?? 'use'}'`)
             const notepath = elContext.sourcePath
             const used_name = name ?? this.#getComponentName(elContext, element)
 
-            group.debug(`Parsing Codeblock Content ${used_name}`)
+            group.debug(`Parsing Codeblock Content '${used_name}'`)
             const { syntax, data } = this.#parser.parse(source, notepath, group)
             const matcher = this.#getComponentMatcher(componentId, used_name)
-            const hash = await getHash(source)
+            const hash = getHash(source)
 
-            group.debug(`Serializing Codeblock ${used_name}`)
+            group.debug(`Serializing Codeblock '${used_name}'`)
             const context = { notepath, used_name, syntax, hash }
             const params = { context, element, data }
             group.trace('Serialized Codeblock', params)
 
-            group.debug(`Rendering Codeblock ${used_name}`)
+            group.debug(`Rendering Codeblock '${used_name}'`)
             element.classList.add('component', `${used_name}-component`)
             this.#rendered.push(matcher.path, params)
-            this.#render(matcher.path, params, group)
+            await this.#renderComponent(matcher.path, params, group)
 
-            group.flush(`Rendered Component ${used_name}`)
+            group.flush(`Rendered Component '${used_name}'`)
         } catch (err) {
             group.error(err)
             group.flush(`Failed Rendering Component on ${elContext.sourcePath}`)
@@ -181,6 +192,23 @@ export class CodeblockHandler {
 
         throw new DisabledComponentError(
             `component(${used_name}) was disabled recently`,
+        )
+    }
+
+    async #renderComponent(
+        componentPath: string,
+        { context, element, data }: RenderParams,
+        log: Logger,
+    ): Promise<void> {
+        const latestPath = this.#versions.resolveLatest(componentPath)
+        log.debug(`Rendering with LatestPath '${latestPath}'`)
+
+        const file = this.#plugin.app.vault.getFileByPath(latestPath)
+        if (file) await this.#renderer.render(file, context, element, data, log)
+
+        throw new ComponentError(
+            `component(${latestPath}) could not be located, try reloading Obsidian`,
+            { code: 'missing-component-file' },
         )
     }
 }

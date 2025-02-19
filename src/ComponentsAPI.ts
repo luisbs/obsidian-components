@@ -3,7 +3,7 @@ import type { ComponentsPlugin } from '@/types'
 import type { ComponentsPluginAPI } from '@/index'
 import type { Logger } from '@luis.bs/obsidian-fnc'
 
-export class ComponentsAPI implements ComponentsPluginAPI {
+export default class ComponentsAPI implements ComponentsPluginAPI {
     #log: Logger
     #plugin: ComponentsPlugin
 

@@ -5,41 +5,13 @@ import { TAbstractFile, TFile, TFolder, Vault, normalizePath } from 'obsidian'
 
 type ContentEditor = (content: string) => string
 
-export class FilesystemAdapter {
+export default class FilesystemAdapter {
+    #plugin: ComponentsPlugin
     #vault: Vault
 
-    constructor(private plugin: ComponentsPlugin) {
+    constructor(plugin: ComponentsPlugin) {
         this.#vault = plugin.app.vault
-    }
-
-    /**
-     * @note this method can not be used with files inside hidden folders like `.obsidian`
-     */
-    public resolveFile(source: TFile | string): TFile | null {
-        if (typeof source === 'string') return this.#vault.getFileByPath(source)
-        if (source instanceof TFile) return source
-        return null
-    }
-
-    public static resolvePath(source: TAbstractFile | string): string {
-        return typeof source === 'string' ? source : source.path
-    }
-
-    public static join(...paths: string[]): string {
-        return normalizePath(Path.join(...paths))
-    }
-
-    /**
-     * Generates a vault-path to the file,
-     * if no params are passed the route of the
-     * cache folder is returned.
-     */
-    public getCachePath(...paths: string[]): string {
-        return FilesystemAdapter.join(
-            this.plugin.settings.cache_folder,
-            '__components__',
-            ...paths,
-        )
+        this.#plugin = plugin
     }
 
     /**
@@ -63,41 +35,83 @@ export class FilesystemAdapter {
             .replace(/\?\d+$/i, '') // removes the postfix
     }
 
-    async #missing(filepath: string): Promise<boolean> {
-        return !(await this.#vault.adapter.exists(filepath))
+    /**
+     * Generates a vault-path to the file,
+     * @note if no params are passed the route of the cache folder is returned.
+     */
+    public getCachePath(...paths: string[]): string {
+        return this.join(
+            this.#plugin.settings.cache_folder,
+            '__components__',
+            ...paths,
+        )
     }
 
+    /**
+     * Normalize after joining the path.
+     */
+    public join(...paths: string[]): string {
+        return normalizePath(Path.join(...paths))
+    }
+
+    /**
+     * Resolve an **fileOrPath** to a **string**.
+     */
+    public resolvePath(fileOrPath: TAbstractFile | string): string {
+        return String.isString(fileOrPath) ? fileOrPath : fileOrPath.path
+    }
+
+    /**
+     * Resolve an **fileOrPath** to a **TFile** only if possible.
+     * @note this method can not be used with files inside hidden folders like `.obsidian`
+     */
+    public resolveFile(fileOrPath: TFile | string): TFile | null {
+        if (fileOrPath instanceof TFile) return fileOrPath
+        if (!String.isString(fileOrPath)) return null
+        return this.#vault.getFileByPath(fileOrPath)
+    }
+
+    /**
+     * Internal utility method.
+     */
     async #exists(filepath: string): Promise<boolean> {
         return await this.#vault.adapter.exists(filepath)
     }
 
     /**
-     * Checks if a file exists.
+     * Internal utility method.
      */
-    public async missing(fileOrPath: TFile | string): Promise<boolean> {
-        return this.#missing(FilesystemAdapter.resolvePath(fileOrPath))
+    async #missing(filepath: string): Promise<boolean> {
+        return !(await this.#vault.adapter.exists(filepath))
     }
 
     /**
      * Checks if a file exists.
      */
     public async exists(fileOrPath: TFile | string): Promise<boolean> {
-        return this.#exists(FilesystemAdapter.resolvePath(fileOrPath))
+        return this.#exists(this.resolvePath(fileOrPath))
+    }
+
+    /**
+     * Checks if a file exists.
+     */
+    public async missing(fileOrPath: TFile | string): Promise<boolean> {
+        return this.#missing(this.resolvePath(fileOrPath))
     }
 
     /**
      * Removes a file from the filesystem.
      */
     public async remove(fileOrPath: TFile | string): Promise<void> {
-        const filepath = FilesystemAdapter.resolvePath(fileOrPath)
+        const filepath = this.resolvePath(fileOrPath)
         await this.#vault.adapter.remove(filepath)
     }
 
     /**
-     * Recovers the content of a file.
+     * Retrieves the content of a file.
      */
     public async read(fileOrPath: TFile | string): Promise<string> {
-        const filepath = FilesystemAdapter.resolvePath(fileOrPath)
+        const filepath = this.resolvePath(fileOrPath)
         return await this.#vault.adapter.read(filepath)
     }
 
@@ -109,7 +123,7 @@ export class FilesystemAdapter {
         fileOrPath: TFile | string,
         editor: ContentEditor,
     ): Promise<void> {
-        const filepath = FilesystemAdapter.resolvePath(fileOrPath)
+        const filepath = this.resolvePath(fileOrPath)
         const content = await this.#vault.adapter.read(filepath)
         await this.#vault.adapter.write(filepath, editor(content))
     }
@@ -123,17 +137,14 @@ export class FilesystemAdapter {
         newFilePath: string,
         editor?: ContentEditor,
     ): Promise<void> {
-        const filepath = FilesystemAdapter.resolvePath(fileOrPath)
+        const filepath = this.resolvePath(fileOrPath)
+
+        // simplier copy
+        if (!editor) return this.#vault.adapter.copy(filepath, newFilePath)
 
         // copy with edit
-        if (typeof editor === 'function') {
-            const content = await this.#vault.adapter.read(filepath)
-            await this.#vault.adapter.write(newFilePath, editor(content))
-        }
-        // simplier copy
-        else {
-            await this.#vault.adapter.copy(filepath, newFilePath)
-        }
+        const content = await this.#vault.adapter.read(filepath)
+        await this.#vault.adapter.write(newFilePath, editor(content))
     }
 
     /**
@@ -141,7 +152,7 @@ export class FilesystemAdapter {
      * and creates a new empty folder with the same name.
      */
     public async renewFolder(folderOrPath: TFolder | string): Promise<void> {
-        const folderpath = FilesystemAdapter.resolvePath(folderOrPath)
+        const folderpath = this.resolvePath(folderOrPath)
         if (await this.#exists(folderpath)) {
             await this.#vault.adapter.rmdir(folderpath, true)
         }
@@ -153,12 +164,13 @@ export class FilesystemAdapter {
     /**
      * Generates a hash of certain length based on the content of a file.
      * @param length preferred of the hash, if is passed a number lower to `1` the complete hash is returned
+     * @note by default only the first 6 characters are returned
      */
     public async getFileHash(
         fileOrPath: TFile | string,
         length = 6,
     ): Promise<string> {
-        const filepath = FilesystemAdapter.resolvePath(fileOrPath)
+        const filepath = this.resolvePath(fileOrPath)
         const content = await this.#vault.adapter.read(filepath)
         const hash = createHash('sha256').update(content).digest('hex')
         return length < 1 ? hash : hash.substring(0, length)

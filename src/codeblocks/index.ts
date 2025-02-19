@@ -1,1 +1,2 @@
-export * from './CodeblockHandler'
+import CodeblockHandler from './CodeblockHandler'
+export default CodeblockHandler

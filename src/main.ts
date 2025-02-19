@@ -7,9 +7,8 @@ import {
     prepareComponentNames,
 } from '@/utility'
 import { SettingsTab } from './settings/SettingsTab'
-import { FilesystemAdapter, VersionController } from './filesystem'
-import { CodeblockHandler } from './codeblocks'
-import { ComponentsAPI } from './ComponentsAPI'
+import ComponentsAPI from './ComponentsAPI'
+import CodeblockHandler from './codeblocks'
 
 export const DEFAULT_SETTINGS: PluginSettings = {
     enable_codeblocks: false,
@@ -32,9 +31,7 @@ export default class ComponentsPlugin extends Plugin {
     public state = {} as PluginState
 
     public api: ComponentsAPI
-    public fs: FilesystemAdapter
-    public parser: CodeblockHandler
-    public versions: VersionController
+    #handler: CodeblockHandler
 
     constructor(app: App, manifest: PluginManifest) {
         super(app, manifest)
@@ -45,9 +42,7 @@ export default class ComponentsPlugin extends Plugin {
         this.log.setFormat('[hh:mm:ss.ms] level:')
 
         this.api = new ComponentsAPI(this)
-        this.fs = new FilesystemAdapter(this)
-        this.parser = new CodeblockHandler(this)
-        this.versions = new VersionController(this)
+        this.#handler = new CodeblockHandler(this)
 
         // thrid-party API
         // @ts-expect-error non-standard API
@@ -60,8 +55,9 @@ export default class ComponentsPlugin extends Plugin {
     }
 
     onunload(): void {
-        this.versions.clear()
-        this.parser.clear()
+        const group = this.log.group('Clearing State')
+        void this.#handler.clear(group)
+        group.flush('Cleared State')
     }
 
     async loadSettings(): Promise<void> {
@@ -98,7 +94,7 @@ export default class ComponentsPlugin extends Plugin {
             components_enabled: names,
             components_matchers: prepareComponentMatchers(this.settings, names),
         }
-        this.parser.registerCodeblocks()
+        this.#handler.registerCodeblocks()
     }
 
     // Design Mode
@@ -116,14 +112,9 @@ export default class ComponentsPlugin extends Plugin {
      * > storage usage, so it should be **disabled always**
      * > until the user enables it **manually**
      */
-    public async enableDesignMode(): Promise<void> {
+    public enableDesignMode(): void {
         if (this.#designMode) return
         this.#designMode = true
-
-        // clear so when components are re-render they start tracking
-        // and the HotComponentReload works correctly
-        await this.versions.clearCache()
-        await this.versions.exploreComponentsFolder()
-        this.parser.refreshAll()
+        void this.#handler.prepareDesignMode()
     }
 }
