@@ -43,7 +43,5 @@
       "names": "grid_gallery",
       "enabled": true
     }
-  ],
-  "components_naming": "CUSTOM",
-  "enable_components": "STRICT"
+  ]
 }
