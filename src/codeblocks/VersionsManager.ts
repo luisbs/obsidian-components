@@ -1,8 +1,7 @@
 import type { ComponentsPlugin } from '@/types'
 import type { Logger } from '@luis.bs/obsidian-fnc'
 import { EventRef, TAbstractFile, TFile, TFolder } from 'obsidian'
-import { MapStore } from '@/utility'
-import FilesystemAdapter from './FilesystemAdapter'
+import { FilesystemAdapter, MapStore } from '@/utility'
 
 type Refresher = (componentPath: string[], log: Logger) => Promise<void>
 

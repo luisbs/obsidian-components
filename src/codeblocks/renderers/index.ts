@@ -5,6 +5,7 @@ import { ComponentError } from '../ComponentError'
 import BaseRenderer, { CodeblockContext } from './BaseRenderer'
 import TemplateRenderer from './TemplateRenderer'
 import JavascriptRenderer from './JavascriptRender'
+import { FilesystemAdapter } from '@/utility'
 
 export { CodeblockContext }
 
@@ -12,13 +13,15 @@ export default class RenderManager {
     #renderers: BaseRenderer[]
 
     constructor(plugin: ComponentsPlugin) {
+        const fs = new FilesystemAdapter(plugin)
+
         // TODO: add support for renderers without virtual DOM
         // ? - [Vapor](https://github.com/vuejs/core/tree/vapor)
         // ? - [Solid](https://github.com/solidjs/solid)
         // ? - [Svelte](https://github.com/sveltejs/svelte)
         this.#renderers = [
             new TemplateRenderer(plugin),
-            new JavascriptRenderer(plugin),
+            new JavascriptRenderer(plugin, fs),
         ]
     }
 

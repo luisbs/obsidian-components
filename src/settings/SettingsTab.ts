@@ -1,16 +1,18 @@
 import type { ComponentsPlugin, PluginSettings } from '@/types'
-import type { TextAreaComponent, TextComponent } from 'obsidian'
-import { PluginSettingTab, Setting } from 'obsidian'
+import { PluginSettingTab, Setting, TextComponent } from 'obsidian'
 import { FolderSuggester } from '@luis.bs/obsidian-fnc'
+import { FilesystemAdapter } from '@/utility'
 import { SettingsTabComponents } from './SettingsTabComponents'
 import * as Tools from './SettingsTabTools'
 
 export class SettingsTab extends PluginSettingTab {
     #plugin: ComponentsPlugin
+    #fs: FilesystemAdapter
 
     constructor(plugin: ComponentsPlugin) {
         super(plugin.app, plugin)
         this.#plugin = plugin
+        this.#fs = new FilesystemAdapter(plugin)
     }
 
     async #update(key: keyof PluginSettings, value: unknown): Promise<void> {
@@ -137,11 +139,7 @@ export class SettingsTab extends PluginSettingTab {
             input.onChange(async (path: string) => {
                 logs.empty()
 
-                if (
-                    !path ||
-                    path === '/' ||
-                    (await this.#plugin.fs.missing(path))
-                ) {
+                if (!path || path === '/' || (await this.#fs.missing(path))) {
                     input.inputEl.classList.add('invalid-value')
                     logs.appendText('Invalid path.')
                     return

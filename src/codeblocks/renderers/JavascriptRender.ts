@@ -1,9 +1,9 @@
 import type { Logger } from '@luis.bs/obsidian-fnc'
 import type { TFile } from 'obsidian'
-import { isRecord } from '@/utility'
+import type { ComponentsPlugin } from '@/types'
+import { FilesystemAdapter, isRecord } from '@/utility'
 import { ComponentError } from '../ComponentError'
 import BaseRenderer, { CodeblockContext } from './BaseRenderer'
-import FilesystemAdapter from '../FilesystemAdapter'
 
 type TemplateRenderer = (
     data: unknown,
@@ -16,6 +16,13 @@ type CodeRenderer = (
 ) => Promise<void>
 
 export default class JavascriptRenderer extends BaseRenderer {
+    #fs: FilesystemAdapter
+
+    constructor(plugin: ComponentsPlugin, fs: FilesystemAdapter) {
+        super(plugin)
+        this.#fs = fs
+    }
+
     public test(component: TFile): boolean {
         return /\.[cm]js$/.test(component.name)
     }
@@ -81,7 +88,7 @@ export default class JavascriptRenderer extends BaseRenderer {
             }
 
             // CommonJS
-            const resolved = FilesystemAdapter.getRealPath(this.plugin, file)
+            const resolved = this.#fs.getRealPath(file.path)
             log.debug(`require('${resolved}')`)
             // eslint-disable-next-line @typescript-eslint/no-require-imports
             return require(resolved)

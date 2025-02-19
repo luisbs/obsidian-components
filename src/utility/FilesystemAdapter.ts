@@ -5,7 +5,7 @@ import { TAbstractFile, TFile, TFolder, Vault, normalizePath } from 'obsidian'
 
 type ContentEditor = (content: string) => string
 
-export default class FilesystemAdapter {
+export class FilesystemAdapter {
     #plugin: ComponentsPlugin
     #vault: Vault
 
@@ -17,29 +17,19 @@ export default class FilesystemAdapter {
     /**
      * A real path of the file on the user system.
      */
-    public getRealPath(path: string | TFile): string {
-        return FilesystemAdapter.getRealPath(this.#plugin, path)
-    }
-
-    /**
-     * A real path of the file on the user system.
-     */
-    public static getRealPath(
-        plugin: ComponentsPlugin,
-        path: string | TFile,
-    ): string {
+    public getRealPath(...paths: string[]): string {
         //? simplier implementation
         //? not used cause `basePath` is not public/documentated
         //? so it may change as an internal implementation
         // @ts-expect-error not-public-api-usage
-        return Path.resolve(String(plugin.app.vault.adapter.basePath), path)
+        return Path.resolve(String(this.#vault.adapter.basePath), ...paths)
 
         //! replaced by above, cause it make changes as URL
         //! like replaces ' ' (space) to '%20'
         //? `getResourcePath` adds a prefix and a postfix to identify file version
         //? it needs to be removed to be recognized as a real route
-        // return plugin.app.vault.adapter
-        //     .getResourcePath(Path.join(path))
+        // return this.#vault.adapter
+        //     .getResourcePath(Path.join(...paths))
         //     .replace(/app:\/\/local/i, '') // removes the prefix
         //     .replace(/^\/(?=[\w]+:)/i, '') // fix route for windows systems
         //     .replace(/\?\d+$/i, '') // removes the postfix
