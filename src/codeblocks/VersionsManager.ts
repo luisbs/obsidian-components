@@ -92,17 +92,30 @@ export default class VersionsManager {
         group.trace('Listed affected files', affected)
 
         // cache new versions
-        group.debug('Caching affected files')
+        group.debug('Prepare affected files')
         for (const item of affected) {
             const file = this.#fs.resolveFile(item)
             if (!file) {
                 group.error(`Not Found <${item}>`)
                 continue
             }
+
+            // removing CommonJS modules from cache, causes that
+            // when it is request, the new module will be requested
+            if (file.extension === 'cjs') {
+                const path = window.require.resolve(this.#fs.getRealPath(item))
+                // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+                delete window.require.cache[path]
+                group.trace(`Deleted cache of <${path}>`)
+                continue
+            }
+
             const cachePath = await this.#cacheFile(file, group)
             this.#versions.prepend(item, cachePath)
         }
-        group.debug('Cached affected files')
+
+        group.trace('Current cjs cache', { ...window.require.cache })
+        group.debug('Prepared affected files')
 
         await this.#refresher(affected, group)
         group.flush(`Listened changes on <${file.path}>`)
