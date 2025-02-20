@@ -145,7 +145,7 @@ export default class VersionsManager {
      */
     async #cacheFile(file: TFile, log: Logger): Promise<string> {
         const cacheHash = await this.#fs.getFileHash(file)
-        const cacheName = `${file.basename}.${cacheHash}.${file.extension}`
+        const cacheName = `${cacheHash}.${file.basename}.${file.extension}`
         const cachePath = this.#fs.getCachePath(cacheName)
 
         // first time cached
@@ -159,7 +159,7 @@ export default class VersionsManager {
 
         // n+1 time cached
         const timestamp = Date.now().toString()
-        const cloneName = `${file.basename}.${cacheHash}-${timestamp}.${file.extension}`
+        const cloneName = `${cacheHash}-${timestamp}.${file.basename}.${file.extension}`
         const clonePath = this.#fs.getCachePath(cloneName)
 
         log.debug(`Cloning <${cacheName}> to <${cloneName}>`)
