@@ -73,9 +73,13 @@ export default class CodeblockHandler {
         log.debug('Refreshing Components', paths)
         for (const componentPath of componentsPaths) {
             log.debug(`Refreshing Components(${componentPath})`)
-            for (const params of this.#rendered.get(componentPath)) {
-                log.trace('Refreshing Codeblock', params)
-                await this.#renderComponent(componentPath, params, log)
+            try {
+                for (const params of this.#rendered.get(componentPath)) {
+                    log.trace('Refreshing Codeblock', params)
+                    await this.#renderComponent(componentPath, params, log)
+                }
+            } catch (err) {
+                log.warn(err)
             }
         }
         log.info('Refreshed Components')
