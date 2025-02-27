@@ -103,10 +103,10 @@ export default class VersionsManager {
             // removing CommonJS modules from cache, causes that
             // when it is request, the new module will be requested
             if (file.extension === 'cjs') {
-                const path = window.require.resolve(this.#fs.getRealPath(item))
+                const path = this.#fs.getAbsolutePath(item)
                 // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
-                delete window.require.cache[path]
-                group.trace(`Deleted cache of <${path}>`)
+                delete window.require.cache[window.require.resolve(path)]
+                group.trace(`Deleted cache of <${item}>`)
                 continue
             }
 
@@ -178,7 +178,7 @@ export default class VersionsManager {
             const source = this.#fs.join(parentPath, $0)
             const latest = this.resolveLatest(source)
             log.trace(`Replacing import path <${latest}>`)
-            return this.#fs.getRealPath(latest)
+            return this.#fs.getAbsolutePath(latest)
         })
     }
 

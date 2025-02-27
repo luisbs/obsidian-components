@@ -81,14 +81,14 @@ export default class JavascriptRenderer extends BaseRenderer {
 
         try {
             // ESModules
-            if (file.name.endsWith('mjs')) {
-                const resolved = this.plugin.app.vault.getResourcePath(file)
-                log.debug(`import('${resolved}')`)
-                return await import(resolved)
+            if (/\.mjs(\?|$)/gi.test(file.name)) {
+                const resource = this.#fs.getResourcePath(file)
+                log.debug(`import('${resource}')`)
+                return await import(resource)
             }
 
             // CommonJS
-            const resolved = this.#fs.getRealPath(file.path)
+            const resolved = this.#fs.getAbsolutePath(file.path)
             log.debug(`require('${resolved}')`)
             // eslint-disable-next-line @typescript-eslint/no-require-imports
             return require(resolved)

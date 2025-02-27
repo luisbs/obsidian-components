@@ -15,24 +15,19 @@ export class FilesystemAdapter {
     }
 
     /**
-     * A real path of the file on the user system.
+     * Returns an URI for the browser engine to use, for example to embed an image.
      */
-    public getRealPath(...paths: string[]): string {
-        //? simplier implementation
-        //? not used cause `basePath` is not public/documentated
-        //? so it may change as an internal implementation
-        // @ts-expect-error not-public-api-usage
-        return Path.resolve(String(this.#vault.adapter.basePath), ...paths)
+    public getResourcePath(file: TFile): string {
+        return this.#plugin.app.vault.getResourcePath(file)
+    }
 
-        //! replaced by above, cause it make changes as URL
-        //! like replaces ' ' (space) to '%20'
-        //? `getResourcePath` adds a prefix and a postfix to identify file version
-        //? it needs to be removed to be recognized as a real route
-        // return this.#vault.adapter
-        //     .getResourcePath(Path.join(...paths))
-        //     .replace(/app:\/\/local/i, '') // removes the prefix
-        //     .replace(/^\/(?=[\w]+:)/i, '') // fix route for windows systems
-        //     .replace(/\?\d+$/i, '') // removes the postfix
+    /**
+     * An absolute path of the file on the user system.
+     */
+    public getAbsolutePath(path: string): string {
+        //? may change internally since `basePath` is not public/documentated
+        // @ts-expect-error not-public-api-usage
+        return Path.resolve(this.#vault.adapter.basePath as string, path)
     }
 
     /**
@@ -67,7 +62,6 @@ export class FilesystemAdapter {
      */
     public resolveFile(fileOrPath: TFile | string): TFile | null {
         if (fileOrPath instanceof TFile) return fileOrPath
-        if (!String.isString(fileOrPath)) return null
         return this.#vault.getFileByPath(fileOrPath)
     }
 
