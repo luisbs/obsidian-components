@@ -34,7 +34,7 @@
       "id": "soundtrack.html.cjs",
       "path": "components/entries/soundtrack.html.cjs",
       "names": "soundtrack_html\nsoundtrack",
-      "enabled": true
+      "enabled": false
     },
     {
       "id": "video.html",
