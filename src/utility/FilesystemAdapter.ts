@@ -82,30 +82,28 @@ export class FilesystemAdapter {
     /**
      * Checks if a file exists.
      */
-    public async exists(fileOrPath: TFile | string): Promise<boolean> {
-        return this.#exists(this.resolvePath(fileOrPath))
+    public async exists(filepath: string): Promise<boolean> {
+        return this.#exists(filepath)
     }
 
     /**
      * Checks if a file exists.
      */
-    public async missing(fileOrPath: TFile | string): Promise<boolean> {
-        return this.#missing(this.resolvePath(fileOrPath))
+    public async missing(filepath: string): Promise<boolean> {
+        return this.#missing(filepath)
     }
 
     /**
      * Removes a file from the filesystem.
      */
-    public async remove(fileOrPath: TFile | string): Promise<void> {
-        const filepath = this.resolvePath(fileOrPath)
+    public async remove(filepath: string): Promise<void> {
         await this.#vault.adapter.remove(filepath)
     }
 
     /**
      * Retrieves the content of a file.
      */
-    public async read(fileOrPath: TFile | string): Promise<string> {
-        const filepath = this.resolvePath(fileOrPath)
+    public async read(filepath: string): Promise<string> {
         return await this.#vault.adapter.read(filepath)
     }
 

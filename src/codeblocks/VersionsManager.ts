@@ -26,10 +26,6 @@ export default class VersionsManager {
      */
     #versions = new MapStore<string>()
 
-    // public dump(): void {
-    //     this.#log.debug({ tracked: this.#tracked, versions: this.#versions })
-    // }
-
     constructor(plugin: ComponentsPlugin, refresher: Refresher) {
         this.#log = plugin.log.make(VersionsManager.name)
         this.#fs = new FilesystemAdapter(plugin)
@@ -72,69 +68,92 @@ export default class VersionsManager {
      * Update cache registry when a file is modified.
      */
     async #handleFileModification(file: TAbstractFile): Promise<void> {
-        if (!this.#plugin.isDesignModeEnabled) return
         if (!(file instanceof TFile)) return
-        // ignore files outside of the `components_folder`
-        // that are not been tracked
-        if (
-            !file.path.startsWith(this.#plugin.settings.components_folder) &&
-            !this.#tracked.has(file.path)
-        ) {
-            return
-        }
 
-        //
         const group = this.#log.group()
-        group.debug(`Listening changes on <${file.path}>`)
+        group.debug('Listening changes on', file)
 
         group.debug('Listing affected files')
-        const affected = this.#affectedFiles(file.path)
-        group.trace('Listed affected files', affected)
+        const affected = await this.#affectedFiles(file, group)
 
-        // cache new versions
-        group.debug('Prepare affected files')
-        for (const item of affected) {
-            const file = this.#fs.resolveFile(item)
-            if (!file) {
-                group.error(`Not Found <${item}>`)
-                continue
-            }
-
-            // removing CommonJS modules from cache, causes that
-            // when it is request, the new module will be requested
-            if (file.extension === 'cjs') {
-                const path = this.#fs.getAbsolutePath(item)
-                // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
-                delete window.require.cache[window.require.resolve(path)]
-                group.trace(`Deleted cache of <${item}>`)
-                continue
-            }
-
-            const cachePath = await this.#cacheFile(file, group)
-            this.#versions.prepend(item, cachePath)
-        }
-
-        group.trace('Current cjs cache', { ...window.require.cache })
         group.debug('Prepared affected files')
-
         await this.#refresher(affected, group)
-        group.flush(`Listened changes on <${file.path}>`)
+
+        group.flush(`Listened changes on <${file.name}>`)
     }
 
     /**
-     * Calculate all the files affected when a file changed,
-     * and its correct order.
+     * Calculate all the files affected when a file changed
      */
-    #affectedFiles(filepath: string): string[] {
-        const directDependents = this.#tracked.get(filepath)
-        const dependents = [filepath, ...directDependents]
+    async #affectedFiles(changedFile: TFile, log: Logger): Promise<string[]> {
+        const affectedFiles = [] as string[]
+        const pendingFiles = [changedFile]
 
-        for (const dependent of directDependents) {
-            dependents.push(...this.#affectedFiles(dependent))
+        // shared code
+        const processDependencyTree = async (file: TFile) => {
+            log.debug('Refreshing dependencies', file)
+            await this.#indexDependencies(file, log)
+
+            log.debug('Checking dependents', file)
+            for (const dependent of this.#tracked.get(file.path)) {
+                const dependentFile = this.#fs.resolveFile(dependent)
+                if (dependentFile) pendingFiles.push(dependentFile)
+                else log.warn('Not found', dependent)
+            }
         }
 
-        // keep order of apperience
-        return dependents.reverse().unique().reverse()
+        while (pendingFiles.length) {
+            const file = pendingFiles.shift()
+            // avoid circular dependencies
+            if (!file || affectedFiles.includes(file.path)) continue
+
+            // Template files
+            if (['html', 'md'].includes(file.extension)) {
+                // can be HotReloaded because it doesn't import
+                log.debug('Affected Template', file)
+                affectedFiles.push(file.path)
+                continue
+            }
+
+            // CommonJS files
+            if (file.extension === 'cjs') {
+                // can be HotReloaded because the cache can be invalidated
+                log.debug('Affected CommonJS', file)
+                affectedFiles.push(file.path)
+
+                log.debug('Deleting cache', file)
+                // invalidate the CommonJS cache, to allow a fresh load
+                const filepath = this.#fs.getAbsolutePath(file.path)
+                // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+                delete window.require.cache[window.require.resolve(filepath)]
+
+                await processDependencyTree(file)
+                continue
+            }
+
+            // the next formats require DesignMode to be HotReloaded
+            if (!this.#plugin.isDesignModeEnabled) continue
+            if (
+                !this.#tracked.has(file.path) &&
+                !file.path.startsWith(this.#plugin.settings.components_folder)
+            ) {
+                // ignore files not tracked outside of the `components_folder`
+                continue
+            }
+
+            // ESModule files
+            log.debug('Affected ESModule', file)
+            affectedFiles.push(file.path)
+
+            log.debug('Caching clone', file)
+            const cachePath = await this.#cacheFile(file, log)
+            this.#versions.prepend(file.path, cachePath)
+
+            await processDependencyTree(file)
+        }
+
+        log.trace('Current cjs cache', { ...window.require.cache })
+        return affectedFiles.unique()
     }
 
     /**
@@ -197,45 +216,50 @@ export default class VersionsManager {
             throw new Error(`path <${componentsPath}> is not a folder`)
         }
 
-        log.info('Indexing Components')
-        await this.#indexFolder(componentsFolder, log)
-        log.debug('Indexed Components')
-    }
+        log.info('Indexing files')
+        const pendingFiles = [componentsFolder] as TAbstractFile[]
+        while (pendingFiles.length) {
+            const file = pendingFiles.shift()
+            if (file instanceof TFolder) {
+                log.debug('Indexing folder', file)
+                pendingFiles.push(...file.children)
+                continue
+            }
 
-    /**
-     * Index all the files and subfiles in a folder.
-     */
-    async #indexFolder(folder: TFolder, log: Logger): Promise<void> {
-        log.debug(`Indexing folder <${folder.path}>`)
-        for (const child of folder.children) {
-            if (child instanceof TFolder) await this.#indexFolder(child, log)
-            else await this.#indexFile(child.path, log)
+            // unexpected behavior
+            if (!(file instanceof TFile)) continue
+
+            // queue dependency files
+            log.debug('Indexing file', file)
+            for (const dependency of await this.#indexDependencies(file, log)) {
+                const dependencyFile = this.#fs.resolveFile(dependency)
+                if (dependencyFile) pendingFiles.push(dependencyFile)
+                else log.warn('Not found', dependency)
+            }
         }
-        log.debug(`Indexed folder <${folder.path}>`)
+
+        log.trace('Indexed files', {
+            tracked: this.#tracked,
+            versions: this.#versions,
+        })
     }
 
     /**
-     * Index all the imported/requested files in a file.
+     * Find all the imported/requested files in a file.
      */
-    async #indexFile(filepath: string, log: Logger): Promise<void> {
-        // only index file, if it has not been indexed
-        if (this.#tracked.hasValue(filepath)) return
-
-        log.debug(`Indexing imports on <${filepath}>`)
-        const parentPath = filepath.replace(/[\\/][^\\/]*$/gi, '')
-        const content = await this.#fs.read(filepath)
-        const imports: string[] = []
+    async #indexDependencies(file: TFile, log: Logger): Promise<string[]> {
+        log.debug('Indexing dependencies', file)
+        const parentPath = file.parent?.path ?? ''
+        const content = await this.#fs.read(file.path)
+        const dependencies: string[] = []
 
         for (const match of content.matchAll(importsRegex())) {
-            const importedPath = this.#fs.join(parentPath, match[0] || '')
-            log.trace(`file <${filepath}> imports <${importedPath}>`)
-            this.#tracked.push(importedPath, filepath)
-            imports.push(importedPath)
+            const dependency = this.#fs.join(parentPath, match[0] || '')
+            log.trace(`file <${file.name}> imports <${dependency}>`)
+            this.#tracked.push(dependency, file.path)
+            dependencies.push(dependency)
         }
 
-        // index imports on imported files
-        for (const importedPath of imports) {
-            await this.#indexFile(importedPath, log)
-        }
+        return dependencies
     }
 }

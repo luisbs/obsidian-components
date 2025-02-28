@@ -81,7 +81,7 @@ export default class JavascriptRenderer extends BaseRenderer {
 
         try {
             // ESModules
-            if (/\.mjs(\?|$)/gi.test(file.name)) {
+            if (file.extension === 'mjs') {
                 const resource = this.#fs.getResourcePath(file)
                 log.debug(`import('${resource}')`)
                 return await import(resource)

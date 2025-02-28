@@ -69,6 +69,7 @@ export class MapStore<T> {
 
     /**
      * Check if a value is stored in relation to a key.
+     * @deprecated
      */
     public hasKeyValue(key: string, value: T): boolean {
         return this.get(key).includes(value)
@@ -86,6 +87,14 @@ export class MapStore<T> {
      */
     public getFirst(key: string): T | undefined {
         return this.get(key).first()
+    }
+
+    /**
+     * Ensure a key is been stored.
+     */
+    public store(key: string): void {
+        if (this.has(key)) return
+        this._values.set(key, [])
     }
 
     /**
@@ -111,6 +120,7 @@ export class MapStore<T> {
      * Creates a MapStore from an object
      * uses the source values as result keys,
      * and the source keys as result values.
+     * @deprecated
      */
     public static fromReversedObject(
         values: Record<string, string>,
