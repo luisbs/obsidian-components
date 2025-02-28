@@ -16,6 +16,11 @@
 
 - [x] Add a showcase video.
 - [ ] Add the plugin to the obsidian plugins repository.
+- [ ] Support **Dataview** integration.
+  - [ ] If **Dataview** is enabled add notice on **SettingsPage**
+  - [ ] Add setting toggle to handle the **Codeblock** content as **Dataview** query.
+  - [ ] If **Dataview** is enabled, query the data using **Dataview** API.
+  - [ ] Pipe the query result to the defined **Component**.
 
 ### Support
 

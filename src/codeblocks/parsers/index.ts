@@ -3,6 +3,7 @@ import type { Logger } from '@luis.bs/obsidian-fnc'
 import type { CodeblockContent, CodeblockParser } from './BaseParser'
 import { YamlParser } from './YamlParser'
 import { JsonParser } from './JsonParser'
+import { DataviewParser } from './DataviewParser'
 
 export type { CodeblockContent, CodeblockSyntax } from './BaseParser'
 
@@ -11,7 +12,11 @@ export default class ParserManager {
 
     constructor(private plugin: ComponentsPlugin) {
         // TODO: add support for parsing data with Dataview
-        this.#parsers = [new JsonParser(), new YamlParser()]
+        this.#parsers = [
+            new DataviewParser(plugin),
+            new JsonParser(),
+            new YamlParser(),
+        ]
     }
 
     #separator(): RegExp | undefined {

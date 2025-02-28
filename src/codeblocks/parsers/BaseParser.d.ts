@@ -1,4 +1,4 @@
-export type CodeblockSyntax = 'yaml' | 'json' | 'unknown'
+export type CodeblockSyntax = 'yaml' | 'json' | 'dataview' | 'unknown'
 
 export interface CodeblockContent {
     /** Syntax of the **Codeblock**. */
