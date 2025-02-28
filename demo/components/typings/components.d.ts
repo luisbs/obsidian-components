@@ -1,10 +1,23 @@
+declare namespace AttachmentsCache {
+    /** Test whether the attachments should be cached. */
+    function mayCache(notepath: string, remote: string): boolean;
+    /** Test whether a remote file is already cached. */
+    function isCached(notepath: string, remote: string): Promise<boolean>;
+    /** Tries to map a remote url into a Vault resourcePath. */
+    function resource(notepath: string, remote: string): Promise<string | undefined>;
+    /** Tries to map a remote url into a Vault filePath. */
+    function resolve(notepath: string, remote: string): Promise<string | undefined>;
+    /** Tries to cache a file locally and returns a Vault resourcePath. */
+    function cache(notepath: string, remote: string): Promise<string | undefined>;
+}
+
 interface CodeblockContext {
     /** Vault-path of the note containing the **Codeblock**. */
     notepath: string;
     /** Component name used on the **Codeblock**. */
     used_name: string;
     /** Syntax of the **Codeblock**. */
-    syntax: 'json' | 'yaml' | 'unknown';
+    syntax: 'json' | 'yaml' | 'dataview' | 'unknown';
     /** Hash result of the **Codeblock** content. */
     hash: string;
 }

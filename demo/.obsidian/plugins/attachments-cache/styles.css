@@ -1,0 +1,71 @@
+.attachments-cache-settings code {
+    background-color: var(--tag-background);
+    color: var(--tag-color);
+    border: var(--tag-border-width) solid var(--tag-border-color);
+    border-radius: var(--tag-radius);
+    font-size: var(--tag-size);
+    font-weight: var(--tag-weight);
+    text-decoration: var(--tag-decoration);
+    padding: var(--tag-padding-y) var(--tag-padding-x);
+    line-height: 1;
+}
+
+.attachments-cache-settings
+    :is(.configs-header, .remotes-input)
+    .setting-item-description {
+    color: orangered;
+}
+.attachments-cache-settings .configs-header select {
+    min-width: 100px;
+    max-width: 200px;
+}
+
+/* Expandable Form */
+.attachments-cache-settings .configs-list > .setting-item {
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 0.25em;
+    flex-wrap: wrap;
+    padding: 1em 1em 0;
+    margin-bottom: 0.75em;
+    gap: 0.5em;
+
+    overflow-y: hidden;
+    height: 74px;
+}
+.attachments-cache-settings .configs-list > .setting-item.show-details {
+    height: 100%;
+}
+
+.attachments-cache-settings .configs-list > .setting-item > .setting-item-info {
+    margin-bottom: 0.75em;
+}
+.attachments-cache-settings .cache-details {
+    border-top: 1px solid var(--background-modifier-border);
+    padding: 0.75em 0 0;
+    width: 100%;
+}
+.attachments-cache-settings .cache-details .setting-item {
+    border-top: none;
+    padding: 0;
+}
+.attachments-cache-settings .cache-details .setting-item-control {
+    flex: 0 1 40%;
+    flex-wrap: wrap;
+    padding-bottom: 8px;
+}
+.attachments-cache-settings .cache-details :is(input, select) {
+    width: 100%;
+}
+.attachments-cache-settings .cache-details textarea {
+    width: 100%;
+    height: 9ch;
+    resize: vertical;
+}
+.attachments-cache-settings .cache-remotes {
+    border-top: 1px solid var(--background-modifier-border);
+    padding: 0.5em 0;
+    width: 100%;
+}
+.attachments-cache-settings .cache-remotes .setting-item:last-child {
+    padding-bottom: 0;
+}

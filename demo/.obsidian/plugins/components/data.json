@@ -1,5 +1,5 @@
 {
-  "plugin_level": "TRACE",
+  "plugin_level": "DEBUG",
   "enable_codeblocks": true,
   "enable_separators": true,
   "usage_separator": "---",

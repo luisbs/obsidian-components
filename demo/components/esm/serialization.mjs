@@ -15,16 +15,21 @@ function shouldGroup(itemsLabel, item) {
  * @template {ItemsGroup<L, T>} G
  * @param {unknown} data
  * @param {L} itemsLabel
- * @param {(item: unknown) => T | undefined} callback
- * @param {(items: T[], data: Record<string, unknown>) => G} headersCallback
- * @returns {G[]}
+ * @param {(items: T[], data: Record<string, unknown>) => Promise<G>} callback
+ * @returns {Promise<G[]>}
  */
-export function serialize(data, itemsLabel, callback, headersCallback) {
-    if (Array.isArray(data) && data.some(shouldGroup.bind(null, itemsLabel))) {
-        return data.map((group) => serializeGroup(group, itemsLabel, callback, headersCallback));
+export async function serialize(data, itemsLabel, callback) {
+    if (!Array.isArray(data) || !data.some(shouldGroup.bind(null, itemsLabel))) {
+        const prepared = [];
+        prepared.push(await serializeGroup(data, itemsLabel, callback));
+        return prepared;
     }
 
-    return [serializeGroup(data, itemsLabel, callback, headersCallback)];
+    const prepared = [];
+    for (const group of data) {
+        prepared.push(await serializeGroup(group, itemsLabel, callback));
+    }
+    return prepared;
 }
 
 /**
@@ -33,19 +38,12 @@ export function serialize(data, itemsLabel, callback, headersCallback) {
  * @template {ItemsGroup<L, T>} G
  * @param {unknown} group
  * @param {L} itemsLabel
- * @param {(item: unknown) => T | undefined} callback
- * @param {(items: T[], data: Record<string, unknown>) => G} headersCallback
- * @returns {G}
+ * @param {(items: undefined[], data: Record<string, unknown>) => Promise<G>} callback
+ * @returns {Promise<G>}
  */
-export function serializeGroup(group, itemsLabel, callback, headersCallback = null) {
-    let items = [];
-    if (Array.isArray(group)) items = group;
-    else if (typeof group !== 'object') items = [group];
-    else if (itemsLabel in group) items = group[itemsLabel];
-
-    // invalid can be omitted returning undefined
-    const prepared = items.map(callback).filter((v) => !!v);
-
-    if (headersCallback) return headersCallback(prepared, group);
-    return { [itemsLabel]: prepared };
+export async function serializeGroup(group, itemsLabel, callback) {
+    if (Array.isArray(group)) return callback(group, {});
+    if (typeof group !== 'object') return callback([group], {});
+    if (itemsLabel in group) return callback(group[itemsLabel], group);
+    return callback([], group);
 }

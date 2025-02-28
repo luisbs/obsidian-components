@@ -5,7 +5,7 @@ const Renderer = require('./Renderer.cjs');
 
 /** @extends {Renderer<HTMLElement>} */
 module.exports = class CodeRenderer extends Renderer {
-    /** @type {HTMLDivElement} */
+    /** @type {HTMLElement} */
     #container;
 
     /** @type {HTMLElement} */

@@ -1,31 +1,38 @@
 import { Obj, Renderer, URI, serialize } from '../../esm/index.mjs';
 
-/** @type {(image: unknown) => URIMetadata} */
-export function serializeImage(image) {
-    if (Obj.isNil(image)) return;
-    if (typeof image === 'object') return URI.getMetadata(image.url);
-    else if (typeof image === 'string') return URI.getMetadata(image);
+/** @type {(notepath: string, items: unknown[]) => Promise<URIMetadata[]>} */
+export async function serializeImages(notepath, images) {
+    const prepared = [];
+    for (const image of images) {
+        if (Obj.isNil(image)) continue;
+
+        let item = null;
+        if (typeof image === 'string') item = await URI.getMetadata(image, notepath);
+        else if (typeof image === 'object') item = await URI.getMetadata(image.url, notepath);
+        if (item) prepared.push(item);
+    }
+    return prepared;
 }
 
-/** @type {(items: URIMetadata[], data: Record<string, unknown>) => } */
-export function serializeGroup(images, { label, title, link, artist }) {
+/** @type {(notepath: string, items: unknown[], data: Record<string, unknown>) => Promise<ImageGroupMetadata[]>} */
+export async function serializeGroup(notepath, images, { label, title, link, artist }) {
     return {
-        images,
         label: label || title || '',
-        link: URI.getMetadata(link || artist) || undefined,
+        link: (await URI.getMetadata(link || artist, notepath)) || undefined,
+        images: await serializeImages(notepath, images),
     };
 }
 
-/** @type {(input: unknown) => ImageGroupMetadata[]} */
-export function serializeGallery(input) {
-    return serialize(input, 'images', serializeImage, serializeGroup);
+/** @type {(notepath:string, input: unknown) => Promise<ImageGroupMetadata[]>} */
+export async function serializeGallery(notepath, input) {
+    return serialize(input, 'images', serializeGroup.bind(null, notepath));
 }
 
 /**
  * @param {ImageGroupMetadata} row
  * @param {Renderer} cardEl
  */
-export async function appendGalleryHeader(row, cardEl, HEADER_ATTRS = ['label', 'link']) {
+export function appendGalleryHeader(row, cardEl, HEADER_ATTRS = ['label', 'link']) {
     // card-header
     if (Obj.includes(row, HEADER_ATTRS)) {
         const headerEl = cardEl.div('gallery-header');

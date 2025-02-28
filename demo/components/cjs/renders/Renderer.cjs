@@ -9,7 +9,7 @@ module.exports = class Renderer {
      * Append an element.
      *
      * @param {T} el
-     * @returns {void}
+     * @returns {T}
      */
     append(el) {
         throw Error('Not implemented');

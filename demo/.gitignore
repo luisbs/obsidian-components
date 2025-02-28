@@ -1,4 +1,5 @@
 __temp/
+__cache/
 
 .obsidian/*.json
 !community-plugins.json

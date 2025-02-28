@@ -11,8 +11,8 @@ function innerCls(row) {
  * @param {unknown} input
  * @param {CodeblockContext} context
  */
-export default async function render(root, input, context) {
-    const data = serializeGallery(input);
+export default async function render(root, input, { notepath }) {
+    const data = await serializeGallery(notepath, input);
     // console.log({ input, data });
 
     const rootEl = CodeRenderer.init(root);
@@ -20,7 +20,7 @@ export default async function render(root, input, context) {
         const containerEl = rootEl.div(innerCls(row));
 
         // gallery-header
-        await appendGalleryHeader(row, containerEl);
+        appendGalleryHeader(row, containerEl);
         if (row.images.length < 1) continue;
 
         // gallery-content

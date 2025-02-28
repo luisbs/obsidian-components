@@ -1,6 +1,5 @@
 import { Arr, HtmlRenderer, Obj, URI, tagsCleaner } from '../esm/index.mjs';
 import { ATTRS, HEADER_ATTRS, CHAPTERS_ATTRS, LINKS_ATTRS } from './commons/content.mjs';
-import { serializeImage } from './commons/images.mjs';
 
 /**
  * @param {ContentMetadata} row
@@ -27,7 +26,7 @@ function innerCls(row) {
  * @param {unknown} input
  * @param {CodeblockContext} context
  */
-export default async function render(input, context) {
+export default async function render(input, { notepath }) {
     /** @type {ContentMetadata[]} */
     const data = Arr.wrap(input);
     // console.log({ input, data });
@@ -65,7 +64,7 @@ export default async function render(input, context) {
         }
 
         // content-cover
-        const cover = serializeImage(row.cover);
+        const cover = await URI.getMetadata(row.cover, notepath);
         if (cover) {
             // used as background for easier size manipulation
             const coverEl = cardEl.div('content-cover');

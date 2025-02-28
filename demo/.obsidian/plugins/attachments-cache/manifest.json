@@ -1,0 +1,11 @@
+{
+	"id": "attachments-cache",
+	"name": "Attachments Cache",
+	"version": "0.5.0",
+	"minAppVersion": "1.8.4",
+	"description": "Plugin to cache attachments",
+	"author": "luisbs",
+	"authorUrl": "https://github.com/luisbs",
+	"fundingUrl": "https://www.buymeacoffee.com/luisbs",
+	"isDesktopOnly": false
+}

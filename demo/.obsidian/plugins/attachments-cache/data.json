@@ -1,0 +1,31 @@
+{
+  "plugin_level": "WARN",
+  "plugin_priority": "NORMAL",
+  "allow_characters": false,
+  "url_param_cache": "cache_file",
+  "url_param_ignore": "ignore_file",
+  "note_param_cache": "cache_from",
+  "note_param_ignore": "cache_unless",
+  "cache_configs": [
+    {
+      "pattern": "*",
+      "remotes": [
+        {
+          "pattern": "cdn.myanimelist.net",
+          "whitelisted": true
+        },
+        {
+          "pattern": "static.wikia.nocookie.net",
+          "whitelisted": true
+        },
+        {
+          "pattern": "*",
+          "whitelisted": false
+        }
+      ],
+      "enabled": true,
+      "target": "__cache",
+      "mode": "TARGET-PATH"
+    }
+  ]
+}
