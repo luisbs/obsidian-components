@@ -53,7 +53,7 @@ export default class CodeblockHandler {
             // and the HotComponentReload works correctly
             group.info('Clearing cache')
             await this.#versions.resetCache(group)
-            await this.#versions.indexComponents(group)
+            await this.#versions.indexAllComponents(group)
 
             group.info('Refreshing All Components')
             await this.refresh(Array.from(this.#rendered.keys()), group)
@@ -82,7 +82,7 @@ export default class CodeblockHandler {
                 log.warn(err)
             }
         }
-        log.info('Refreshed Components')
+        log.debug('Refreshed Components')
     }
 
     /**
@@ -150,6 +150,12 @@ export default class CodeblockHandler {
             element.classList.add('component', `${used_name}-component`)
             this.#rendered.push(matcher.path, params)
             await this.#renderComponent(matcher.path, params, group)
+
+            const file = this.#plugin.app.vault.getFileByPath(matcher.path)
+            if (file) {
+                group.debug(`Indexing Component '${matcher.path}'`)
+                await this.#versions.indexComponent(file, group)
+            }
 
             group.flush(`Rendered Component '${used_name}'`)
         } catch (err) {

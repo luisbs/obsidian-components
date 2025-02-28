@@ -16,8 +16,8 @@ export default class VersionsManager {
     #handler: EventRef
 
     /**
-     * Stores a map in the form `[source-file, [files-were-is-imported]]`
-     * @example { 'HtmlRenderer.cjs': ['music.html.cjs', 'content.html.cjs'] }
+     * Stores a map in the form `[source-file, [dependencies-imported]]`
+     * @example { 'music.html.cjs': ['HtmlRenderer.cjs', 'uri.cjs'] }
      */
     #tracked = new MapStore<string>()
     /**
@@ -31,10 +31,20 @@ export default class VersionsManager {
         this.#fs = new FilesystemAdapter(plugin)
         this.#plugin = plugin
         this.#refresher = refresher
-        this.#handler = this.#plugin.app.vault.on(
-            'modify',
-            this.#handleFileModification.bind(this),
-        )
+        this.#handler = this.#plugin.app.vault.on('modify', async (file) => {
+            if (!(file instanceof TFile)) return
+
+            const group = this.#log.group()
+            group.debug(`Listening changes on <${file.name}>`)
+
+            group.debug('Listing affected files')
+            const affected = await this.#affectedFiles(file, group)
+
+            group.debug('Prepared affected files')
+            await this.#refresher(affected, group)
+
+            group.flush(`Listened changes on <${file.name}>`)
+        })
     }
 
     /**
@@ -65,24 +75,6 @@ export default class VersionsManager {
     }
 
     /**
-     * Update cache registry when a file is modified.
-     */
-    async #handleFileModification(file: TAbstractFile): Promise<void> {
-        if (!(file instanceof TFile)) return
-
-        const group = this.#log.group()
-        group.debug('Listening changes on', file)
-
-        group.debug('Listing affected files')
-        const affected = await this.#affectedFiles(file, group)
-
-        group.debug('Prepared affected files')
-        await this.#refresher(affected, group)
-
-        group.flush(`Listened changes on <${file.name}>`)
-    }
-
-    /**
      * Calculate all the files affected when a file changed
      */
     async #affectedFiles(changedFile: TFile, log: Logger): Promise<string[]> {
@@ -91,11 +83,11 @@ export default class VersionsManager {
 
         // shared code
         const processDependencyTree = async (file: TFile) => {
-            log.debug('Refreshing dependencies', file)
+            log.debug(`Refreshing dependencies <${file.name}>`)
             await this.#indexDependencies(file, log)
 
-            log.debug('Checking dependents', file)
-            for (const dependent of this.#tracked.get(file.path)) {
+            log.debug(`Checking dependents <${file.name}>`)
+            for (const dependent of this.#tracked.keysWithValue(file.path)) {
                 const dependentFile = this.#fs.resolveFile(dependent)
                 if (dependentFile) pendingFiles.push(dependentFile)
                 else log.warn('Not found', dependent)
@@ -110,7 +102,7 @@ export default class VersionsManager {
             // Template files
             if (['html', 'md'].includes(file.extension)) {
                 // can be HotReloaded because it doesn't import
-                log.debug('Affected Template', file)
+                log.debug(`Affected Template <${file.name}>`)
                 affectedFiles.push(file.path)
                 continue
             }
@@ -118,10 +110,10 @@ export default class VersionsManager {
             // CommonJS files
             if (file.extension === 'cjs') {
                 // can be HotReloaded because the cache can be invalidated
-                log.debug('Affected CommonJS', file)
+                log.debug(`Affected CommonJS <${file.name}>`)
                 affectedFiles.push(file.path)
 
-                log.debug('Deleting cache', file)
+                log.debug(`Deleting cache <${file.name}>`)
                 // invalidate the CommonJS cache, to allow a fresh load
                 const filepath = this.#fs.getAbsolutePath(file.path)
                 // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
@@ -142,10 +134,10 @@ export default class VersionsManager {
             }
 
             // ESModule files
-            log.debug('Affected ESModule', file)
+            log.debug(`Affected ESModule <${file.name}>`)
             affectedFiles.push(file.path)
 
-            log.debug('Caching clone', file)
+            log.debug(`Caching clone <${file.name}>`)
             const cachePath = await this.#cacheFile(file, log)
             this.#versions.prepend(file.path, cachePath)
 
@@ -206,9 +198,7 @@ export default class VersionsManager {
      * and all the imported/requested files.
      * @throws {Error}
      */
-    public async indexComponents(log: Logger): Promise<void> {
-        if (!this.#plugin.isDesignModeEnabled) return
-
+    public async indexAllComponents(log: Logger): Promise<void> {
         const componentsPath = this.#plugin.settings.components_folder
         const componentsFolder =
             this.#plugin.app.vault.getFolderByPath(componentsPath)
@@ -217,38 +207,47 @@ export default class VersionsManager {
         }
 
         log.info('Indexing files')
-        const pendingFiles = [componentsFolder] as TAbstractFile[]
+        await this.indexComponent(componentsFolder, log)
+
+        log.debug('Indexed files', {
+            tracked: this.#tracked,
+            versions: this.#versions,
+        })
+    }
+
+    async indexComponent(rootfile: TAbstractFile, log: Logger): Promise<void> {
+        if (this.#tracked.has(rootfile.path)) return
+
+        const pendingFiles = [rootfile] as TAbstractFile[]
         while (pendingFiles.length) {
             const file = pendingFiles.shift()
+
             if (file instanceof TFolder) {
-                log.debug('Indexing folder', file)
+                log.debug(`Indexing folder <${file.name}>`)
                 pendingFiles.push(...file.children)
                 continue
             }
 
             // unexpected behavior
             if (!(file instanceof TFile)) continue
+            // file was previously indexed
+            if (this.#tracked.has(file.path)) continue
+            this.#tracked.store(file.path)
 
             // queue dependency files
-            log.debug('Indexing file', file)
+            log.debug(`Indexing dependencies on <${file.name}>`)
             for (const dependency of await this.#indexDependencies(file, log)) {
                 const dependencyFile = this.#fs.resolveFile(dependency)
                 if (dependencyFile) pendingFiles.push(dependencyFile)
                 else log.warn('Not found', dependency)
             }
         }
-
-        log.trace('Indexed files', {
-            tracked: this.#tracked,
-            versions: this.#versions,
-        })
     }
 
     /**
      * Find all the imported/requested files in a file.
      */
     async #indexDependencies(file: TFile, log: Logger): Promise<string[]> {
-        log.debug('Indexing dependencies', file)
         const parentPath = file.parent?.path ?? ''
         const content = await this.#fs.read(file.path)
         const dependencies: string[] = []
@@ -256,7 +255,7 @@ export default class VersionsManager {
         for (const match of content.matchAll(importsRegex())) {
             const dependency = this.#fs.join(parentPath, match[0] || '')
             log.trace(`file <${file.name}> imports <${dependency}>`)
-            this.#tracked.push(dependency, file.path)
+            this.#tracked.push(file.path, dependency)
             dependencies.push(dependency)
         }
 
