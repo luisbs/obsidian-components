@@ -1,7 +1,7 @@
 {
 	"id": "components",
 	"name": "Components",
-	"version": "0.5.0",
+	"version": "0.5.1",
 	"minAppVersion": "1.8.4",
 	"description": "Plugin to use custom visual elements on notes",
 	"author": "luisbs",

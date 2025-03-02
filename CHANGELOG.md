@@ -1,5 +1,11 @@
 # @luis.bs/obsidian-components
 
+## 0.5.1
+
+### Patch Changes
+
+- 19cbd1a: Replaced Node.js libraries for better support on android
+
 ## 0.5.0
 
 ### Minor Changes
