@@ -42,6 +42,9 @@
         "build:lib": "vite build -c ./scripts/vite.config.lib.mjs && tsc -p ./scripts/tsconfig.lib.json",
         "build:dist": "vite build -c ./scripts/vite.config.dist.mjs",
         "build:demo": "vite build -c ./scripts/vite.config.demo.mjs",
+        "ci:publish": "pnpm build:lib && clean-pkg-json && changeset publish --no-git-tag",
+        "ci:obsidian": "pnpm build:dist && node ./scripts/obsidian-release.mjs",
+        "ci:manifest": "pnpm build:demo && node ./scripts/update-manifest.mjs",
         "release": "changeset"
     },
     "dependencies": {

@@ -1,0 +1,67 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    steps:
+      # Since GITHUB_TOKEN will not trigger manifest.yml generate a replacement
+      - name: Generate Access Token
+        uses: actions/create-github-app-token@v1
+        id: access
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.PRIVATE_KEY }}
+
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+        with:
+          token: ${{ steps.access.outputs.token }}
+          # Prevents the usage of GITHUB_TOKEN
+          persist-credentials: false
+          # This makes Actions fetch all Git history so that Changesets can generate changelogs with the correct commits
+          fetch-depth: 0
+
+      - name: Install PnPM
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          registry-url: 'https://registry.npmjs.org'
+          cache: pnpm
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Create Release Pull Request or Publish to NPM
+        # fork to correctly handle `changeset publish --no-git-tag`
+        uses: luisbs/changesets-action@v1
+        id: changesets
+        with:
+          title: "chore: release @luis.bs/obsidian-components"
+          commit: "chore: release @luis.bs/obsidian-components"
+          publish: pnpm run ci:publish
+          noGitTags: true
+          createGithubReleases: false
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.access.outputs.token }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create GitHub Release
+        if: steps.changesets.outputs.published == 'true'
+        # reverse what clean-pkg-json did before publishing
+        run: |
+          git reset --hard HEAD
+          pnpm run ci:obsidian
+        env:
+          GH_TOKEN: ${{ steps.access.outputs.token }}
