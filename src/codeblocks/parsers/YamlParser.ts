@@ -12,7 +12,6 @@ export class YamlParser implements CodeblockParser {
     }
 
     parse(source: string, _notepath: string): Promise<unknown> {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-        return parseYaml(source)
+        return Promise.resolve(parseYaml(source))
     }
 }

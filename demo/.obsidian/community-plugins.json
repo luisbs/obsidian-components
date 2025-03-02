@@ -1,5 +1,6 @@
 [
   "hot-reload",
   "components",
-  "attachments-cache"
+  "attachments-cache",
+  "dataview"
 ]

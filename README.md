@@ -63,6 +63,14 @@ author: J. R. Tolkien
 ```
 ````
 
+If [Dataview](https://github.com/blacksmithgu/obsidian-dataview) is installed and enabled the obsidian syntax can also bee used
+
+````md
+```use books
+TABLE title, author FROM "books"
+```
+````
+
 ### Custom Codeblocks
 
 > **This behavior is disabled by default** and can be enabled with the [Custom Codeblocks Setting](./docs/settings.md#custom-codeblocks-setting).
@@ -85,6 +93,18 @@ Each supported syntax can be enabled as a `format` on the settings. The formats 
 - **Javascript_HTML Components** are defined using _Javascript_ and should return a _HTML_ string.
 - **Javascript_Markdown Components** are defined using _Javascript_ and should return a _Markdown_ string.
 - **Javascript_code Components** are defined using _Javascript_ and works over the runtime elements.
+
+### Dataview Support
+
+When a **Dataview** query is identified, it is queried against **Dataview** Plugin and the result is piped into the **Component**.
+
+The piped values can be checked with the `successful` flag, when something fails something similar to the next object is passed.
+
+```js
+{ successful: false, value: undefined }
+```
+
+For details on the passed data structure, check [documentation](https://blacksmithgu.github.io/obsidian-dataview/resources/develop-against-dataview/) of Dataview.
 
 ---
 

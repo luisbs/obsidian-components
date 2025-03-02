@@ -13,5 +13,5 @@ export interface CodeblockParser {
     /** Checks if the source has a valid syntax. */
     test(source: string): boolean
     /** Tries to parse the content. */
-    parse(source: string, notepath: string): unknown
+    parse(source: string, notepath: string): Promise<unknown>
 }

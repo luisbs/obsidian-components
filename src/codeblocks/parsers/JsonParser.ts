@@ -8,7 +8,6 @@ export class JsonParser implements CodeblockParser {
     }
 
     parse(source: string, _notepath: string): Promise<unknown> {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-        return JSON.parse(source)
+        return Promise.resolve(JSON.parse(source))
     }
 }

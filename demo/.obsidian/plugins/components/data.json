@@ -1,5 +1,5 @@
 {
-  "plugin_level": "WARN",
+  "plugin_level": "DEBUG",
   "enable_codeblocks": true,
   "enable_separators": true,
   "usage_separator": "---",
@@ -10,6 +10,12 @@
       "id": "book.md",
       "path": "components/entries/book.md",
       "names": "book",
+      "enabled": true
+    },
+    {
+      "id": "books.md.cjs",
+      "path": "components/entries/books.md.cjs",
+      "names": "books",
       "enabled": true
     },
     {

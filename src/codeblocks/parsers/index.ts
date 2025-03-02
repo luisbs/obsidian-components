@@ -29,7 +29,11 @@ export default class ParserManager {
         return new RegExp(escaped, 'gi')
     }
 
-    parse(source: string, notepath: string, log: Logger): CodeblockContent {
+    async parse(
+        source: string,
+        notepath: string,
+        log: Logger,
+    ): Promise<CodeblockContent> {
         log.trace(`Parsing from '${notepath}' <${source}>`)
         const separator = this.#separator()
 
@@ -38,12 +42,11 @@ export default class ParserManager {
                 for (const parser of this.#parsers) {
                     if (parser.test(source)) {
                         log.debug(`Parsing as ${parser.id}`)
-                        return {
-                            syntax: parser.id,
-                            data: source
-                                .split(separator)
-                                .map((i) => parser.parse(i, notepath)),
+                        const data = []
+                        for (const item of source.split(separator)) {
+                            data.push(await parser.parse(item, notepath))
                         }
+                        return { syntax: parser.id, data }
                     }
                 }
             }
@@ -53,7 +56,7 @@ export default class ParserManager {
                     log.debug(`Parsing as ${parser.id}`)
                     return {
                         syntax: parser.id,
-                        data: parser.parse(source, notepath),
+                        data: await parser.parse(source, notepath),
                     }
                 }
             }
