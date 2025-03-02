@@ -40,8 +40,10 @@ export default class VersionsManager {
             group.debug('Listing affected files')
             const affected = await this.#affectedFiles(file, group)
 
-            group.debug('Prepared affected files')
-            await this.#refresher(affected, group)
+            if (affected.length) {
+                group.debug('Prepared affected files')
+                await this.#refresher(affected, group)
+            }
 
             group.flush(`Listened changes on <${file.name}>`)
         })
