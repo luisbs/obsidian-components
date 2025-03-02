@@ -18,7 +18,8 @@ export default ts.config(
             },
             globals: {
                 ...globals.browser,
-                ...globals.node,
+                // Obsidian Android version doesn't include Node globals
+                // ...globals.node,
             },
         },
         rules: {

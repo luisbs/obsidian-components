@@ -1,7 +1,7 @@
 import type { ComponentsPlugin } from '@/types'
-import Path from 'path'
-import { createHash } from 'crypto'
+import pathe from 'pathe'
 import { TAbstractFile, TFile, TFolder, Vault, normalizePath } from 'obsidian'
+import { getHash } from './common'
 
 type ContentEditor = (content: string) => string
 
@@ -27,7 +27,7 @@ export class FilesystemAdapter {
     public getAbsolutePath(path: string): string {
         //? may change internally since `basePath` is not public/documentated
         // @ts-expect-error not-public-api-usage
-        return Path.resolve(this.#vault.adapter.basePath as string, path)
+        return pathe.resolve(this.#vault.adapter.basePath as string, path)
     }
 
     /**
@@ -46,7 +46,7 @@ export class FilesystemAdapter {
      * Normalize after joining the path.
      */
     public join(...paths: string[]): string {
-        return normalizePath(Path.join(...paths))
+        return normalizePath(pathe.join(...paths))
     }
 
     /**
@@ -164,7 +164,7 @@ export class FilesystemAdapter {
     ): Promise<string> {
         const filepath = this.resolvePath(fileOrPath)
         const content = await this.#vault.adapter.read(filepath)
-        const hash = createHash('sha256').update(content).digest('hex')
+        const hash = await getHash(content)
         return length < 1 ? hash : hash.substring(0, length)
     }
 }

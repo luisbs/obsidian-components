@@ -1,4 +1,3 @@
-import builtins from 'builtin-modules'
 import banner from 'vite-plugin-banner'
 import { viteStaticCopy } from 'vite-plugin-static-copy'
 import pkg from '../package.json'
@@ -50,7 +49,6 @@ export function rollupOptions() {
             '@codemirror/text',
             '@codemirror/tooltip',
             '@codemirror/view',
-            ...builtins,
         ],
     }
 }

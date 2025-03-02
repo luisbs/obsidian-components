@@ -139,7 +139,7 @@ export default class CodeblockHandler {
             group.debug(`Parsing Codeblock Content '${used_name}'`)
             const parsed = await this.#parser.parse(source, notepath, group)
             const matcher = this.#getComponentMatcher(componentId, used_name)
-            const hash = getHash(source)
+            const hash = await getHash(source)
 
             group.debug(`Serializing Codeblock '${used_name}'`)
             const context = { notepath, used_name, hash, syntax: parsed.syntax }
