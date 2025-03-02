@@ -2,4 +2,4 @@
 '@luis.bs/obsidian-components': minor
 ---
 
-Allow HMR from CommonJS and Template files
+Allow HotReload from CommonJS and Template files

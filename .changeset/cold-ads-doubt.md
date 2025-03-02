@@ -1,5 +1,5 @@
 ---
-'@luis.bs/obsidian-components': patch
+'@luis.bs/obsidian-components': minor
 ---
 
 Added Support for Dataview
