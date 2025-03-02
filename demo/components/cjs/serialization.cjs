@@ -15,19 +15,19 @@ function shouldGroup(itemsLabel, item) {
  * @template {ItemsGroup<L, T>} G
  * @param {unknown} data
  * @param {L} itemsLabel
- * @param {(items: T[], data: Record<string, unknown>) => Promise<G>} callback
- * @returns {Promise<G[]>}
+ * @param {(items: T[], data: Record<string, unknown>) => G} callback
+ * @returns {G[]}
  */
-async function serialize(data, itemsLabel, callback) {
+function serialize(data, itemsLabel, callback) {
     if (!Array.isArray(data) || !data.some(shouldGroup.bind(null, itemsLabel))) {
         const prepared = [];
-        prepared.push(await serializeGroup(data, itemsLabel, callback));
+        prepared.push(serializeGroup(data, itemsLabel, callback));
         return prepared;
     }
 
     const prepared = [];
     for (const group of data) {
-        prepared.push(await serializeGroup(group, itemsLabel, callback));
+        prepared.push(serializeGroup(group, itemsLabel, callback));
     }
     return prepared;
 }
@@ -38,10 +38,10 @@ async function serialize(data, itemsLabel, callback) {
  * @template {ItemsGroup<L, T>} G
  * @param {unknown} group
  * @param {L} itemsLabel
- * @param {(items: undefined[], data: Record<string, unknown>) => Promise<G>} callback
- * @returns {Promise<G>}
+ * @param {(items: undefined[], data: Record<string, unknown>) => G} callback
+ * @returns {G}
  */
-async function serializeGroup(group, itemsLabel, callback) {
+function serializeGroup(group, itemsLabel, callback) {
     if (Array.isArray(group)) return callback(group, {});
     if (typeof group !== 'object') return callback([group], {});
     if (itemsLabel in group) return callback(group[itemsLabel], group);

@@ -26,7 +26,7 @@ function innerCls(row) {
  * @param {unknown} input
  * @param {CodeblockContext} context
  */
-export default async function render(input, { notepath }) {
+export default function render(input, { notepath }) {
     /** @type {ContentMetadata[]} */
     const data = Arr.wrap(input);
     // console.log({ input, data });
@@ -64,7 +64,7 @@ export default async function render(input, { notepath }) {
         }
 
         // content-cover
-        const cover = await URI.getMetadata(row.cover, notepath);
+        const cover = URI.getMetadata(row.cover, notepath);
         if (cover) {
             // used as background for easier size manipulation
             const coverEl = cardEl.div('content-cover');

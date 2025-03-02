@@ -11,8 +11,8 @@ function innerCls(row) {
  * @param {unknown} input
  * @param {CodeblockContext} context
  */
-export default async function render(root, input, { notepath }) {
-    const data = await serializeGallery(notepath, input);
+export default function render(root, input, { notepath }) {
+    const data = serializeGallery(notepath, input);
     // console.log({ input, data });
 
     const rootEl = CodeRenderer.init(root);

@@ -1,14 +1,8 @@
 export default class URI {
-    /** @type {(path: string) => Promise<string>} */
-    static async #normalize(path = '', notepath = '') {
+    /** @type {(path: string) => string} */
+    static #normalize(path = '') {
         if (typeof path !== 'string') return '';
-        if (path.startsWith('http')) {
-            if (!AttachmentsCache) return path;
-            const resolved = await AttachmentsCache.cache(notepath, path);
-            if (!resolved) return path;
-            const file = app.vault.getFileByPath(resolved);
-            return file ? app.vault.getResourcePath(file) : undefined;
-        }
+        if (path.startsWith('http')) return path;
 
         /** @type {Record<string, { type: 'folder' | 'file', realpath: string }>} */
         const files = app.fileManager.vault.adapter.files;
@@ -82,8 +76,8 @@ export default class URI {
         return { type: 'vault', uri, params };
     }
 
-    /** @type {(value: string, notepath: string) => Promise<URIMetadata?>} */
-    static async getMetadata(value, notepath = '') {
+    /** @type {(value: string) => URIMetadata?} */
+    static getMetadata(value) {
         if (typeof value !== 'string') return null;
         value = value.trim();
 
@@ -105,7 +99,7 @@ export default class URI {
             params,
 
             ext,
-            src: await this.#normalize(uri, notepath),
+            src: this.#normalize(uri),
             size: this.#getSize(params) || '1',
             label: this.#getLabel(params) || path_tail.replace('#', ' > '),
             isVideo: /mp4|webm|ogg/gi.test(ext),
