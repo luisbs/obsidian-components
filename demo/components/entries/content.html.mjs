@@ -64,7 +64,7 @@ export default function render(input, { notepath }) {
         }
 
         // content-cover
-        const cover = URI.getMetadata(row.cover, notepath);
+        const cover = URI.getMetadata(row.cover);
         if (cover) {
             // used as background for easier size manipulation
             const coverEl = cardEl.div('content-cover');

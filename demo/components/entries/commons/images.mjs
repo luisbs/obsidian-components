@@ -1,31 +1,31 @@
 import { Obj, Renderer, URI, serialize } from '../../esm/index.mjs';
 
-/** @type {(notepath: string, items: unknown[]) => URIMetadata[]} */
-export function serializeImages(notepath, images) {
+/** @type {(items: unknown[]) => URIMetadata[]} */
+export function serializeImages(images) {
     const prepared = [];
     for (const image of images) {
         if (Obj.isNil(image)) continue;
 
         let item = null;
-        if (typeof image === 'string') item = URI.getMetadata(image, notepath);
-        else if (typeof image === 'object') item = URI.getMetadata(image.url, notepath);
+        if (typeof image === 'string') item = URI.getMetadata(image);
+        else if (typeof image === 'object') item = URI.getMetadata(image.url);
         if (item) prepared.push(item);
     }
     return prepared;
 }
 
-/** @type {(notepath: string, items: unknown[], data: Record<string, unknown>) => ImageGroupMetadata[]} */
-export function serializeGroup(notepath, images, { label, title, link, artist }) {
+/** @type {(items: unknown[], data: Record<string, unknown>) => ImageGroupMetadata[]} */
+export function serializeGroup(images, { label, title, link, artist }) {
     return {
         label: label || title || '',
-        link: URI.getMetadata(link || artist, notepath) || undefined,
-        images: serializeImages(notepath, images),
+        link: URI.getMetadata(link || artist) || undefined,
+        images: serializeImages(images),
     };
 }
 
-/** @type {(notepath:string, input: unknown) => ImageGroupMetadata[]} */
-export function serializeGallery(notepath, input) {
-    return serialize(input, 'images', serializeGroup.bind(null, notepath));
+/** @type {(input: unknown) => ImageGroupMetadata[]} */
+export function serializeGallery(input) {
+    return serialize(input, 'images', serializeGroup.bind(null));
 }
 
 /**

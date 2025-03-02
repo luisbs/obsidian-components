@@ -48,7 +48,5 @@
       "names": "video",
       "enabled": true
     }
-  ],
-  "usage_method": "INLINE",
-  "usage_naming": "__name"
+  ]
 }

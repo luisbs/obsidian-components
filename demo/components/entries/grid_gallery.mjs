@@ -12,7 +12,7 @@ function innerCls(row) {
  * @param {CodeblockContext} context
  */
 export default function render(root, input, { notepath }) {
-    const data = serializeGallery(notepath, input);
+    const data = serializeGallery(input);
     // console.log({ input, data });
 
     const rootEl = CodeRenderer.init(root);
