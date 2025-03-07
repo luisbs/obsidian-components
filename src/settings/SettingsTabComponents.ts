@@ -98,13 +98,13 @@ export class SettingsTabComponents {
 
         // enable filtered components
         el.addExtraButton((button) => {
-            button.setIcon('badge-check').setTooltip('Enable Listed Components')
+            button.setIcon('badge-check').setTooltip('Enable listed Components')
             button.onClick(() => this.#toggleComponents(this.#filtered, true))
         })
 
         // disable filtered components
         el.addExtraButton((button) => {
-            button.setIcon('badge-x').setTooltip('Disable Listed Components')
+            button.setIcon('badge-x').setTooltip('Disable listed Components')
             button.onClick(() => this.#toggleComponents(this.#filtered, false))
         })
     }
@@ -116,8 +116,8 @@ export class SettingsTabComponents {
             if (!this.#filtered.includes(c.id)) continue
 
             const el = new Setting(this.#componentsEl)
-            el.setName(this.#componentName(c.id, c.enabled))
-            el.setDesc(this.#componentDesc(c.id))
+            el.setName(this.#componentName(c))
+            el.setDesc(this.#componentDesc(c))
             el.addExtraButton((button) => {
                 button.setTooltip('Edit names')
                 button.setIcon('pencil')
@@ -131,16 +131,13 @@ export class SettingsTabComponents {
         }
     }
 
-    #componentName(id: string, status: boolean): DocumentFragment {
+    #componentName({ id }: ComponentConfig): DocumentFragment {
         const div = createFragment()
-        div.append(
-            `${status ? 'Enabled' : 'Disabled'} component: `,
-            Tools.el('code', id),
-        )
+        div.append(`Component: `, Tools.el('code', id))
         return div
     }
 
-    #componentDesc(id: string): DocumentFragment {
+    #componentDesc({ id }: ComponentConfig): DocumentFragment {
         const frag = createFragment()
         const div = frag.createDiv('components-names')
         div.append('Usage: ')
@@ -165,6 +162,7 @@ export class SettingsTabComponents {
 
         let formInput: TextAreaComponent | null = null
         const el = new Setting(this.#activeForm)
+        el.setName('Custom names')
         el.addTextArea((textarea) => {
             formInput = textarea
             textarea.setValue(c.names)

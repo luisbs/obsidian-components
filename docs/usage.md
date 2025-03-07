@@ -47,7 +47,7 @@ author: 'F. Scott Fitzgerald'
 
 ### As custom Codeblocks
 
-> **This behavior is disabled by default** and can be enabled with the [Custom Codeblocks Setting](./settings.md#custom-codeblocks-setting).
+> **This behavior is disabled by default** and can be enabled with [Enable Custom Codeblocks](./settings.md#enable-custom-codeblocks).
 
 The **custom Codeblocks** allow a user to use **components** avoiding the `use` word. It uses the **components** custom names defined by the user instead. Example:
 
@@ -101,9 +101,17 @@ will all recive the `.component.book-component` css-class
 
 ## Supported Codeblocks Syntax
 
-The plugin supports 2 syntax for defining data, it should be writen in a standard way
+The plugin supports 3 syntax for defining data, it should be writen in a standard way
 
-- **YAML** uses the obsidian [`parseYaml()`](https://docs.obsidian.md/Reference/TypeScript+API/parseYaml) method.
+- **dataview** uses [Dataview](https://github.com/blacksmithgu/obsidian-dataview) plugin to resolve the passed query into data.
+
+````md
+```dataview
+TABLE title, author FROM "books"
+```
+````
+
+- **yaml** uses the obsidian [`parseYaml()`](https://docs.obsidian.md/Reference/TypeScript+API/parseYaml) method.
 
 ````md
 ```yaml
@@ -112,7 +120,7 @@ param1: 'value1'
 ```
 ````
 
-- **JSON** uses the standard [`JSON.parse()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/parse) method.
+- **json** uses the standard [`JSON.parse()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/parse) method.
 
 ````md
 ```json
@@ -123,7 +131,7 @@ param1: 'value1'
 ```
 ````
 
-On top of this usage, a separator can be used to write first-level array items without indentations, check [Codeblocks Separators Setting](./settings.md#codeblocks-separators-setting) for details.
+On top of this usage, a separator can be used to write first-level array items without indentations, check [Enable separators inside Codeblocks](./settings.md#enable-separators-inside-Codeblocks) for details.
 
 ---
 

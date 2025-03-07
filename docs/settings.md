@@ -2,7 +2,7 @@
 
 The next entries are settings that can be configured on the _SettingsTab_ of the plugin.
 
-## Design Mode Setting
+## Design Mode
 
 > Will be removed on some future update.
 
@@ -18,7 +18,7 @@ To bypass these behavior the _Design Mode Setting_ actives a modifications track
 
 The bad thing about this is that it will generate a higher memory and storage usage meanwhile the app is open; thats why it is disabled by default.
 
-## Custom Codeblocks Setting
+## Enable custom Codeblocks
 
 By default to identify a **Codeblocks** that should run a **component**, the `use <component-name>` sentence is used as the header of the **Codeblock**. Example:
 
@@ -36,7 +36,7 @@ param1: value1
 ```
 ````
 
-## Codeblocks Separators Setting
+## Enable separators inside Codeblocks
 
 By default the content inside a **Codeblock** is parsed as detailed at [Supported Codeblocks Syntax](./usage.md#supported-codeblocks-syntax). But in the case of `YAML` that will force arrays to be indented. Example:
 

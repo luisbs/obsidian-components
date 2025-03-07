@@ -36,13 +36,12 @@ export class SettingsTab extends PluginSettingTab {
         this.containerEl.empty()
         this.containerEl.addClass('components-settings')
 
-        new Setting(this.containerEl).setName('Plugin Settings').setHeading()
         this.#displayGeneralSettings()
 
-        new Setting(this.containerEl).setName('Codeblock Settings').setHeading()
+        new Setting(this.containerEl).setName('Codeblock').setHeading()
         this.#displayCodeblocksSettings()
 
-        new Setting(this.containerEl).setName('Component Settings').setHeading()
+        new Setting(this.containerEl).setName('Component').setHeading()
         this.#displayComponentsSettings()
 
         new SettingsTabComponents(this.#plugin, this.containerEl)
@@ -50,10 +49,8 @@ export class SettingsTab extends PluginSettingTab {
 
     #displayGeneralSettings(): void {
         const levelSetting = new Setting(this.containerEl)
-        levelSetting.setName('Plugging LogLevel')
-        levelSetting.setDesc(
-            docs('Plugging LogLevel', 'To check the plugin logs'),
-        )
+        levelSetting.setName('Log level')
+        levelSetting.setDesc(docs('Log level', 'To check the plugin logs'))
         levelSetting.addDropdown((dropdown) => {
             dropdown.addOptions(LEVEL_LABELS)
             dropdown.setValue(this.#plugin.settings.plugin_level)
@@ -83,12 +80,9 @@ export class SettingsTab extends PluginSettingTab {
 
     #displayCodeblocksSettings(): void {
         const codeblockSettings = new Setting(this.containerEl)
-        codeblockSettings.setName('Custom Codeblocks')
+        codeblockSettings.setName('Enable custom Codeblocks')
         codeblockSettings.setDesc(
-            docs(
-                'Custom Codeblocks',
-                'Allows the usage of the components custom names as codeblocks identifiers',
-            ),
+            docs('Enable custom Codeblocks', 'Use custom names as Codeblocks'),
         )
         codeblockSettings.addToggle((input) => {
             input.setValue(this.#plugin.settings.enable_codeblocks)
@@ -98,11 +92,11 @@ export class SettingsTab extends PluginSettingTab {
         //
         let usageSeparatorInput: TextComponent | null = null
         const enableSeparatorSettings = new Setting(this.containerEl)
-        enableSeparatorSettings.setName('Enable Codeblocks Separators')
+        enableSeparatorSettings.setName('Enable separators inside Codeblocks')
         enableSeparatorSettings.setDesc(
             docs(
-                'Enable Codeblocks Separators',
-                'Allows the usage of separators inside codeblocks',
+                'Enable separators inside Codeblocks',
+                'Use separators inside Codeblocks',
             ),
         )
         enableSeparatorSettings.addToggle((input) => {
@@ -114,7 +108,7 @@ export class SettingsTab extends PluginSettingTab {
         })
 
         const separatorSetting = new Setting(this.containerEl)
-        separatorSetting.setName('Codeblocks Separator')
+        separatorSetting.setName('Codeblocks separator')
         separatorSetting.setDesc('Separator to use inside codeblocks.')
         separatorSetting.addText((input) => {
             usageSeparatorInput = input
@@ -148,7 +142,7 @@ export class SettingsTab extends PluginSettingTab {
         // Components folder setting
         const sourceDesc = createFragment()
         sourceDesc.append(
-            'Files in this directory will be taken as components.',
+            'Files in this directory will be taken as Components.',
         )
         const sourceLog = sourceDesc.createEl('p', 'invalid-value')
 
@@ -165,7 +159,7 @@ export class SettingsTab extends PluginSettingTab {
         //
         // Cache folder setting
         const cacheDesc = createFragment()
-        cacheDesc.append('Folder used to cache pre-processed components.')
+        cacheDesc.append('Folder used to cache pre-processed Components.')
         const cacheLog = cacheDesc.createEl('p', 'invalid-value')
 
         const cachefolderSetting = new Setting(this.containerEl)
