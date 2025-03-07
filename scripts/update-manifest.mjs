@@ -3,6 +3,7 @@ import { execSync } from 'node:child_process'
 
 const run = (command) => console.log(execSync(command).toString('utf8'))
 
+// eslint-disable-next-line no-undef
 const NEW_VERSION = process.env.npm_package_version
 
 // update manifest.json with target version

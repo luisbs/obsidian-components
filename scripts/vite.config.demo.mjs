@@ -5,7 +5,7 @@ import { packageBanner, packageStatic, rollupOptions } from './vite.share.mjs'
 // https://vitejs.dev/config/
 export default defineConfig({
     plugins: [packageBanner(), packageStatic(['manifest.json', 'styles.css'])],
-    resolve: { alias: { '@': resolve(__dirname, '../src') } },
+    resolve: { alias: { '@': resolve(import.meta.dirname, '../src') } },
     build: {
         emptyOutDir: false,
         outDir: 'demo/.obsidian/plugins/components',
@@ -15,7 +15,7 @@ export default defineConfig({
         lib: {
             formats: ['cjs'],
             fileName: () => 'main.js',
-            entry: resolve(__dirname, '../src/main.ts'),
+            entry: resolve(import.meta.dirname, '../src/main.ts'),
         },
     },
 })
