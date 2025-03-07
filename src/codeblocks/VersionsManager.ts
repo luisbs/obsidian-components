@@ -31,7 +31,7 @@ export default class VersionsManager {
         this.#fs = new FilesystemAdapter(plugin)
         this.#plugin = plugin
         this.#refresher = refresher
-        this.#handler = this.#plugin.app.vault.on('modify', async (file) => {
+        this.#handler = plugin.app.vault.on('modify', async (file) => {
             if (!(file instanceof TFile)) return
 
             const group = this.#log.group()
@@ -64,7 +64,7 @@ export default class VersionsManager {
     public async resetCache(log: Logger): Promise<void> {
         // prevent cleaning on non designMode state
         if (!this.#plugin.isDesignModeEnabled) return
-        await this.#fs.renewFolder(this.#fs.getCachePath())
+        await this.#fs.renewCache()
         log.info('Cleared Versions Cache')
     }
 
@@ -162,7 +162,7 @@ export default class VersionsManager {
         const cachePath = this.#fs.getCachePath(cacheName)
 
         // first time cached
-        if (await this.#fs.missing(cachePath)) {
+        if (this.#fs.missing(cachePath)) {
             log.debug(`Caching <${file.name}> to <${cacheName}>`)
             await this.#fs.copy(file, cachePath, (content) => {
                 return this.#replaceImports(file, content, log)
@@ -251,7 +251,7 @@ export default class VersionsManager {
      */
     async #indexDependencies(file: TFile, log: Logger): Promise<string[]> {
         const parentPath = file.parent?.path ?? ''
-        const content = await this.#fs.read(file.path)
+        const content = await this.#fs.read(file)
         const dependencies: string[] = []
 
         for (const match of content.matchAll(importsRegex())) {

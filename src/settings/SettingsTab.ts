@@ -130,10 +130,10 @@ export class SettingsTab extends PluginSettingTab {
             input: TextComponent,
             logs: HTMLElement,
         ) => {
-            input.onChange(async (path: string) => {
+            input.onChange((path: string) => {
                 logs.empty()
 
-                if (!path || path === '/' || (await this.#fs.missing(path))) {
+                if (!path || path === '/' || this.#fs.missing(path)) {
                     input.inputEl.classList.add('invalid-value')
                     logs.appendText('Invalid path.')
                     return

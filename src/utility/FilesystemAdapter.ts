@@ -1,9 +1,7 @@
 import type { ComponentsPlugin } from '@/types'
 import pathe from 'pathe'
-import { TAbstractFile, TFile, TFolder, Vault, normalizePath } from 'obsidian'
+import { TAbstractFile, TFile, Vault, normalizePath } from 'obsidian'
 import { getHash } from './common'
-
-type ContentEditor = (content: string) => string
 
 export class FilesystemAdapter {
     #plugin: ComponentsPlugin
@@ -15,19 +13,14 @@ export class FilesystemAdapter {
     }
 
     /**
-     * Returns an URI for the browser engine to use, for example to embed an image.
+     * Removes everything from a folder
+     * and creates a new empty folder with the same name.
      */
-    public getResourcePath(file: TFile): string {
-        return this.#plugin.app.vault.getResourcePath(file)
-    }
-
-    /**
-     * An absolute path of the file on the user system.
-     */
-    public getAbsolutePath(path: string): string {
-        //? may change internally since `basePath` is not public/documentated
-        // @ts-expect-error not-public-api-usage
-        return pathe.resolve(this.#vault.adapter.basePath as string, path)
+    public async renewCache(): Promise<void> {
+        const path = this.getCachePath()
+        const folder = this.#vault.getFolderByPath(path)
+        if (folder) await this.#vault.delete(folder, false)
+        await this.#vault.createFolder(path)
     }
 
     /**
@@ -40,6 +33,23 @@ export class FilesystemAdapter {
             '__components__',
             ...paths,
         )
+    }
+
+    /**
+     * An absolute path of the file on the user system.
+     */
+    public getAbsolutePath(path: string): string {
+        //? is not public/documentated, may change internally
+        // @ts-expect-error not-public-api-usage
+        // eslint-disable-next-line
+        return this.#vault.adapter.getFullPath(path)
+    }
+
+    /**
+     * Returns an URI for the browser engine to use, for example to embed an image.
+     */
+    public getResourcePath(file: TFile): string {
+        return this.#plugin.app.vault.getResourcePath(file)
     }
 
     /**
@@ -66,58 +76,24 @@ export class FilesystemAdapter {
     }
 
     /**
-     * Internal utility method.
+     * Checks if a file exists.
      */
-    async #exists(filepath: string): Promise<boolean> {
-        return await this.#vault.adapter.exists(filepath)
-    }
-
-    /**
-     * Internal utility method.
-     */
-    async #missing(filepath: string): Promise<boolean> {
-        return !(await this.#vault.adapter.exists(filepath))
+    public exists(filepath: string): boolean {
+        return !!this.#vault.getAbstractFileByPath(filepath)
     }
 
     /**
      * Checks if a file exists.
      */
-    public async exists(filepath: string): Promise<boolean> {
-        return this.#exists(filepath)
-    }
-
-    /**
-     * Checks if a file exists.
-     */
-    public async missing(filepath: string): Promise<boolean> {
-        return this.#missing(filepath)
-    }
-
-    /**
-     * Removes a file from the filesystem.
-     */
-    public async remove(filepath: string): Promise<void> {
-        await this.#vault.adapter.remove(filepath)
+    public missing(filepath: string): boolean {
+        return !this.#vault.getAbstractFileByPath(filepath)
     }
 
     /**
      * Retrieves the content of a file.
      */
-    public async read(filepath: string): Promise<string> {
-        return await this.#vault.adapter.read(filepath)
-    }
-
-    /**
-     * Edits a file content using a callback.
-     * @param editor callback used to perform the edition
-     */
-    public async edit(
-        fileOrPath: TFile | string,
-        editor: ContentEditor,
-    ): Promise<void> {
-        const filepath = this.resolvePath(fileOrPath)
-        const content = await this.#vault.adapter.read(filepath)
-        await this.#vault.adapter.write(filepath, editor(content))
+    public async read(file: TFile): Promise<string> {
+        return await this.#vault.cachedRead(file)
     }
 
     /**
@@ -125,32 +101,13 @@ export class FilesystemAdapter {
      * @param editor callback used to perform an edition before saving
      */
     public async copy(
-        fileOrPath: TFile | string,
-        newFilePath: string,
-        editor?: ContentEditor,
-    ): Promise<void> {
-        const filepath = this.resolvePath(fileOrPath)
-
-        // simplier copy
-        if (!editor) return this.#vault.adapter.copy(filepath, newFilePath)
-
-        // copy with edit
-        const content = await this.#vault.adapter.read(filepath)
-        await this.#vault.adapter.write(newFilePath, editor(content))
-    }
-
-    /**
-     * Removes everything from a folder
-     * and creates a new empty folder with the same name.
-     */
-    public async renewFolder(folderOrPath: TFolder | string): Promise<void> {
-        const folderpath = this.resolvePath(folderOrPath)
-        if (await this.#exists(folderpath)) {
-            await this.#vault.adapter.rmdir(folderpath, true)
-        }
-        if (await this.#missing(folderpath)) {
-            await this.#vault.adapter.mkdir(folderpath)
-        }
+        file: TFile,
+        newPath: string,
+        editor: (content: string) => string,
+    ): Promise<TFile> {
+        const newFile = await this.#vault.copy(file, newPath)
+        await this.#vault.process(newFile, editor)
+        return newFile
     }
 
     /**
@@ -158,12 +115,8 @@ export class FilesystemAdapter {
      * @param length preferred of the hash, if is passed a number lower to `1` the complete hash is returned
      * @note by default only the first 6 characters are returned
      */
-    public async getFileHash(
-        fileOrPath: TFile | string,
-        length = 6,
-    ): Promise<string> {
-        const filepath = this.resolvePath(fileOrPath)
-        const content = await this.#vault.adapter.read(filepath)
+    public async getFileHash(file: TFile, length = 6): Promise<string> {
+        const content = await this.#vault.cachedRead(file)
         const hash = await getHash(content)
         return length < 1 ? hash : hash.substring(0, length)
     }
